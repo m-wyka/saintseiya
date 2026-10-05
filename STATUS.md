@@ -8,15 +8,17 @@ Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportow
 
 | Kontrola | Wynik | Kiedy |
 |---|---|---|
-| `pnpm check` (lint, format, typy, Vitest) | zielone, 287 testów w 25 plikach | po ostatniej zmianie kodu, na Windows |
-| `pnpm test:e2e` (Playwright) | zielone, 36 testów | po ostatniej zmianie kodu, na Windows |
+| `pnpm check` (lint, format, typy, Vitest) | zielone, 324 testy w 30 plikach | 2026-10-05 ok. 18:50, macOS, ze zmianami nagłówka, nagłówków paneli i sekcji oraz gwiezdnego tła razem |
+| `pnpm test:e2e` (Playwright) | zielone, 41 testów | 2026-10-05 ok. 18:55, macOS, pełny przebieg ze zmianami nagłówka, nagłówków paneli i sekcji oraz gwiezdnego tła razem |
 | `pnpm build` | nie ponawiany w tej sesji | ostatnio przechodził w poprzedniej sesji (macOS) |
 
 - **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**). Cały kod jest na gałęzi `staging`. `main` ma tylko początkowy commit z pustym README i na razie go nie ruszamy; `staging` wyrasta z niego, więc da się je później scalić. `legacy/`, `.data/`, `.env` są ignorowane.
 - **Niezacommitowane**: zmiany z tej sesji (lista w „Zrobione w ostatniej sesji”) leżą w katalogu roboczym na `staging` — czekają na decyzję Mateusza o commicie. Do tego nieśledzony `pnpm-workspace.yaml` (zgoda na skrypty instalacyjne `esbuild` i `unrs-resolver`, wymagana przez pnpm 12 na tym komputerze) — nie mój, do decyzji, czy trafia do repozytorium.
+- **Niezacommitowane na macOS (2026-10-05)**: przebudowa nagłówka (sekcja „Przebudowa nagłówka” niżej) — czeka na decyzję o commicie. W tym samym drzewie leżą zmiany gwiezdnego tła (`StarrySky.vue`, `app/utils/sky*.ts`, `starfield.ts`, `constellations.ts`, `main.css`, `layouts/default.vue`, `tests/unit/starfield.test.ts`, scenariusz w `public.spec.ts`) z równoległej sesji — opis w sekcji „Gwiezdne tło” niżej, też czekają na decyzję o commicie.
 - **Dostęp do GitHuba**: na pierwszym komputerze `origin` używa aliasu SSH `git@github-m-wyka:m-wyka/saintseiya.git` (jak `dot-sport-shop`), bo domyślne dane GitHuba należą tam do innego konta, bez prawa zapisu. Na drugim komputerze do wypychania potrzebny jest dostęp konta `m-wyka`.
 - **Procesy**: nic z projektu nie działa w tle (serwer dev i pomocniczy MySQL na porcie 3399 zatrzymane).
 - **Baza**: `.data/saintseiya.db` z importu 2026-10-05, obrazki zewnętrzne sprawdzone. Przegląd jej nie dotknął — 339 kont archiwalnych, żadnych kont testowych. Na tym komputerze są baza i `.data/uploads`; nie ma `legacy/` ani pomocniczego MySQL.
+- **Baza na pierwszym komputerze (macOS)**: 2026-10-05 podmieniona na eksport z Windows, pobrany z Dysku Google (`saintseiya/saintseiya-export-2026-10-05/`: `saintseiya.db` + `uploads.zip`), z migracjami 0000–0004. Względem poprzedniej ma moduł FAQ (4 kategorie, 72 pytania; bez podstrony „Faq”), zmienione menu górne, poprawioną `/redakcja`, 10 wpisów dziennika i 3 konta nie-archiwalne (id 340–342, dwa z rolą administratora) — do usunięcia przed wdrożeniem. Wgrane pliki bez zmian (1677). Poprzednie dane leżą w `.data/backup-before-import-2026-10-05/` (190 MB) — można usunąć, gdy niepotrzebne.
 - **Kopia do przeglądu**: na tym komputerze jej nie ma (tymczasową usunąłem po zrzutach ekranu). Ta na pierwszym komputerze (`.data/review/`) jest jednorazowa — komendy odtworzenia na końcu pliku.
 - **`.env` na tym komputerze**: ma `NUXT_SESSION_PASSWORD` i `DATA_SYNC_DIR` (tej zmiennej kod nie używa), nie ma `NUXT_E2E_LOGIN=true` — do logowania testowego w `pnpm dev` trzeba ją dopisać albo podać w powłoce.
 
@@ -51,6 +53,49 @@ Na drugim komputerze:
 - Pamięć Claude dla projektu jest pusta — nie ma czego przenosić.
 
 ## Zrobione w ostatniej sesji
+
+**Przebudowa nagłówka** (macOS, 2026-10-05; niezacommitowane):
+
+- Pasek górny nad banerem zniknął. Statystyki (Rycerzy, postów, komentarzy) są zaparkowane w `app/components/layout/SiteStatistics.vue` — komponent nie jest nigdzie podpięty; `/api/layout` nadal je zwraca.
+- Menu konta siedzi po prawej stronie paska menu głównego (`UserMenu` na nowym `BaseDropdown`). Zalogowany: awatar z inicjałów (`initialsOf`, pierwsze dwa słowa nicku) + nick, w środku nick i rola, Profil, Twoje konto, Panel administratora (role inne niż `user`), język PL/EN, Wyloguj. Gość: przycisk „Zaloguj”, w środku język i „Zaloguj przez Google”. Poniżej `sm` w pasku zostaje sam awatar.
+- Zdjęcie z Google nie jest już pokazywane w nagłówku (zostaje w profilu i postach).
+- Odnośniki paska mają `text-xs`; „Newsy” wypadły z `MAIN_NAVIGATION` (czyli także z menu mobilnego i skrótów wyszukiwarki) — lista newsów jest pod „Wszystkie newsy” na stronie głównej.
+- `LanguageSwitcher` to teraz `role="group"` zamiast `<nav>`; `routes.account()`; klucze `LAYOUT.PROFILE`, `LAYOUT.SIGN_IN`, `LAYOUT.PANEL` = „Panel administratora”.
+- Testy: e2e przepisane pod menu (`openAccountMenu` w `tests/e2e/helpers.ts`), strona 404 sprawdza menu boczne zamiast statystyk, nowy test jednostkowy `tests/unit/initials.test.ts`. Obejrzane na zrzutach 1280, 1024, 768, 390 i 360 px (gość i zalogowany, PL i EN), bez przewijania paska.
+- Wyszukiwarka w pasku to teraz „pole” (`SearchTrigger.vue`): ikona, „Szukaj” i podpowiedź skrótu — `⌘K` na Apple, `Ctrl K` gdzie indziej (rozpoznanie po `user-agent`, wartość z serwera przez `useState`); na telefonie sama ikona w kółku. Okno otwiera też `/`, o ile fokus nie jest w polu tekstowym ani edytorze. Nowy scenariusz e2e „the search opens from the keyboard”.
+- Nie sprawdzone: animacja otwierania na żywo (tylko stan końcowy na zrzutach), Safari i Firefox, obsługa klawiaturą poza Escape w kodzie.
+
+**Nagłówki paneli** (macOS, 2026-10-05; niezacommitowane):
+
+- Nowy `PanelHeading` (`app/components/content/PanelHeading.vue`): tytuł na skośnej złotej płycie, obok pasek nocnego nieba z gwiazdozbiorem. Zastąpił płaski pomarańczowy pasek w menu bocznym (`NavigationSections`, więc także w menu mobilnym), w News Center i w kategoriach na `/forum`. Style w `main.css`: `star-banner`, `star-banner-plate`, `star-banner-sky` (dolna złota linia, gasnąca od stopy skosu ku gwiazdozbiorowi), `constellation-trace`; nowy kolor `gold-100`. Płyta i niebo mają tylko łagodne przejście w poziomie — pionowy gradient „jasna góra, ciemny dół” i wytłoczony cień tekstu Mateusz odrzucił jako staroświeckie.
+- Gwiazdozbiory pochodzą z `app/utils/constellations.ts` — pliku z równoległej pracy nad niebem gwiezdnym. `PanelHeading` od niego zależy, więc oba muszą trafić do repozytorium razem. Menu boczne dostaje po kolei Pegaza, Smoka, Łabędzia, Andromedę i Feniksa; News Center i forum idą zodiakiem od Barana.
+- Przy wejściu na stronę płyta raz błyska, a linie gwiazdozbioru się rysują (w menu bocznym kaskadowo, przez `--banner-order`). Przy `prefers-reduced-motion` animacji nie ma.
+- Pozostałe użycia `cosmo-bar` (okna dialogowe, przyciski, zakładki, panel administratora) bez zmian.
+- Sprawdzone: lint całości, format zmienionych plików, typy, Vitest (324 testy). Pełne `pnpm check` staje na formacie czterech plików nieba gwiezdnego (`StarrySky.vue`, `constellations.ts`, `skyPainter.ts`, `skyShow.ts`), których tu nie ruszałem. Obejrzane w Chrome (strona główna, forum) i na zrzutach Playwright (menu mobilne 390 px, ograniczony ruch).
+- Nie sprawdzone: `pnpm test:e2e`, Safari i Firefox, tytuł sekcji dłuższy niż dwie linie w menu bocznym (przy czterech liniach skos płyty dochodzi do gwiazdozbioru).
+
+**Nagłówki sekcji** (macOS, 2026-10-05; niezacommitowane):
+
+- `SectionHeading` (`app/components/content/SectionHeading.vue`) jest wyraźniejszy: tytuł 24 px pogrubiony (było 20 px), wyrównany do lewej krawędzi treści, a pod nim na całą szerokość „meteor” — czteroramienna gwiazda z poświatą i zwężająca się, gasnąca w prawo złota smuga. Zastąpił mały pomarańczowy pasek przed tytułem. Odnośnik „Zobacz wszystko” zostaje po prawej, w wierszu tytułu. Propsy bez zmian, więc żadne z 11 użyć nie wymagało poprawek.
+- Style w `main.css`: `meteor-head`, `meteor-trail`. Smuga rysuje się od gwiazdy przy wjeżdżaniu nagłówka w ekran (`animation-timeline: view()`, jak `reveal`); bez wsparcia przeglądarki i przy `prefers-reduced-motion` jest od razu cała.
+- Odrzucony wariant: gwiazda, tytuł i smuga w jednym wierszu. W kolumnach 460 px („Najnowsze grafiki / video”) tytuł się łamał, smuga kurczyła się do kikuta wyglądającego jak strzałka, a w „Rycerze komentują” wchodziła pod strzałki karuzeli.
+- Sprawdzone: `pnpm check`, `pnpm test:e2e`, zrzuty Playwright 1440 i 390 px (strona główna, `/linki`, `/faq`), przebieg animacji zmierzony przy przewijaniu w Chrome.
+- Nie sprawdzone: Safari i Firefox, pozostałe miejsca użycia na żywo (komentarze pod treścią, mapy, tagi, profil użytkownika) — ten sam komponent, ale nie oglądane.
+
+**Gwiezdne tło** (macOS, 2026-10-05, równolegle z przebudową nagłówka; niezacommitowane):
+
+- Stare tło (`starfield`: osiem kropek w CSS migających razem) zastąpił komponent `StarrySky` (`app/components/layout/StarrySky.vue`) w `layouts/default.vue`. Panel administratora bez zmian. Z `main.css` wypadły `starfield`, `--animate-twinkle` i klatki `twinkle`.
+- Dwie warstwy canvas pod treścią. Nieruchoma: mgławica wzdłuż ukośnego pasa i gwiazdy (jedna na 700 px², najwyżej 6000; dużo słabych i niewiele jasnych, jak na prawdziwym niebie; sześć odcieni; poświata i krzyżowy błysk przy najjaśniejszych). Żywa: migotanie, gwiazdozbiory i meteory. Niebo jest za każdym razem takie samo (ziarno 1986).
+- Gwiazdozbiory w `app/utils/constellations.ts`: dwanaście znaków zodiaku oraz Pegaz, Smok, Łabędź, Andromeda i Feniks, z prawdziwych pozycji gwiazd (J2000, współrzędne z danych d3-celestial, zrzutowane na płasko). Co kilka sekund jeden rysuje się w marginesie obok treści, na zmianę z lewej i z prawej: gwiazdy zapalają się po kolei, linie się dorysowują, całość gaśnie po ok. 15 s. Figura obraca się tak, żeby jak najlepiej wypełnić margines.
+- Meteory co 8–20 s, wszystkie w tym samym kierunku; mniej więcej co ósmy raz leci seria 4–7 (ukłon w stronę Pegasus Ryūsei Ken).
+- Bez bibliotek. Phaser (ok. 345 kB po gzipie) i anime.js (silnik animacji wartości — rysowanie na canvasie i tak trzeba napisać samemu) odpadły; własny kod ma 10 kB po minifikacji, 4,6 kB po gzipie.
+- Obie warstwy są rysowane w gęstości ekranu (najwyżej 2, najwyżej 6 mln pikseli na warstwę). Żywa była początkowo w gęstości 1 i linie gwiazdozbiorów wychodziły na Retinie schodkowe — poprawione po uwadze Mateusza; linia to teraz ostry rdzeń 1 px i dwa coraz słabsze, szersze przejścia zamiast jednej płaskiej poświaty.
+- Obciążenie zmierzone w Chrome bez okna, 1920×1080 przy gęstości 2, przez 20 s: animacja dokłada ok. 520 ms pracy głównego wątku (ok. 2,6%), strona trzyma 60 kl./s. Pętla rysuje każdą klatkę, gdy gwiazdozbiór się rysuje lub gaśnie i gdy leci meteor, a poza tym ok. 20 kl./s (samo migotanie). Początkowo rysowanie linii też szło w ok. 20 kl./s i wyglądało na przycinające — poprawione po uwadze Mateusza. Na ekranie 120 Hz nie mierzone.
+- Animacja nie działa przy `prefers-reduced-motion` (zostaje nieruchome niebo i po jednym gotowym gwiazdozbiorze w każdym marginesie) oraz poniżej ok. 1344 px szerokości, gdzie treść zasłania niebo. Gwiazdozbiory pojawiają się od ok. 1408 px. Decyzja Mateusza: na telefonach (poniżej `md`) ma zostać samo nieruchome niebo, bez animacji — tak działa od początku, bo próg 1344 px jest ostrzejszy; zmierzone przy 390, 767, 768, 1024, 1280 i 1343 px (warstwa z animacją ma 0×0, zero odświeżeń) i pilnowane testem w `mobile.spec.ts`. Między 768 a 1343 px animacji też nie ma, bo strona nie ma tam marginesów.
+- `PanelHeading` z równoległej pracy korzysta z `fitConstellation(constellation, box, turn)`; przy `turn = 0` wynik jest zawsze ten sam, więc serwer i przeglądarka rysują to samo.
+- Testy: `tests/unit/starfield.test.ts` (12 testów) i scenariusz e2e w `public.spec.ts`. `pnpm check` zielone (324 testy w 30 plikach) i `pnpm test:e2e` zielone (40 testów) — oba puszczone ze zmianami nagłówka leżącymi w tym samym drzewie. Format czterech plików nieba, na którym wcześniej stawało `pnpm check`, jest poprawiony.
+- Obejrzane na zrzutach Playwright: 1440, 1512, 1920 i 2560 px, telefon 390 px, ograniczony ruch; przebieg rysowania gwiazdozbioru na serii klatek.
+- Nie sprawdzone: Safari i Firefox, prawdziwy telefon, zużycie GPU i baterii (mierzony był tylko główny wątek), `pnpm build`. Płynność oceniona z klatek i pomiaru, nie na żywo w oknie przeglądarki.
 
 Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claude in Chrome), więc przegląd szedł scenariuszami Playwright i zrzutami ekranu.
 
@@ -174,7 +219,7 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 ## Uwagi z przeglądu (niepoprawione)
 
 1. **Strona główna, News Center** — pod krótką treścią zakładki zostaje duża pusta przestrzeń (panel rozciąga się do wysokości prawej kolumny). Kwestia wyglądu, do decyzji.
-2. **Pasek górny** — „Rycerzy” jest ukryte przy zerze. Do decyzji, czy zamiast tego liczyć też konta archiwalne (339).
+2. **Statystyki** — nie są teraz nigdzie pokazywane (`SiteStatistics.vue` czeka na miejsce). „Rycerzy” jest w nim ukryte przy zerze; do decyzji, czy zamiast tego liczyć też konta archiwalne (339).
 3. **Listy poza `AdminTable`** (zdjęcia w albumie, nawigacja, zakładki ustawień) — przyciski „Edytuj” i „Usuń” nadal bez nazwy z kontekstem pozycji.
 4. **Emotikony** — w nowych wpisach `:)` zostaje tekstem; zamiana na emoji działała tylko przy imporcie.
 5. **Pliki do pobrania** — trzy pozycje z konkursu z 2013 r. i regulamin „konta VIP”, w opisach adres e-mail konkursu. Do decyzji, czy zostają publicznie.
@@ -191,7 +236,8 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 7. **Repozytorium na GitHubie jest publiczne** — zostaje publiczne czy przełączyć na prywatne? W `docs/legacy.md` są wymienione nazwy prywatnych plików z `legacy/` (same nazwy, bez treści).
 8. **Stare pliki konkursowe** w „Plikach do pobrania” (uwaga 5 wyżej).
 9. **Commit zmian z sesji na Windows** i los `pnpm-workspace.yaml` (patrz „Gdzie jesteśmy”).
-10. **„Rycerzy” w pasku górnym** — ukrywać przy zerze (jak teraz) czy liczyć też konta archiwalne (uwaga 2 wyżej).
+10. **Statystyki portalu** — gdzie mają wrócić (stopka, strona główna?) i czy „Rycerzy” ukrywać przy zerze, czy liczyć też konta archiwalne (uwaga 2 wyżej).
+11. **Nagłówek** — gość ma język schowany w menu „Zaloguj” (dwa kliknięcia do EN); alternatywa to przełącznik PL/EN na wierzchu paska. Rozmiar odnośników (`text-xs`) do oceny — przy 1024 px zmieściłby się też poprzedni `text-sm`.
 
 ## Znane ograniczenia
 

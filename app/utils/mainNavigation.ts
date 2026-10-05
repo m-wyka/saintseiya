@@ -10,7 +10,6 @@ export interface MainNavigationItem {
 
 export const MAIN_NAVIGATION: MainNavigationItem[] = [
   { labelKey: 'GENERAL.HOME', to: routes.home(), icon: 'home', matchesExactly: true },
-  { labelKey: 'GENERAL.NEWS', to: routes.newsList(), icon: 'star' },
   { labelKey: 'GENERAL.FORUM', to: routes.forumIndex(), icon: 'forum' },
   { labelKey: 'GENERAL.GALLERY', to: routes.gallery(), icon: 'image' },
   { labelKey: 'GENERAL.VIDEO', to: routes.videos(), icon: 'play' },

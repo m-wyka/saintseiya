@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { signIn, visit } from './helpers';
+import { openAccountMenu, signIn, visit } from './helpers';
 
 test.describe('administration panel', () => {
   test('the dashboard shows statistics and charts', async ({ page }) => {
@@ -55,7 +55,8 @@ test.describe('administration panel', () => {
     await visit(page, '/newsy/powrot-brazowych-rycerzy');
     await expect(page.getByRole('heading', { level: 1, name: 'Powrót Brązowych Rycerzy' })).toBeVisible();
 
-    await page.getByRole('navigation', { name: 'Język' }).getByRole('link', { name: 'en' }).click();
+    await openAccountMenu(page, 'Admin Tłumaczeń');
+    await page.getByRole('group', { name: 'Język' }).getByRole('link', { name: 'en' }).click();
     await expect(page).toHaveURL('/en/news/powrot-brazowych-rycerzy');
     await expect(page.getByRole('heading', { level: 1, name: 'Return of the Bronze Saints' })).toBeVisible();
   });
@@ -211,8 +212,9 @@ test.describe('administration panel', () => {
     const memberPage = await memberContext.newPage();
     await signIn(memberPage, { name: 'Awansowany Rycerz' });
     await visit(memberPage, '/');
-    await expect(memberPage.getByRole('link', { name: 'Awansowany Rycerz' })).toBeVisible();
-    await expect(memberPage.getByRole('link', { name: 'Panel', exact: true })).toHaveCount(0);
+    await openAccountMenu(memberPage, 'Awansowany Rycerz');
+    await expect(memberPage.getByRole('link', { name: 'Twoje konto' })).toBeVisible();
+    await expect(memberPage.getByRole('link', { name: 'Panel administratora' })).toHaveCount(0);
 
     await signIn(page, { name: 'Admin Ról', role: 'admin' });
     await visit(page, '/admin/uzytkownicy');
@@ -229,7 +231,8 @@ test.describe('administration panel', () => {
     await expect(memberRow.getByText('Newsy, kategorie i tagi')).toBeVisible();
 
     await visit(memberPage, '/');
-    await memberPage.getByRole('link', { name: 'Panel', exact: true }).click();
+    await openAccountMenu(memberPage, 'Awansowany Rycerz');
+    await memberPage.getByRole('link', { name: 'Panel administratora' }).click();
     const panelNavigation = memberPage.getByRole('navigation', { name: 'Panel administratora' });
     await expect(panelNavigation.getByRole('link', { name: 'Newsy' })).toBeVisible();
     await expect(panelNavigation.getByRole('link', { name: 'Użytkownicy' })).toHaveCount(0);
@@ -242,8 +245,8 @@ test.describe('administration panel', () => {
     await expect(memberRow.getByRole('button', { name: 'Odblokuj' })).toBeVisible();
 
     await visit(memberPage, '/');
-    await expect(memberPage.getByRole('link', { name: 'Zaloguj przez Google' })).toBeVisible();
-    await expect(memberPage.getByRole('link', { name: 'Awansowany Rycerz' })).toHaveCount(0);
+    await expect(memberPage.getByRole('button', { name: 'Zaloguj' })).toBeVisible();
+    await expect(memberPage.getByRole('button', { name: 'Awansowany Rycerz' })).toHaveCount(0);
     expect([401, 403]).toContain((await memberPage.request.get('/api/admin/news')).status());
 
     await memberRow.getByRole('button', { name: 'Odblokuj' }).click();

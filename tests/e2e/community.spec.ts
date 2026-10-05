@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { signIn, visit } from './helpers';
+import { openAccountMenu, signIn, visit } from './helpers';
 
 test.describe('signed-in community features', () => {
   test('a user replies in a thread with formatted text', async ({ page }) => {
@@ -76,15 +76,20 @@ test.describe('signed-in community features', () => {
     await page.getByLabel('Nick widoczny na stronie').fill('Smok Shiryu');
     await page.getByRole('button', { name: 'Zapisz nick' }).click();
     await expect(page.getByText('Nick zmieniony')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Smok Shiryu' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Smok Shiryu' })).toBeVisible();
   });
 
   test('signing out returns to the visitor view', async ({ page }) => {
     await signIn(page, { name: 'Gość Testowy' });
     await visit(page, '/');
-    await expect(page.getByRole('link', { name: 'Gość Testowy' })).toBeVisible();
+    await openAccountMenu(page, 'Gość Testowy');
+    await page.getByRole('link', { name: 'Profil' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Gość Testowy' })).toBeVisible();
 
+    await openAccountMenu(page, 'Gość Testowy');
     await page.getByRole('button', { name: 'Wyloguj' }).click();
+    await expect(page).toHaveURL('/');
+    await openAccountMenu(page, 'Zaloguj');
     await expect(page.getByRole('link', { name: 'Zaloguj przez Google' })).toBeVisible();
   });
 });

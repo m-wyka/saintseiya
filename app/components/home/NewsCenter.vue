@@ -6,10 +6,10 @@ const { t } = useI18n();
 
 <template>
   <section v-if="tabs.length" class="overflow-hidden panel" aria-label="News Center">
-    <h2 class="flex items-center gap-2 cosmo-bar px-4 py-2 heading-display text-lg text-abyss-950">
+    <PanelHeading :constellation-index="0">
       <AppIcon name="star" />
       News Center
-    </h2>
+    </PanelHeading>
     <div
       class="carousel-tabs"
       :style="{

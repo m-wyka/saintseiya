@@ -24,8 +24,25 @@ export const signIn = async (page: Page, account: TestAccount) => {
 export const waitUntilInteractive = (page: Page) =>
   page.waitForFunction(() => document.documentElement.dataset.hydrated === 'true');
 
+export const openAccountMenu = (page: Page, triggerName: string) =>
+  page
+    .getByRole('navigation', { name: /^(Menu główne|Main menu)$/ })
+    .getByRole('button', { name: triggerName })
+    .click();
+
 export const visit = async (page: Page, address: string) => {
   const response = await page.goto(address);
   await waitUntilInteractive(page);
   return response;
 };
+
+export const starrySky = (page: Page) =>
+  page.evaluate(() => {
+    const [still, live] = [...document.querySelectorAll('canvas')];
+    const { data } = still!.getContext('2d')!.getImageData(0, 0, still!.width, still!.height);
+    return {
+      paintedPixels: data.filter((_, index) => index % 4 === 3).filter((alpha) => alpha > 0).length,
+      stillWidth: still!.width,
+      liveWidth: live!.width,
+    };
+  });

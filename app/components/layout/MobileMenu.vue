@@ -50,7 +50,7 @@ useHead({ bodyAttrs: { class: computed(() => (ui.isMenuOpen ? 'max-lg:overflow-h
         @click="closeOnLinkClick"
       >
         <div class="flex items-center justify-between">
-          <p class="heading-display text-xl text-gold-300">{{ t('LAYOUT.MENU') }}</p>
+          <p class="heading-display text-xl font-bold text-gold-300">{{ t('LAYOUT.MENU') }}</p>
           <button
             type="button"
             class="cursor-pointer rounded-full p-2 text-aqua-300 hover:bg-white/10 hover:text-gold-300"

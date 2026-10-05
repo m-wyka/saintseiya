@@ -6,7 +6,7 @@ const pathWithoutHash = (path: string) => path.split('#')[0];
 </script>
 
 <template>
-  <nav class="flex items-center gap-1" :aria-label="t('GENERAL.LANGUAGE')">
+  <div class="flex items-center gap-1" role="group" :aria-label="t('GENERAL.LANGUAGE')">
     <NuxtLink
       v-for="option in locales"
       :key="option.code"
@@ -21,5 +21,5 @@ const pathWithoutHash = (path: string) => path.split('#')[0];
     >
       {{ option.code }}
     </NuxtLink>
-  </nav>
+  </div>
 </template>

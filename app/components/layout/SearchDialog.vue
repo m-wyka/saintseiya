@@ -52,8 +52,14 @@ const sections = computed(() =>
 const isSearching = computed(() => status.value === 'pending' || searchedPhrase.value !== phrase.value);
 const isForumPost = (url: string) => url.startsWith('/forum/post/');
 
+const isTypingTarget = (target: EventTarget | null) =>
+  target instanceof HTMLElement && (target.isContentEditable || target.matches('input, textarea, select'));
+
 const openOnShortcut = (event: KeyboardEvent) => {
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+  const hasModifier = event.ctrlKey || event.metaKey;
+  const isCommandK = hasModifier && event.key.toLowerCase() === 'k';
+  const isSlash = event.key === '/' && !hasModifier && !event.altKey && !isTypingTarget(event.target);
+  if (isCommandK || isSlash) {
     event.preventDefault();
     ui.openSearch();
   }

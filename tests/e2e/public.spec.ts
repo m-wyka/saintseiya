@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { visit } from './helpers';
+import { openAccountMenu, starrySky, visit } from './helpers';
 
 test.describe('public site', () => {
   test('home page shows the header, navigation, news and the news center', async ({ page }) => {
@@ -114,6 +114,22 @@ test.describe('public site', () => {
     await expect(page).not.toHaveURL('/');
   });
 
+  test('the search opens from the keyboard', async ({ page }) => {
+    await visit(page, '/');
+    const dialog = page.getByRole('dialog', { name: 'Szukaj' });
+    const phrase = dialog.getByLabel('Szukana fraza');
+
+    await page.keyboard.press('/');
+    await expect(phrase).toBeFocused();
+    await page.keyboard.type('lost/canvas');
+    await expect(phrase).toHaveValue('lost/canvas');
+    await dialog.getByRole('button', { name: 'Zamknij' }).click();
+    await expect(dialog).toBeHidden();
+
+    await page.keyboard.press('ControlOrMeta+K');
+    await expect(phrase).toBeFocused();
+  });
+
   test('the old search address leads to the home page', async ({ page }) => {
     await visit(page, '/szukaj');
     await expect(page).toHaveURL('/');
@@ -136,14 +152,17 @@ test.describe('public site', () => {
 
     expect(response?.status()).toBe(404);
     await expect(page.getByRole('heading', { name: 'Tej strony nie ma w Sanktuarium' })).toBeVisible();
-    await expect(page.getByText('Postów na forum:')).toBeVisible();
+    await expect(
+      page.getByRole('complementary', { name: 'Nawigacja po działach' }).getByRole('link', { name: 'Regulamin' }),
+    ).toBeVisible();
     await page.getByRole('button', { name: 'Wróć na stronę główną' }).click();
     await expect(page).toHaveURL('/');
   });
 
   test('the English version keeps its language and addresses while browsing', async ({ page }) => {
     await visit(page, '/');
-    await page.getByRole('navigation', { name: 'Język' }).getByRole('link', { name: 'en' }).click();
+    await openAccountMenu(page, 'Zaloguj');
+    await page.getByRole('group', { name: 'Język' }).getByRole('link', { name: 'en' }).click();
 
     await expect(page).toHaveURL('/en');
     await expect(page.locator('html')).toHaveAttribute('lang', 'en-GB');
@@ -155,11 +174,26 @@ test.describe('public site', () => {
     await page.locator('a[href^="/en/forum/section/"]').first().click();
     await expect(page).toHaveURL(/\/en\/forum\/section\/[\w-]+$/);
 
-    await mainMenu.getByRole('link', { name: 'News' }).click();
-    await expect(page).toHaveURL('/en/news');
-    await page.getByRole('navigation', { name: 'Language' }).getByRole('link', { name: 'pl' }).click();
-    await expect(page).toHaveURL('/newsy');
+    await mainMenu.getByRole('link', { name: 'Gallery' }).click();
+    await expect(page).toHaveURL('/en/gallery');
+    await openAccountMenu(page, 'Sign in');
+    await page.getByRole('group', { name: 'Language' }).getByRole('link', { name: 'pl' }).click();
+    await expect(page).toHaveURL('/galeria');
     await expect(page.locator('html')).toHaveAttribute('lang', 'pl-PL');
+  });
+
+  test('the starry sky is painted behind the page and holds still when motion is reduced', async ({ page }) => {
+    const paintedPixels = async () => (await starrySky(page)).paintedPixels;
+
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await visit(page, '/');
+    await expect.poll(paintedPixels).toBeGreaterThan(1000);
+    const animated = await starrySky(page);
+    expect(animated.liveWidth).toBe(animated.stillWidth);
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect.poll(async () => (await starrySky(page)).liveWidth).toBe(0);
+    expect(await paintedPixels()).toBeGreaterThan(1000);
   });
 
   test('visitors cannot open the administration panel', async ({ page }) => {

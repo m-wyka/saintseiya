@@ -1,5 +1,5 @@
 import { devices, expect, test } from '@playwright/test';
-import { visit } from './helpers';
+import { starrySky, visit } from './helpers';
 
 test.use({ viewport: devices['iPhone 13'].viewport, hasTouch: true });
 
@@ -16,6 +16,12 @@ test.describe('mobile layout', () => {
     await expect(page).toHaveURL('/regulamin');
     await expect(drawer).toBeHidden();
     await expect(page.getByText('Zasady portalu.')).toBeVisible();
+  });
+
+  test('the starry sky is painted on a phone but nothing in it moves', async ({ page }) => {
+    await visit(page, '/');
+    await expect.poll(async () => (await starrySky(page)).paintedPixels).toBeGreaterThan(1000);
+    expect((await starrySky(page)).liveWidth).toBe(0);
   });
 
   test('pages fit the screen without horizontal scrolling', async ({ page }) => {

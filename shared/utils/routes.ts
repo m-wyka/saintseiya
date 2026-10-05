@@ -104,5 +104,6 @@ export const routes = {
   faqItem: (id: number) => `/faq#${faqItemAnchor(id)}`,
   downloads: () => '/pliki',
   user: (id: number) => `/uzytkownik/${id}`,
+  account: () => '/konto',
   media: (storedPath: string) => `${MEDIA_BASE_URL}/${storedPath.split('/').map(encodeURIComponent).join('/')}`,
 };

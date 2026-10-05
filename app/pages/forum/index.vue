@@ -11,8 +11,8 @@ useSeoMeta({ title: () => t('GENERAL.FORUM') });
   <div>
     <PageHeading :title="t('GENERAL.FORUM')" :subtitle="t('FORUM.SUBTITLE')" />
     <div class="flex flex-col gap-6">
-      <section v-for="category in categories" :key="category.id" class="reveal overflow-hidden panel">
-        <h2 class="cosmo-bar px-4 py-2 heading-display text-lg text-abyss-950">{{ category.name }}</h2>
+      <section v-for="(category, categoryIndex) in categories" :key="category.id" class="reveal overflow-hidden panel">
+        <PanelHeading :constellation-index="categoryIndex">{{ category.name }}</PanelHeading>
         <ul class="divide-y divide-aqua-500/10">
           <li
             v-for="forum in category.forums"

@@ -34,7 +34,7 @@ const closeOnBackdrop = (event: MouseEvent) => {
 <template>
   <dialog
     ref="dialog"
-    class="m-auto max-h-[85dvh] overflow-hidden rounded-2xl border border-cosmo-500/40 bg-abyss-900 p-0 text-mist shadow-aura backdrop:bg-black/75 backdrop:backdrop-blur-sm open:animate-rise"
+    class="m-auto max-h-[85dvh] overflow-hidden rounded-2xl border border-cosmo-500/40 bg-abyss-900 p-0 text-mist backdrop:bg-black/75 backdrop:backdrop-blur-sm open:animate-rise"
     :class="compact ? 'w-[min(26rem,94vw)]' : 'w-[min(52rem,94vw)]'"
     :aria-label="title"
     @close="isOpen = false"
