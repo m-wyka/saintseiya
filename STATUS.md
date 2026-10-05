@@ -1,22 +1,24 @@
 # Stan prac
 
-Stan na 2026-10-05, koniec drugiej sesji tego dnia. Plik do aktualizowania na koniec każdej sesji. Zasady projektu są w `CLAUDE.md`, opis starej strony i importu w `docs/legacy.md`, obsługa w `README.md`.
+Stan na 2026-10-05, koniec trzeciej sesji tego dnia — pierwszej na drugim komputerze (Windows, `E:\work\saintseiya`). Plik do aktualizowania na koniec każdej sesji. Zasady projektu są w `CLAUDE.md`, opis starej strony i importu w `docs/legacy.md`, obsługa w `README.md`.
 
 ## Gdzie jesteśmy
 
-Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportowanych danych. Trwa ręczny przegląd w przeglądarce — mniej więcej połowa listy za nami, znalazł trzy błędy (poprawione). Nie była jeszcze przeglądana przez Mateusza, nie ma podpiętego prawdziwego logowania Google ani hostingu.
+Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportowanych danych. Przegląd działów panelu i moderacji jest prawie domknięty — w tej sesji scenariuszami e2e zamiast ręcznego klikania. Nie była jeszcze przeglądana przez Mateusza, nie ma podpiętego prawdziwego logowania Google ani hostingu.
 
 | Kontrola | Wynik | Kiedy |
 |---|---|---|
-| `pnpm check` (lint, format, typy, Vitest) | zielone, 256 testów w 21 plikach | po ostatniej zmianie kodu |
-| `pnpm test:e2e` (Playwright) | zielone, 26 testów | po ostatniej zmianie kodu |
-| `pnpm build` | przechodzi | po ostatniej zmianie kodu; startu `.output` nie ponawiałem |
+| `pnpm check` (lint, format, typy, Vitest) | zielone, 256 testów w 21 plikach | po ostatniej zmianie kodu, na Windows |
+| `pnpm test:e2e` (Playwright) | zielone, 33 testy | po ostatniej zmianie kodu, na Windows |
+| `pnpm build` | nie ponawiany w tej sesji | ostatnio przechodził w poprzedniej sesji (macOS) |
 
-- **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**). Cały kod jest na gałęzi `staging`, wypchniętej na GitHuba. `main` ma tylko początkowy commit z pustym README i na razie go nie ruszamy; `staging` wyrasta z niego, więc da się je później scalić. `legacy/`, `.data/`, `.env` są ignorowane.
+- **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**). Cały kod jest na gałęzi `staging`. `main` ma tylko początkowy commit z pustym README i na razie go nie ruszamy; `staging` wyrasta z niego, więc da się je później scalić. `legacy/`, `.data/`, `.env` są ignorowane.
+- **Niezacommitowane**: zmiany z tej sesji (lista w „Zrobione w ostatniej sesji”) leżą w katalogu roboczym na `staging` — czekają na decyzję Mateusza o commicie. Do tego nieśledzony `pnpm-workspace.yaml` (zgoda na skrypty instalacyjne `esbuild` i `unrs-resolver`, wymagana przez pnpm 12 na tym komputerze) — nie mój, do decyzji, czy trafia do repozytorium.
 - **Dostęp do GitHuba**: na pierwszym komputerze `origin` używa aliasu SSH `git@github-m-wyka:m-wyka/saintseiya.git` (jak `dot-sport-shop`), bo domyślne dane GitHuba należą tam do innego konta, bez prawa zapisu. Na drugim komputerze do wypychania potrzebny jest dostęp konta `m-wyka`.
 - **Procesy**: nic z projektu nie działa w tle (serwer dev i pomocniczy MySQL na porcie 3399 zatrzymane).
-- **Baza**: `.data/saintseiya.db` z importu 2026-10-05, obrazki zewnętrzne sprawdzone. Przegląd jej nie dotknął — 339 kont archiwalnych, żadnych kont testowych.
-- **Kopia do przeglądu**: `.data/review/` (baza + wgrane pliki, 190 MB). Na niej klikałem w panelu. Zawiera konta testowe „Rycerz Testowy” (admin) i „Drugi Rycerz” (user) oraz zmieniony tytuł pierwszej zakładki News Center. Jednorazowa — można usunąć i odtworzyć (komendy na końcu pliku).
+- **Baza**: `.data/saintseiya.db` z importu 2026-10-05, obrazki zewnętrzne sprawdzone. Przegląd jej nie dotknął — 339 kont archiwalnych, żadnych kont testowych. Na tym komputerze są baza i `.data/uploads`; nie ma `legacy/` ani pomocniczego MySQL.
+- **Kopia do przeglądu**: na tym komputerze jej nie ma (tymczasową usunąłem po zrzutach ekranu). Ta na pierwszym komputerze (`.data/review/`) jest jednorazowa — komendy odtworzenia na końcu pliku.
+- **`.env` na tym komputerze**: ma `NUXT_SESSION_PASSWORD` i `DATA_SYNC_DIR` (tej zmiennej kod nie używa), nie ma `NUXT_E2E_LOGIN=true` — do logowania testowego w `pnpm dev` trzeba ją dopisać albo podać w powłoce.
 
 ## Przeniesienie na inny komputer
 
@@ -50,23 +52,40 @@ Na drugim komputerze:
 
 ## Zrobione w ostatniej sesji
 
-**Kontrole**: `pnpm test:e2e` potwierdzone po wcześniejszych zmianach.
+Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claude in Chrome), więc przegląd szedł scenariuszami Playwright i zrzutami ekranu.
 
-**Przegląd ręczny w przeglądarce** (na kopii bazy, każda pozycja sprawdzona także w bazie lub na stronie publicznej):
+**Uruchomienie na Windows** — `pnpm check` padało na dwóch testach, oba poprawione:
 
-- **Ustawienia** — edycja tytułu zakładki, zmiana kolejności, dodanie, usunięcie, zapis, widok na stronie głównej. Nietknięte treści zakładek po zapisie zostają bajt w bajt.
-- **Profil użytkownika** — konto archiwalne z postami, prawdziwe konto bez postów, 404 dla nieistniejącego i błędnego identyfikatora.
-- **Edytor map** — rysowanie, zaznaczanie, etykieta, trzy rodzaje celu (podstrona z wyszukiwarką, adres, okienko z treścią), komunikat walidacji, przesuwanie, zmiana rozmiaru, usuwanie obszaru, zapis. Na mapie publicznej okienko się otwiera, odnośnik prowadzi pod adres. 17 pierwotnych obszarów mapy bez zmian.
-- **Pliki** — wgranie, edycja, lista publiczna, pobranie z licznikiem, usunięcie (także pliku z dysku).
-- **Linki** — dodanie, wyszukiwanie, edycja, usunięcie, lista publiczna.
-- **Obrazki** — wgranie dwóch naraz, miniatury, kopiowanie adresu, odrzucenie pliku udającego obrazek, usunięcie (także z dysku).
-- **Shoutbox w panelu** — ukrycie (wpis znika ze strony publicznej), filtr, przywrócenie, wyszukiwanie, usunięcie; do tego napisanie wpisu na stronie publicznej.
+1. `tests/unit/serverRules.test.ts` — oczekiwana ścieżka była wpisana z ukośnikami POSIX; teraz liczona przez `resolve`.
+2. `server/utils/imageProcessing.ts` — `sharp.cache({ files: 0 })`. libvips trzymał otwarte pliki, które wcześniej czytał, i Windows nie pozwalał ich potem usunąć (`EBUSY` przy sprzątaniu w `tests/unit/legacy/maps.test.ts`; to samo groziło przy usuwaniu zdjęć w panelu).
+
+**Nowe testy e2e** (26 → 33):
+
+- `admin.spec.ts` — **odświeżanie roli w sesji**: zalogowany użytkownik po nadaniu roli moderatora widzi „Panel” i tylko przyznane działy już po przeładowaniu strony; po blokadzie jest wylogowany. Przy okazji wyszukiwanie i filtr „Zablokowani” w Użytkownikach, blokada i odblokowanie.
+- `moderation.spec.ts` (nowy plik):
+  - moderacja forum: edycja cudzego posta, usunięcie posta, przyklejenie, przeniesienie do działu redakcji (zwykły użytkownik dostaje 404), usunięcie tematu;
+  - komentarze: ukrycie znika ze strony publicznej, przywrócenie wraca;
+  - ankiety: dodanie z trzema odpowiedziami, zakończenie (brak przycisków głosowania), usunięcie;
+  - nawigacja: dodanie odnośnika, zmiana kolejności, widok w menu portalu, zmiana nazwy, usunięcie;
+  - video: dodanie z adresu YouTube, edycja, usunięcie;
+  - galeria: wgranie dwóch zdjęć, edycja tytułu, okładka, zmiana kolejności, widok publiczny, usunięcie.
+- `public.spec.ts` — strona 404 pokazuje statystyki w pasku górnym.
+
+**Wygląd na telefonie** — zrzuty 390 px na prawdziwych danych (strona główna, newsy, forum, galeria, mapy, szukaj, linki, ankiety, video, pliki, shoutbox, dwie podstrony). Obejrzałem stronę główną, forum, newsy i galerię; pozostałe sprawdzone tylko na brak poziomego przewijania.
 
 **Znalezione i poprawione błędy**:
 
-1. `server/utils/html.ts` — `htmlToPlainText` sklejał wyrazy w miejscu `<br>` i granic akapitów („świat?Isko25”). Dotyczyło skrótów w profilu, wyszukiwarce, ostatnich komentarzach i liście komentarzy w panelu. Test jednostkowy dopisany.
-2. `app/components/admin/MapAreaCanvas.vue` — po narysowaniu nowego obszaru zaznaczał się poprzedni, więc etykieta i cel trafiałyby do złego obszaru. Przyczyna: `defineModel` nie odświeża wartości synchronicznie, a indeks był liczony ze starej długości listy. Test e2e dopisany.
-3. `app/components/admin/MapAreaCanvas.vue` — zaznaczenie zmieniało się przy wciśnięciu przycisku myszy, formularz obszaru pod mapą zmieniał wysokość i strona „podskakiwała” pod kursorem: nowy obszar wychodził zniekształcony, a kliknięty mógł się przesunąć. Zaznaczenie zmienia się teraz po zakończeniu gestu. Płótno mapy dostało `role="group"` i etykietę „Obszary mapy”.
+1. `app/pages/index.vue` — strona główna na telefonie wychodziła 85 px poza ekran (kolumna siatki bez `minmax(0, 1fr)` rozpychana przez treść News Center). Test e2e tego nie łapał, bo dane testowe są za skromne.
+2. `app/assets/css/main.css`, `carousel-tabs` — przeglądarka wymusza `contain: size` na pasku zakładek, więc miał wysokość 0, a zakładki wylewały się na treść; gdy zawijały się do drugiego rzędu (telefon), nachodziły na nagłówek. Pasek ma teraz jawną wysokość i jeden przewijany rząd.
+
+**Poprawione uwagi z poprzedniego przeglądu** (dawne punkty 1–5):
+
+- News Center — poziomy pasek przewijania pod treścią ukryty tam, gdzie działają zakładki.
+- Pasek górny — „Rycerzy” nie pokazuje się, dopóki licznik wynosi 0; strona błędu ładuje dane układu, więc ma statystyki i menu.
+- Panel → Użytkownicy — „Na portalu od” przy kontach archiwalnych pokazuje „—”.
+- Panel → Obrazki — komunikat o odrzuconym pliku znika przy następnej akcji.
+- Tabele panelu — akcje wiersza są grupą z etykietą „Akcje: <nazwa wiersza>” (`AdminTable`).
+- `UserRoleForm` — podpowiedź mówiła o ponownym zalogowaniu; zmiana roli działa od najbliższego wczytania strony.
 
 ## Co jest zrobione
 
@@ -88,26 +107,22 @@ Na drugim komputerze:
 
 ## Czego nie sprawdziłem
 
-Napisane i przechodzą kontrole automatyczne, ale nie były klikane w przeglądarce:
-
-- **Panel: Użytkownicy** — tu przerwałem. Strona się ładuje; w kopii do przeglądu czeka konto „Drugi Rycerz”. Do sprawdzenia: nadanie roli moderatora z uprawnieniami, blokada i odblokowanie, filtr, wyszukiwanie.
-- **Odświeżanie roli w sesji** (`server/plugins/freshSession.ts`) — nadal bez testu. Plan: test e2e na dwóch kontekstach przeglądarki — użytkownik zalogowany, administrator nadaje mu rolę moderatora, użytkownik po przeładowaniu widzi „Panel”; po blokadzie jest wylogowany.
-- **Panel: Podstrony, Galeria, Komentarze, Forum, Ankiety, Nawigacja, Video** — obejrzane po załadowaniu, bez klikania akcji.
-- **Moderacja forum** — w e2e tylko zamknięcie i otwarcie tematu; przyklejenie, przeniesienie, usuwanie i edycja posta tylko w testach integracyjnych.
+- **Panel: Podstrony** — w e2e tylko dodanie strony pod hubem; przenoszenie w drzewie, zmiana rodzica i usuwanie tylko w testach integracyjnych.
+- **Panel: Forum (struktura)** — działy i kategorie obejrzane po załadowaniu, akcje tylko w testach integracyjnych.
+- **Panel: Użytkownicy** — nadanie roli i blokada przeszły w e2e; odebranie roli i komunikaty odmowy (ostatni administrator, własne konto) tylko w testach integracyjnych.
+- **Nowe scenariusze e2e działają na skromnych danych testowych**, nie na zaimportowanej bazie — błąd szerokości strony głównej pokazał, że to robi różnicę. Działów panelu z tej sesji nikt nie oglądał na prawdziwych danych.
+- **Wygląd na telefonie** — widziałem cztery strony na zrzutach 390 px; panelu administratora, tematu forum, mapy i formularzy na telefonie nikt nie oglądał. Brak testu regresji dla błędu szerokości strony głównej (wymagałby szerszej treści w danych testowych).
+- **Zakładki News Center w przeglądarkach bez `::scroll-marker`** (Firefox, Safari) — tam zostaje samo przewijanie w poziomie z widocznym paskiem; nie sprawdzałem.
+- **`pnpm build` i start `.output`** — nie uruchamiane na Windows.
 - **Prawdziwe logowanie Google i prawdziwa captcha** — brak kluczy, testowane tylko logowanie testowe.
-- **Wygląd na telefonie** — e2e sprawdza menu i brak poziomego przewijania, nikt nie oglądał. Okna sterowanej przeglądarki nie dało się zwęzić, więc potrzebny telefon, narzędzia deweloperskie albo zrzuty z Playwright w wąskim oknie.
 
 ## Uwagi z przeglądu (niepoprawione)
 
-Drobiazgi zauważone po drodze, do poprawienia przy okazji albo do decyzji:
-
-1. **Strona główna, News Center** — pod treścią zakładki widać poziomy pasek przewijania, a pod krótką treścią zostaje duża pusta przestrzeń (panel rozciąga się do wysokości prawej kolumny).
-2. **Pasek górny** — „Rycerzy” liczy tylko prawdziwe konta, więc na starcie pokaże 0. Na stronie błędu 404 pasek nie pokazuje statystyk.
-3. **Panel → Użytkownicy** — „Na portalu od” przy kontach archiwalnych pokazuje datę importu; profil publiczny ją ukrywa. Lepiej „—”.
-4. **Panel → Obrazki** — komunikat o odrzuconym pliku zostaje na ekranie po kolejnych udanych akcjach.
-5. **Tabele panelu** — przyciski „Edytuj” i „Usuń” nie mają nazwy z kontekstem wiersza (dostępność).
-6. **Emotikony** — w nowych wpisach `:)` zostaje tekstem; zamiana na emoji działała tylko przy imporcie.
-7. **Pliki do pobrania** — trzy pozycje z konkursu z 2013 r. i regulamin „konta VIP”, w opisach adres e-mail konkursu. Do decyzji, czy zostają publicznie.
+1. **Strona główna, News Center** — pod krótką treścią zakładki zostaje duża pusta przestrzeń (panel rozciąga się do wysokości prawej kolumny). Kwestia wyglądu, do decyzji.
+2. **Pasek górny** — „Rycerzy” jest ukryte przy zerze. Do decyzji, czy zamiast tego liczyć też konta archiwalne (339).
+3. **Listy poza `AdminTable`** (zdjęcia w albumie, nawigacja, zakładki ustawień) — przyciski „Edytuj” i „Usuń” nadal bez nazwy z kontekstem pozycji.
+4. **Emotikony** — w nowych wpisach `:)` zostaje tekstem; zamiana na emoji działała tylko przy imporcie.
+5. **Pliki do pobrania** — trzy pozycje z konkursu z 2013 r. i regulamin „konta VIP”, w opisach adres e-mail konkursu. Do decyzji, czy zostają publicznie.
 
 ## Decyzje dla Mateusza
 
@@ -118,7 +133,9 @@ Drobiazgi zauważone po drodze, do poprawienia przy okazji albo do decyzji:
 5. **Klucze**: Google OAuth, Cloudflare Turnstile, `NUXT_ADMIN_EMAILS`.
 6. **`legacy/php-cgi53.core`** (653 MB zrzutu pamięci) — można usunąć.
 7. **Repozytorium na GitHubie jest publiczne** — zostaje publiczne czy przełączyć na prywatne? W `docs/legacy.md` są wymienione nazwy prywatnych plików z `legacy/` (same nazwy, bez treści).
-8. **Stare pliki konkursowe** w „Plikach do pobrania” (uwaga 7 wyżej).
+8. **Stare pliki konkursowe** w „Plikach do pobrania” (uwaga 5 wyżej).
+9. **Commit zmian z sesji na Windows** i los `pnpm-workspace.yaml` (patrz „Gdzie jesteśmy”).
+10. **„Rycerzy” w pasku górnym** — ukrywać przy zerze (jak teraz) czy liczyć też konta archiwalne (uwaga 2 wyżej).
 
 ## Znane ograniczenia
 
@@ -133,8 +150,8 @@ Drobiazgi zauważone po drodze, do poprawienia przy okazji albo do decyzji:
 
 ## Następne kroki
 
-1. Dokończyć przegląd z „Czego nie sprawdziłem”, zaczynając od Użytkowników i testu e2e dla odświeżania roli w sesji.
-2. Poprawić drobiazgi z „Uwag z przeglądu” (punkty 1–5 nie wymagają decyzji).
+1. Commit zmian z tej sesji na `staging` (po zgodzie Mateusza), potem `pnpm build` na Windows.
+2. Reszta z „Czego nie sprawdziłem”: Podstrony i struktura forum w e2e, telefon na pozostałych stronach (temat forum, mapa, panel), zakładki News Center w Firefoksie.
 3. Scalenie `staging` do `main`, gdy Mateusz zdecyduje. Do tego czasu commity tylko na `staging`.
 4. Przegląd wyglądu z Mateuszem i poprawki, w tym telefon.
 5. Klucze Google i Turnstile, test prawdziwego logowania.
@@ -149,7 +166,8 @@ pnpm install
 pnpm dev                # http://localhost:3000
 ```
 
-- **Logowanie lokalne**: `/logowanie-testowe` (w `.env` jest `NUXT_E2E_LOGIN=true`), wybór roli w formularzu.
+- **Windows**: Node 22.23 i pnpm 12 są domyślne w powłoce, `nvm use` niepotrzebne. Komendy z tego pliku pisane pod macOS trzeba przełożyć na PowerShell (zmienne przez `$env:NAZWA = '...'`).
+- **Logowanie lokalne**: `/logowanie-testowe`, wybór roli w formularzu. Wymaga `NUXT_E2E_LOGIN=true` — jest w `.env` na pierwszym komputerze, na Windows trzeba dopisać.
 - **Ponowny import**: najpierw start pomocniczego MySQL (komenda w `docs/legacy.md`), potem `pnpm legacy:import --force` i `pnpm images:check`. Import kasuje bazę i katalog wgranych plików.
 
 **Przegląd na kopii bazy** — żeby klikanie w panelu nie zmieniało zaimportowanych danych:
@@ -161,6 +179,10 @@ sqlite3 .data/saintseiya.db ".backup .data/review/saintseiya.db"
 cp -cR .data/uploads .data/review/uploads     # -c działa na macOS (APFS); gdzie indziej samo cp -R
 NUXT_DB_PATH=.data/review/saintseiya.db NUXT_UPLOADS_DIR=.data/review/uploads pnpm dev
 ```
+
+Na Windows bez `sqlite3` (przy zatrzymanym serwerze): `Copy-Item .data/saintseiya.db* .data/review/`, potem `$env:NUXT_DB_PATH = '.data/review/saintseiya.db'; pnpm dev`. Do samego oglądania `NUXT_UPLOADS_DIR` może zostać domyślny.
+
+**Zrzuty ekranu zamiast sterowanej przeglądarki**: krótki skrypt Node z `chromium.launch({ channel: 'chrome' })` z `@playwright/test`, widok 390 px, `page.screenshot`; przy okazji `document.documentElement.scrollWidth - window.innerWidth` wykrywa wychodzenie poza ekran. Skrypt musi leżeć w katalogu projektu, żeby znalazł `node_modules` — po użyciu usunąć.
 
 **Uwagi do przeglądarki sterowanej przez Claude**:
 

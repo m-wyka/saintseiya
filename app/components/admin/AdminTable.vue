@@ -1,12 +1,21 @@
 <script setup lang="ts" generic="Row extends { id: number }">
 import type { CrudColumn } from '~/utils/crud';
 
-defineProps<{
+const props = defineProps<{
   columns: CrudColumn[];
   rows: Row[];
   isLoading?: boolean;
   emptyMessage?: string;
 }>();
+
+const NAMING_KEYS = ['title', 'name', 'question', 'label'];
+
+const rowLabel = (row: Row): string => {
+  const values = row as Record<string, unknown>;
+  const candidateKeys = [...NAMING_KEYS, ...props.columns.map((column) => column.key)];
+  const namingKey = candidateKeys.find((key) => typeof values[key] === 'string' && values[key]);
+  return namingKey ? String(values[namingKey]) : `pozycja ${row.id}`;
+};
 </script>
 
 <template>
@@ -37,7 +46,7 @@ defineProps<{
             <slot :name="`cell-${column.key}`" :row="row">{{ cellText(row, column.key) }}</slot>
           </td>
           <td class="px-4 py-2.5 align-middle">
-            <div class="flex items-center justify-end gap-1.5">
+            <div class="flex items-center justify-end gap-1.5" role="group" :aria-label="`Akcje: ${rowLabel(row)}`">
               <slot name="actions" :row="row" />
             </div>
           </td>

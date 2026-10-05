@@ -12,6 +12,9 @@ const description = computed(() =>
     : 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie za chwilę.',
 );
 
+const layout = useLayoutStore();
+await callOnce('layout', () => layout.load().catch(() => undefined));
+
 useSeoMeta({ title });
 </script>
 

@@ -13,7 +13,7 @@ const isCurrent = (item: (typeof MAIN_NAVIGATION)[number]) =>
   <header class="relative">
     <div class="mx-auto flex max-w-page items-center justify-between gap-4 px-4 py-2 text-xs text-aqua-300">
       <p v-if="layout.statistics" class="flex flex-wrap items-center gap-x-4 gap-y-1">
-        <span>
+        <span v-if="layout.statistics.memberCount">
           Rycerzy: <strong class="text-gold-300">{{ formatNumber(layout.statistics.memberCount) }}</strong>
         </span>
         <span class="max-sm:hidden">

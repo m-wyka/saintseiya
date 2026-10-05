@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { mediaContentType, resolveMediaFile } from '../../server/utils/media';
 import { assertWithinRateLimit, resetRateLimits } from '../../server/utils/rateLimit';
@@ -10,7 +11,7 @@ describe('media files', () => {
   const uploadsDir = '/srv/uploads';
 
   it('resolves a stored path inside the uploads folder', () => {
-    expect(resolveMediaFile('/media/legacy/img/a%20b.jpg', uploadsDir)).toBe('/srv/uploads/legacy/img/a b.jpg');
+    expect(resolveMediaFile('/media/legacy/img/a%20b.jpg', uploadsDir)).toBe(resolve(uploadsDir, 'legacy/img/a b.jpg'));
   });
 
   it('refuses paths that escape the uploads folder or are malformed', () => {

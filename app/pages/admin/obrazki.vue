@@ -38,7 +38,13 @@ const upload = async (event: Event) => {
   await refresh();
 };
 
+const removeImage = async (media: MediaImage) => {
+  errorMessage.value = '';
+  await remove(media.id);
+};
+
 const copyAddress = async (media: MediaImage) => {
+  errorMessage.value = '';
   try {
     await navigator.clipboard.writeText(addressOf(media));
     toasts.success('Adres skopiowany do schowka');
@@ -97,7 +103,7 @@ useSeoMeta({ title: 'Obrazki' });
               <AppIcon name="link" />
               Kopiuj adres
             </BaseButton>
-            <ConfirmButton @confirm="remove(media.id)" />
+            <ConfirmButton @confirm="removeImage(media)" />
           </div>
         </div>
       </li>

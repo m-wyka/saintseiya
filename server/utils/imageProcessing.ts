@@ -6,6 +6,9 @@ const THUMBNAIL_MAX_EDGE = 480;
 const THUMBNAIL_QUALITY = 80;
 const COMPOSITE_QUALITY = 90;
 
+// libvips keeps files it has read open in its cache; on Windows that blocks deleting them afterwards.
+sharp.cache({ files: 0 });
+
 export interface ImageSize {
   width: number;
   height: number;

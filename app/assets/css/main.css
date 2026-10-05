@@ -227,13 +227,21 @@
   scrollbar-width: thin;
   scroll-marker-group: before;
 
+  @supports (scroll-marker-group: before) {
+    scrollbar-width: none;
+  }
+
+  /* Browsers force `contain: size` on the marker group, so it needs an explicit height and a single row. */
   &::scroll-marker-group {
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
     gap: 0.25rem;
+    height: 2.75rem;
+    overflow-x: auto;
+    scrollbar-width: none;
     border-bottom: 1px solid rgb(81 141 163 / 0.18);
     background-color: rgb(0 0 0 / 0.3);
-    padding: 0.5rem 0.75rem;
+    padding: 0 0.75rem;
   }
 
   & > * {
@@ -243,7 +251,9 @@
 
   & > *::scroll-marker {
     content: var(--slide-title, '');
+    flex: none;
     cursor: pointer;
+    white-space: nowrap;
     border-radius: 9999px;
     padding: 0.25rem 0.75rem;
     font-size: 0.75rem;

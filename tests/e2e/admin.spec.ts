@@ -105,6 +105,51 @@ test.describe('administration panel', () => {
     expect((await page.request.get('/api/admin/news')).status()).toBe(403);
   });
 
+  test('a role change and a ban reach the signed-in user on the next page load', async ({ page, browser }) => {
+    const memberContext = await browser.newContext();
+    const memberPage = await memberContext.newPage();
+    await signIn(memberPage, { name: 'Awansowany Rycerz' });
+    await visit(memberPage, '/');
+    await expect(memberPage.getByRole('link', { name: 'Awansowany Rycerz' })).toBeVisible();
+    await expect(memberPage.getByRole('link', { name: 'Panel', exact: true })).toHaveCount(0);
+
+    await signIn(page, { name: 'Admin Ról', role: 'admin' });
+    await visit(page, '/admin/uzytkownicy');
+    await page.getByRole('searchbox', { name: 'Szukaj' }).fill('awansowany');
+    const memberRow = page.getByRole('row', { name: /Awansowany Rycerz/ });
+    await expect(page.getByRole('row')).toHaveCount(2);
+    await memberRow.getByRole('button', { name: 'Rola' }).click();
+
+    const roleForm = page.locator('form').filter({ hasText: 'Rola i uprawnienia: Awansowany Rycerz' });
+    await roleForm.getByLabel('Rola', { exact: true }).selectOption('moderator');
+    await roleForm.getByText('Newsy, kategorie i tagi').click();
+    await roleForm.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page.getByText('Rola zapisana')).toBeVisible();
+    await expect(memberRow.getByText('Newsy, kategorie i tagi')).toBeVisible();
+
+    await visit(memberPage, '/');
+    await memberPage.getByRole('link', { name: 'Panel', exact: true }).click();
+    const panelNavigation = memberPage.getByRole('navigation', { name: 'Panel administratora' });
+    await expect(panelNavigation.getByRole('link', { name: 'Newsy' })).toBeVisible();
+    await expect(panelNavigation.getByRole('link', { name: 'Użytkownicy' })).toHaveCount(0);
+
+    await memberRow.getByRole('button', { name: 'Zablokuj' }).click();
+    await expect(page.getByText('Konto zablokowane').first()).toBeVisible();
+    await page.getByRole('searchbox', { name: 'Szukaj' }).fill('');
+    await page.getByLabel('Status').selectOption('banned');
+    await expect(page.getByRole('row')).toHaveCount(2);
+    await expect(memberRow.getByRole('button', { name: 'Odblokuj' })).toBeVisible();
+
+    await visit(memberPage, '/');
+    await expect(memberPage.getByRole('link', { name: 'Zaloguj przez Google' })).toBeVisible();
+    await expect(memberPage.getByRole('link', { name: 'Awansowany Rycerz' })).toHaveCount(0);
+    expect([401, 403]).toContain((await memberPage.request.get('/api/admin/news')).status());
+
+    await memberRow.getByRole('button', { name: 'Odblokuj' }).click();
+    await expect(page.getByRole('row')).toHaveCount(1);
+    await memberContext.close();
+  });
+
   test('a forum moderator locks a thread so regular users cannot reply', async ({ page, browser }) => {
     await signIn(page, { name: 'Moderator Forum', role: 'moderator', permissions: ['forum'] });
     await visit(page, '/forum/dzial/postacie');

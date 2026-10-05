@@ -6,7 +6,7 @@ const { data: home } = await useFetch('/api/home');
 
 <template>
   <div class="flex flex-col gap-10">
-    <div v-if="home" class="grid animate-rise gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    <div v-if="home" class="grid animate-rise grid-cols-1 gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <NewsCenter :tabs="home.newsCenterTabs" />
       <div class="flex flex-col gap-6">
         <ThreadList title="Najnowsze tematy" :threads="home.latestThreads.slice(0, 5)" />

@@ -124,6 +124,7 @@ test.describe('public site', () => {
 
     expect(response?.status()).toBe(404);
     await expect(page.getByRole('heading', { name: 'Tej strony nie ma w Sanktuarium' })).toBeVisible();
+    await expect(page.getByText('Postów na forum:')).toBeVisible();
     await page.getByRole('button', { name: 'Wróć na stronę główną' }).click();
     await expect(page).toHaveURL('/');
   });

@@ -94,7 +94,8 @@ useSeoMeta({ title: 'Użytkownicy' });
         </span>
       </template>
       <template #cell-createdAt="{ row }">
-        <time :datetime="row.createdAt" class="whitespace-nowrap">{{ formatLongDate(row.createdAt) }}</time>
+        <template v-if="row.isGhost">—</template>
+        <time v-else :datetime="row.createdAt" class="whitespace-nowrap">{{ formatLongDate(row.createdAt) }}</time>
       </template>
       <template #cell-lastSeenAt="{ row }">
         <time v-if="row.lastSeenAt" :datetime="row.lastSeenAt" class="whitespace-nowrap">

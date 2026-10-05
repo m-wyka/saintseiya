@@ -57,7 +57,7 @@ const save = async () => {
       Administrator ma dostęp do wszystkich działów panelu.
     </p>
     <p class="text-xs text-aqua-500">
-      Zmiana obowiązuje od razu. Menu panelu u tej osoby odświeży się po jej ponownym zalogowaniu.
+      Zmiana obowiązuje od razu. Menu panelu u tej osoby odświeży się przy najbliższym wczytaniu strony.
     </p>
     <p v-if="errorMessage" class="flex items-center gap-2 text-sm text-danger" role="alert">
       <AppIcon name="warning" />
