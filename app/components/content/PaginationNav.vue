@@ -28,7 +28,7 @@ const linkTo = (page: number) => ({ path: route.path, query: { ...route.query, p
         class="grid h-9 min-w-9 place-items-center rounded-full px-2 text-sm font-semibold transition duration-200"
         :class="
           candidate === page
-            ? 'text-abyss-950 cosmo-bar'
+            ? 'cosmo-bar text-abyss-950'
             : 'border border-aqua-500/30 text-aqua-200 hover:border-cosmo-500 hover:text-gold-300'
         "
         :aria-current="candidate === page ? 'page' : undefined"

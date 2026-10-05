@@ -38,7 +38,7 @@ useSeoMeta({ title: () => `${title.value} – Galeria` });
         <NuxtLink
           v-if="photo.previousPhotoId"
           :to="routes.photo(photo.previousPhotoId)"
-          class="absolute top-1/2 left-3 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-xl text-cosmo-400 backdrop-blur-sm transition hover:text-abyss-950 hover:cosmo-bar"
+          class="absolute top-1/2 left-3 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-xl text-cosmo-400 backdrop-blur-sm transition hover:cosmo-bar hover:text-abyss-950"
           aria-label="Poprzednia grafika"
         >
           <AppIcon name="chevronLeft" />
@@ -46,7 +46,7 @@ useSeoMeta({ title: () => `${title.value} – Galeria` });
         <NuxtLink
           v-if="photo.nextPhotoId"
           :to="routes.photo(photo.nextPhotoId)"
-          class="absolute top-1/2 right-3 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-xl text-cosmo-400 backdrop-blur-sm transition hover:text-abyss-950 hover:cosmo-bar"
+          class="absolute top-1/2 right-3 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-xl text-cosmo-400 backdrop-blur-sm transition hover:cosmo-bar hover:text-abyss-950"
           aria-label="Następna grafika"
         >
           <AppIcon name="chevronRight" />

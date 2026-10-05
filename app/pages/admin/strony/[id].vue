@@ -93,7 +93,7 @@ useSeoMeta({ title: isNew ? 'Nowa strona' : 'Edycja strony' });
               class="cursor-pointer rounded-full border px-2.5 py-0.5 text-xs transition duration-150"
               :class="
                 input.tagIds.includes(tag.id)
-                  ? 'border-transparent font-semibold text-abyss-950 cosmo-bar'
+                  ? 'border-transparent cosmo-bar font-semibold text-abyss-950'
                   : 'border-aqua-500/30 text-aqua-200 hover:border-cosmo-500'
               "
               :aria-pressed="input.tagIds.includes(tag.id)"

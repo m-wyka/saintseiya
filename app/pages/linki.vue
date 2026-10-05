@@ -19,7 +19,7 @@ useSeoMeta({ title: 'Linki' });
               class="group flex h-full items-start gap-3 panel px-4 py-3 transition duration-300 ease-cosmo hover:-translate-y-0.5 hover:border-cosmo-500/60"
             >
               <span
-                class="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-black/40 text-cosmo-500 transition group-hover:text-abyss-950 group-hover:cosmo-bar"
+                class="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-black/40 text-cosmo-500 transition group-hover:cosmo-bar group-hover:text-abyss-950"
               >
                 <AppIcon name="link" />
               </span>

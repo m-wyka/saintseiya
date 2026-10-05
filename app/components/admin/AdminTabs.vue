@@ -15,7 +15,7 @@ const route = useRoute();
       class="rounded-full border px-3 py-1 text-xs font-semibold transition duration-150"
       :class="
         route.path === tab.to
-          ? 'border-transparent text-abyss-950 cosmo-bar'
+          ? 'border-transparent cosmo-bar text-abyss-950'
           : 'border-aqua-500/30 text-aqua-200 hover:border-cosmo-500 hover:text-gold-300'
       "
       :aria-current="route.path === tab.to ? 'page' : undefined"

@@ -32,7 +32,7 @@ const closeOnBackdrop = (event: MouseEvent) => {
     @click="closeOnBackdrop"
   >
     <div class="flex max-h-[85dvh] flex-col">
-      <header class="flex items-center justify-between gap-4 px-5 py-3 cosmo-bar">
+      <header class="flex items-center justify-between gap-4 cosmo-bar px-5 py-3">
         <h2 class="heading-display text-lg text-abyss-950">{{ title }}</h2>
         <button
           type="button"

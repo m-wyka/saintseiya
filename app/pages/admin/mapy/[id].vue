@@ -213,7 +213,7 @@ useSeoMeta({ title: isNew ? 'Nowa mapa' : 'Edycja mapy' });
                 type="button"
                 class="flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-1.5 text-left text-sm transition"
                 :class="
-                  index === selectedIndex ? 'font-semibold text-abyss-950 cosmo-bar' : 'text-aqua-200 hover:bg-white/5'
+                  index === selectedIndex ? 'cosmo-bar font-semibold text-abyss-950' : 'text-aqua-200 hover:bg-white/5'
                 "
                 @click="selectedIndex = index"
               >

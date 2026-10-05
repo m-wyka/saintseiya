@@ -41,7 +41,7 @@ useSeoMeta({ title: () => (currentCategory.value ? `${currentCategory.value.name
           :class="
             categorySlug
               ? 'border-aqua-500/30 text-aqua-200 hover:border-cosmo-500 hover:text-gold-300'
-              : 'border-transparent font-semibold text-abyss-950 cosmo-bar'
+              : 'border-transparent cosmo-bar font-semibold text-abyss-950'
           "
         >
           Wszystkie
@@ -53,7 +53,7 @@ useSeoMeta({ title: () => (currentCategory.value ? `${currentCategory.value.name
           class="flex items-center gap-2 rounded-full border px-3 py-1 text-xs transition duration-200"
           :class="
             category.slug === categorySlug
-              ? 'border-transparent font-semibold text-abyss-950 cosmo-bar'
+              ? 'border-transparent cosmo-bar font-semibold text-abyss-950'
               : 'border-aqua-500/30 text-aqua-200 hover:border-cosmo-500 hover:text-gold-300'
           "
         >

@@ -31,7 +31,7 @@ useSeoMeta({ title: 'Mapy interaktywne' });
               <p v-if="map.description" class="line-clamp-2 text-xs text-aqua-200">{{ map.description }}</p>
             </div>
             <span
-              class="grid size-9 shrink-0 place-items-center rounded-full text-abyss-950 transition duration-300 cosmo-bar group-hover:translate-x-1"
+              class="grid size-9 shrink-0 place-items-center rounded-full cosmo-bar text-abyss-950 transition duration-300 group-hover:translate-x-1"
             >
               <AppIcon name="chevronRight" />
             </span>

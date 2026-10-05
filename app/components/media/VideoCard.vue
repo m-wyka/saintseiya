@@ -35,7 +35,7 @@ const playerUrl = computed(() => `https://www.youtube-nocookie.com/embed/${props
           class="size-full object-cover transition duration-500 ease-cosmo group-hover:scale-105"
         />
         <span
-          class="absolute top-1/2 left-1/2 grid size-14 -translate-1/2 place-items-center rounded-full text-2xl text-abyss-950 shadow-aura transition duration-300 cosmo-bar group-hover:scale-110"
+          class="absolute top-1/2 left-1/2 grid size-14 -translate-1/2 place-items-center rounded-full cosmo-bar text-2xl text-abyss-950 shadow-aura transition duration-300 group-hover:scale-110"
         >
           <AppIcon name="play" />
         </span>

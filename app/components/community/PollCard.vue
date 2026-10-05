@@ -54,7 +54,7 @@ const vote = async (optionId: number) => {
         <div class="flex items-center gap-2">
           <div class="h-2 flex-1 overflow-hidden rounded-full bg-black/50" role="presentation">
             <div
-              class="h-full rounded-full transition-[width] duration-700 ease-cosmo cosmo-bar"
+              class="h-full rounded-full cosmo-bar transition-[width] duration-700 ease-cosmo"
               :style="{ width: `${shareOf(option.voteCount)}%` }"
             />
           </div>

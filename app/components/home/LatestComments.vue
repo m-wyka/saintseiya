@@ -7,9 +7,9 @@ defineProps<{ comments: CommentSummary[] }>();
 </script>
 
 <template>
-  <section v-if="comments.length" aria-labelledby="latest-comments-heading">
+  <section v-if="comments.length" class="relative" aria-labelledby="latest-comments-heading">
     <SectionHeading id="latest-comments-heading" title="Rycerze komentują" />
-    <ul class="flex snap-x snap-mandatory scrollbar-thin gap-4 overflow-x-auto pb-3">
+    <ul class="carousel-arrows flex snap-x snap-mandatory scrollbar-thin gap-4 overflow-x-auto scroll-smooth pt-1 pb-3">
       <li v-for="comment in comments" :key="comment.id" class="w-72 shrink-0 snap-start">
         <NuxtLink
           :to="comment.target.url"

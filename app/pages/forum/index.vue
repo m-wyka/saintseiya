@@ -11,7 +11,7 @@ useSeoMeta({ title: 'Forum' });
     <PageHeading title="Forum" subtitle="Rozmowy rycerzy o Saint Seiya, mandze, anime i wszystkim wokół." />
     <div class="flex flex-col gap-6">
       <section v-for="category in categories" :key="category.id" class="reveal overflow-hidden panel">
-        <h2 class="px-4 py-2 heading-display text-lg text-abyss-950 cosmo-bar">{{ category.name }}</h2>
+        <h2 class="cosmo-bar px-4 py-2 heading-display text-lg text-abyss-950">{{ category.name }}</h2>
         <ul class="divide-y divide-aqua-500/10">
           <li
             v-for="forum in category.forums"
@@ -20,7 +20,7 @@ useSeoMeta({ title: 'Forum' });
           >
             <div class="flex min-w-0 items-start gap-3">
               <span
-                class="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-black/40 text-cosmo-500 transition group-hover:text-abyss-950 group-hover:cosmo-bar"
+                class="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-black/40 text-cosmo-500 transition group-hover:cosmo-bar group-hover:text-abyss-950"
               >
                 <AppIcon :name="forum.isStaffOnly ? 'lock' : 'forum'" />
               </span>

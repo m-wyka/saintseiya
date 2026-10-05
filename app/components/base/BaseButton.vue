@@ -42,7 +42,7 @@ const attributes = computed(() =>
   <component
     :is="to ? NuxtLink : 'button'"
     v-bind="attributes"
-    class="inline-flex cursor-pointer items-center justify-center rounded-full font-semibold tracking-wide transition duration-200 ease-cosmo select-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+    class="inline-flex cursor-pointer items-center justify-center rounded-md font-semibold tracking-wide transition duration-200 ease-cosmo select-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
     :class="[VARIANT_CLASSES[variant], SIZE_CLASSES[size]]"
   >
     <slot />

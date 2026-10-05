@@ -27,7 +27,7 @@ useSeoMeta({ robots: 'noindex, nofollow' });
 
 <template>
   <div class="flex min-h-dvh flex-col bg-abyss-950 lg:flex-row">
-    <header class="flex items-center justify-between gap-3 px-4 py-2 cosmo-bar lg:hidden">
+    <header class="flex items-center justify-between gap-3 cosmo-bar px-4 py-2 lg:hidden">
       <p class="heading-display text-lg text-abyss-950">Panel SSR</p>
       <button
         type="button"
@@ -63,7 +63,7 @@ useSeoMeta({ robots: 'noindex, nofollow' });
                 class="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm transition duration-150"
                 :class="
                   isCurrent(item.to)
-                    ? 'font-semibold text-abyss-950 cosmo-bar'
+                    ? 'cosmo-bar font-semibold text-abyss-950'
                     : 'text-aqua-200 hover:bg-white/5 hover:text-gold-300'
                 "
                 :aria-current="isCurrent(item.to) ? 'page' : undefined"

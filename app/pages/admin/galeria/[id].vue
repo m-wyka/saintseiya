@@ -141,7 +141,7 @@ useSeoMeta({ title: () => `${data.value?.album.title ?? ''} – Galeria` });
           />
           <span
             v-if="isCover(photo)"
-            class="absolute top-2 left-2 rounded-full px-2 py-0.5 text-[0.7rem] font-semibold text-abyss-950 cosmo-bar"
+            class="absolute top-2 left-2 rounded-full cosmo-bar px-2 py-0.5 text-[0.7rem] font-semibold text-abyss-950"
           >
             Okładka
           </span>

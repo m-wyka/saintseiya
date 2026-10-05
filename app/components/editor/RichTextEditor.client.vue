@@ -233,7 +233,7 @@ const isColorActive = (color: string) => editor.value?.isActive('textStyle', { c
         type="button"
         class="grid h-8 min-w-8 cursor-pointer place-items-center rounded-md px-1.5 text-sm font-bold transition duration-150"
         :class="
-          action.isActive?.() ? 'text-abyss-950 cosmo-bar' : 'text-aqua-300 hover:bg-white/10 hover:text-gold-300'
+          action.isActive?.() ? 'cosmo-bar text-abyss-950' : 'text-aqua-300 hover:bg-white/10 hover:text-gold-300'
         "
         :title="action.title"
         :aria-label="action.title"

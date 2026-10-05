@@ -50,7 +50,7 @@ const youtubePoster = (youtubeId: string) => `https://i.ytimg.com/vi/${youtubeId
               {{ video.title }}
             </span>
             <span
-              class="absolute top-1/2 left-1/2 grid size-9 -translate-1/2 place-items-center rounded-full text-abyss-950 opacity-90 transition cosmo-bar group-hover:scale-110"
+              class="absolute top-1/2 left-1/2 grid size-9 -translate-1/2 place-items-center rounded-full cosmo-bar text-abyss-950 opacity-90 transition group-hover:scale-110"
             >
               <AppIcon name="play" />
             </span>

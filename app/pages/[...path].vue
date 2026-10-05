@@ -40,7 +40,7 @@ useSeoMeta({ title: seoTitle });
           class="group flex h-full items-center gap-3 panel px-4 py-3 text-sm transition duration-300 ease-cosmo hover:-translate-y-0.5 hover:border-cosmo-500/60 hover:shadow-aura"
         >
           <span
-            class="grid size-8 shrink-0 place-items-center rounded-full bg-black/40 text-cosmo-500 transition group-hover:text-abyss-950 group-hover:cosmo-bar"
+            class="grid size-8 shrink-0 place-items-center rounded-full bg-black/40 text-cosmo-500 transition group-hover:cosmo-bar group-hover:text-abyss-950"
           >
             <AppIcon :name="child.childCount ? 'folder' : 'chevronRight'" />
           </span>

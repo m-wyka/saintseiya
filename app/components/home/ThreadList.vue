@@ -27,7 +27,7 @@ defineProps<{ title: string; threads: ThreadSummary[]; showsPostCount?: boolean 
           </span>
           <span
             v-if="showsPostCount"
-            class="shrink-0 rounded-full px-2 py-0.5 text-[0.7rem] font-bold text-abyss-950 cosmo-bar"
+            class="shrink-0 rounded-full cosmo-bar px-2 py-0.5 text-[0.7rem] font-bold text-abyss-950"
             :title="`${thread.postCount} postów`"
           >
             {{ formatNumber(thread.postCount) }}

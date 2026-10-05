@@ -60,7 +60,7 @@ defineProps<{ news: NewsSummary }>();
         class="flex items-center gap-1.5 font-semibold text-cosmo-400 transition duration-200 group-hover:gap-2.5 group-hover:text-gold-300"
       >
         {{ news.hasBody ? 'Czytaj więcej' : 'Otwórz' }}
-        <span class="grid size-5 place-items-center rounded-full text-abyss-950 cosmo-bar">
+        <span class="grid size-5 place-items-center rounded-full cosmo-bar text-abyss-950">
           <AppIcon name="plus" class="text-[0.7rem]" />
         </span>
       </span>
