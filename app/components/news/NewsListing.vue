@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{ categorySlug?: string; tagSlug?: string }>();
 
+const { t } = useI18n();
 const route = useRoute();
 const page = computed(() => Number(route.query.page) || 1);
 
@@ -11,7 +12,7 @@ const { data: listing, error } = await useFetch('/api/news', {
 if (error.value) {
   throw createError({
     statusCode: error.value.statusCode ?? 500,
-    statusMessage: 'Nie udało się wczytać newsów',
+    statusMessage: t('NEWS_LIST.LOAD_FAILED'),
     fatal: true,
   });
 }
@@ -22,7 +23,7 @@ if (error.value) {
     <div v-if="listing.items.length" class="flex flex-col gap-6">
       <NewsCard v-for="news in listing.items" :key="news.slug" :news="news" />
     </div>
-    <EmptyState v-else message="Nie ma jeszcze żadnych newsów w tym miejscu." />
+    <EmptyState v-else :message="t('NEWS_LIST.EMPTY')" />
     <PaginationNav :page="listing.page" :page-count="listing.pageCount" />
   </div>
 </template>

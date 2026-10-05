@@ -27,7 +27,7 @@ describe('missing image marking', () => {
     const marked = markMissingImages(html);
 
     expect(marked).toContain('<a class="missing-image" href="http://dead.example/a.jpg?x=1&amp;y=2"');
-    expect(marked).toContain('<strong>Nie znaleziono zdjęcia</strong>');
+    expect(marked).toContain('<strong>CONTENT.IMAGE_NOT_FOUND</strong>');
     expect(marked).toContain(`<img src="${ALIVE_URL}" alt="" />`);
     expect(marked).toContain('<img src="https://unknown.example/c.gif" alt="" />');
     expect(marked).not.toContain('<img src="http://dead.example');

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { RouteLocationRaw } from 'vue-router';
+defineProps<{ title: string; linkTo?: string; linkLabel?: string }>();
 
-defineProps<{ title: string; linkTo?: RouteLocationRaw; linkLabel?: string }>();
+const { t } = useI18n();
 </script>
 
 <template>
@@ -10,13 +10,13 @@ defineProps<{ title: string; linkTo?: RouteLocationRaw; linkLabel?: string }>();
       <span class="h-5 w-1 rounded-full cosmo-bar" aria-hidden="true" />
       {{ title }}
     </h2>
-    <NuxtLink
+    <NuxtLinkLocale
       v-if="linkTo"
       :to="linkTo"
       class="group flex items-center gap-1 text-xs font-semibold tracking-wide text-cosmo-400 uppercase transition hover:text-gold-300"
     >
-      {{ linkLabel ?? 'Zobacz wszystko' }}
+      {{ linkLabel ?? t('CONTENT.SEE_ALL') }}
       <AppIcon name="chevronRight" class="transition duration-200 group-hover:translate-x-0.5" />
-    </NuxtLink>
+    </NuxtLinkLocale>
   </div>
 </template>

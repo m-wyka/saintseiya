@@ -3,6 +3,8 @@ const isOpen = defineModel<boolean>({ required: true });
 
 defineProps<{ title: string }>();
 
+const { t } = useI18n();
+
 const dialog = ref<HTMLDialogElement | null>(null);
 
 watch(isOpen, (shouldOpen) => {
@@ -37,7 +39,7 @@ const closeOnBackdrop = (event: MouseEvent) => {
         <button
           type="button"
           class="cursor-pointer rounded-full p-1.5 text-abyss-950 transition hover:bg-black/15"
-          aria-label="Zamknij"
+          :aria-label="t('GENERAL.CLOSE')"
           @click="isOpen = false"
         >
           <AppIcon name="close" class="text-xl" />

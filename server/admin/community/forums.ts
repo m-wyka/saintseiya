@@ -2,7 +2,7 @@ import { and, asc, eq, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import { forumSortOrderSchema } from './forumInputs';
 
-const UNKNOWN_CATEGORY = 'Wybierz kategorię forum';
+const UNKNOWN_CATEGORY = 'VALIDATION.FORUM_CATEGORY_REQUIRED';
 
 const categoryExists = (categoryId: number): boolean =>
   Boolean(
@@ -15,9 +15,9 @@ const categoryExists = (categoryId: number): boolean =>
 
 const inputSchema = z.object({
   categoryId: z.number(UNKNOWN_CATEGORY).refine(categoryExists, UNKNOWN_CATEGORY),
-  name: z.string().trim().min(2, 'Nazwa jest za krótka').max(100, 'Nazwa jest za długa'),
+  name: z.string().trim().min(2, 'VALIDATION.NAME_TOO_SHORT').max(100, 'VALIDATION.NAME_TOO_LONG'),
   slug: slugInputSchema,
-  description: z.string().trim().max(300, 'Opis jest za długi').default(''),
+  description: z.string().trim().max(300, 'VALIDATION.DESCRIPTION_TOO_LONG').default(''),
   isStaffOnly: z.boolean().default(false),
   sortOrder: forumSortOrderSchema,
 });
@@ -75,7 +75,7 @@ export const forumsResource = defineAdminResource({
   },
   remove: (id) => {
     if (hasThreads(id)) {
-      throw conflict('W tym dziale są tematy. Najpierw przenieś je lub usuń.');
+      throw conflict('ERRORS.FORUM_HAS_THREADS');
     }
     useDb().delete(schema.forums).where(eq(schema.forums.id, id)).run();
   },

@@ -1,9 +1,9 @@
 import type { Ref } from 'vue';
+import { MISSING_IMAGE_TITLE_KEY } from '#shared/utils/content';
 
 const PLACEHOLDER_CLASS = 'missing-image';
-const PLACEHOLDER_TITLE = 'Nie znaleziono zdjęcia';
 
-const placeholderFor = (image: HTMLImageElement): HTMLElement => {
+const placeholderFor = (image: HTMLImageElement, titleText: string): HTMLElement => {
   const address = image.currentSrc || image.src;
   const placeholder = document.createElement(image.closest('a') ? 'span' : 'a');
   placeholder.className = PLACEHOLDER_CLASS;
@@ -13,7 +13,7 @@ const placeholderFor = (image: HTMLImageElement): HTMLElement => {
     placeholder.rel = 'noopener nofollow';
   }
   const title = document.createElement('strong');
-  title.textContent = PLACEHOLDER_TITLE;
+  title.textContent = titleText;
   const source = document.createElement('span');
   source.textContent = address;
   placeholder.append(title, source);
@@ -23,7 +23,9 @@ const placeholderFor = (image: HTMLImageElement): HTMLElement => {
 const hasFailed = (image: HTMLImageElement): boolean => image.complete && image.naturalWidth === 0;
 
 export const useMissingImagePlaceholders = (container: Ref<HTMLElement | null>, content: Ref<string>) => {
-  const replaceFailedImage = (image: HTMLImageElement) => image.replaceWith(placeholderFor(image));
+  const { t } = useI18n();
+  const replaceFailedImage = (image: HTMLImageElement) =>
+    image.replaceWith(placeholderFor(image, t(MISSING_IMAGE_TITLE_KEY)));
 
   const onLoadError = (event: Event) => {
     if (event.target instanceof HTMLImageElement) {

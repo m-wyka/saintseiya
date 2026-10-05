@@ -3,13 +3,14 @@ import type { NuxtError } from '#app';
 
 const props = defineProps<{ error: NuxtError }>();
 
+const { t } = useI18n();
+const localePath = useLocalePath();
+
 const NOT_FOUND = 404;
 const isNotFound = computed(() => props.error.statusCode === NOT_FOUND);
-const title = computed(() => (isNotFound.value ? 'Tej strony nie ma w Sanktuarium' : 'Coś poszło nie tak'));
+const title = computed(() => t(isNotFound.value ? 'ERROR_PAGE.NOT_FOUND_TITLE' : 'ERROR_PAGE.FAILURE_TITLE'));
 const description = computed(() =>
-  isNotFound.value
-    ? 'Adres mógł się zmienić po przebudowie portalu albo strona została usunięta.'
-    : 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie za chwilę.',
+  t(isNotFound.value ? 'ERROR_PAGE.NOT_FOUND_DESCRIPTION' : 'ERROR_PAGE.FAILURE_DESCRIPTION'),
 );
 
 const layout = useLayoutStore();
@@ -26,9 +27,9 @@ useSeoMeta({ title });
       </p>
       <h1 class="heading-display text-2xl text-gold-300">{{ title }}</h1>
       <p class="max-w-md text-sm text-aqua-300">{{ description }}</p>
-      <BaseButton @click="clearError({ redirect: '/' })">
+      <BaseButton @click="clearError({ redirect: localePath('/') })">
         <AppIcon name="home" />
-        Wróć na stronę główną
+        {{ t('ERROR_PAGE.BACK_HOME') }}
       </BaseButton>
     </div>
   </NuxtLayout>

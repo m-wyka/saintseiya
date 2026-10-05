@@ -14,14 +14,10 @@ const categoryExists = (categoryId: number): boolean =>
   );
 
 const inputSchema = z.object({
-  title: z.string().trim().min(2, 'Tytuł jest za krótki').max(200, 'Tytuł jest za długi'),
-  description: z.string().trim().max(1000, 'Opis jest za długi').default(''),
-  url: z
-    .string()
-    .trim()
-    .max(500, 'Adres jest za długi')
-    .refine(isWebUrl, 'Podaj pełny adres strony zaczynający się od http:// lub https://'),
-  categoryId: existingIdSchema(categoryExists, 'Wybierz kategorię'),
+  title: z.string().trim().min(2, 'VALIDATION.TITLE_TOO_SHORT').max(200, 'VALIDATION.TITLE_TOO_LONG'),
+  description: z.string().trim().max(1000, 'VALIDATION.DESCRIPTION_TOO_LONG').default(''),
+  url: z.string().trim().max(500, 'VALIDATION.URL_TOO_LONG').refine(isWebUrl, 'VALIDATION.WEB_URL_REQUIRED'),
+  categoryId: existingIdSchema(categoryExists, 'VALIDATION.CATEGORY_REQUIRED'),
 });
 
 export const linksResource = defineAdminResource({

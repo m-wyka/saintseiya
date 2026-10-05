@@ -6,16 +6,18 @@ type HomeContent = InternalApi['/api/home']['get'];
 
 defineProps<{ photos: HomeContent['latestPhotos']; videos: HomeContent['latestVideos'] }>();
 
+const { t } = useI18n();
+
 const youtubePoster = (youtubeId: string) => `https://i.ytimg.com/vi/${youtubeId}/mqdefault.jpg`;
 </script>
 
 <template>
   <div class="grid gap-8 xl:grid-cols-2">
     <section v-if="photos.length">
-      <SectionHeading title="Najnowsze grafiki" :link-to="routes.gallery()" />
+      <SectionHeading :title="t('HOME_PANELS.LATEST_PHOTOS')" :link-to="routes.gallery()" />
       <ul class="grid grid-cols-4 gap-2">
         <li v-for="photo in photos" :key="photo.id">
-          <NuxtLink
+          <NuxtLinkLocale
             :to="routes.photo(photo.id)"
             class="group block aspect-square overflow-hidden rounded-lg border border-aqua-500/20 transition duration-300 hover:border-cosmo-500"
             :title="photo.title || photo.albumTitle"
@@ -26,15 +28,15 @@ const youtubePoster = (youtubeId: string) => `https://i.ytimg.com/vi/${youtubeId
               loading="lazy"
               class="size-full object-cover transition duration-500 ease-cosmo group-hover:scale-110"
             />
-          </NuxtLink>
+          </NuxtLinkLocale>
         </li>
       </ul>
     </section>
     <section v-if="videos.length">
-      <SectionHeading title="Najnowsze video" :link-to="routes.videos()" />
+      <SectionHeading :title="t('HOME_PANELS.LATEST_VIDEOS')" :link-to="routes.videos()" />
       <ul class="grid grid-cols-2 gap-2">
         <li v-for="video in videos" :key="video.id">
-          <NuxtLink
+          <NuxtLinkLocale
             :to="routes.videos()"
             class="group relative block aspect-video overflow-hidden rounded-lg border border-aqua-500/20 transition duration-300 hover:border-cosmo-500"
           >
@@ -54,7 +56,7 @@ const youtubePoster = (youtubeId: string) => `https://i.ytimg.com/vi/${youtubeId
             >
               <AppIcon name="play" />
             </span>
-          </NuxtLink>
+          </NuxtLinkLocale>
         </li>
       </ul>
     </section>

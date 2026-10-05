@@ -129,6 +129,27 @@ test.describe('public site', () => {
     await expect(page).toHaveURL('/');
   });
 
+  test('the English version keeps its language and addresses while browsing', async ({ page }) => {
+    await visit(page, '/');
+    await page.getByRole('navigation', { name: 'Język' }).getByRole('link', { name: 'en' }).click();
+
+    await expect(page).toHaveURL('/en');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en-GB');
+    const mainMenu = page.getByRole('navigation', { name: 'Main menu' });
+    await expect(mainMenu.getByRole('link', { name: 'Home' })).toBeVisible();
+
+    await mainMenu.getByRole('link', { name: 'Forum' }).click();
+    await expect(page).toHaveURL('/en/forum');
+    await page.locator('a[href^="/en/forum/section/"]').first().click();
+    await expect(page).toHaveURL(/\/en\/forum\/section\/[\w-]+$/);
+
+    await mainMenu.getByRole('link', { name: 'News' }).click();
+    await expect(page).toHaveURL('/en/news');
+    await page.getByRole('navigation', { name: 'Language' }).getByRole('link', { name: 'pl' }).click();
+    await expect(page).toHaveURL('/newsy');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'pl-PL');
+  });
+
   test('visitors cannot open the administration panel', async ({ page }) => {
     await visit(page, '/admin');
     await expect(page).toHaveURL('/');

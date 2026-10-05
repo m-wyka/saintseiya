@@ -1,9 +1,11 @@
 <script setup lang="ts">
 const props = defineProps<{
   title: string;
-  unit: [one: string, few: string, many: string];
+  unitKey: string;
   points: { year: number; value: number }[];
 }>();
+
+const { t } = useI18n();
 
 const PERCENT = 100;
 const GRIDLINE_SHARES = [1, 0.5];
@@ -28,7 +30,12 @@ const heightOf = (value: number) => `${(value / scaleMax.value) * PERCENT}%`;
 const hovered = computed(() => props.points.find((point) => point.year === hoveredYear.value) ?? null);
 const showsLabel = (index: number) =>
   props.points.length <= DENSE_POINT_COUNT || index % LABEL_EVERY_NTH_WHEN_DENSE === 0;
-const valueLabel = (value: number) => pluralize(value, ...props.unit);
+const valueLabel = (value: number) => t(props.unitKey, { count: formatNumber(value) }, value);
+const summary = computed(() =>
+  hovered.value
+    ? `${hovered.value.year}: ${valueLabel(hovered.value.value)}`
+    : t('ADMIN_UI.CHART_TOTAL', { value: valueLabel(total.value) }),
+);
 </script>
 
 <template>
@@ -37,19 +44,19 @@ const valueLabel = (value: number) => pluralize(value, ...props.unit);
       <div>
         <p class="text-sm font-semibold text-mist">{{ title }}</p>
         <p class="text-xs text-aqua-500" aria-live="polite">
-          {{ hovered ? `${hovered.year}: ${valueLabel(hovered.value)}` : `Łącznie ${valueLabel(total)}` }}
+          {{ summary }}
         </p>
       </div>
       <BaseButton variant="ghost" size="sm" :aria-pressed="showsTable" @click="showsTable = !showsTable">
         <AppIcon :name="showsTable ? 'chart' : 'list'" />
-        {{ showsTable ? 'Wykres' : 'Tabela' }}
+        {{ showsTable ? t('ADMIN_UI.CHART_SHOW_CHART') : t('ADMIN_UI.CHART_SHOW_TABLE') }}
       </BaseButton>
     </figcaption>
 
     <table v-if="showsTable" class="w-full text-left text-xs">
       <thead class="text-aqua-500">
         <tr>
-          <th scope="col" class="py-1 font-semibold">Rok</th>
+          <th scope="col" class="py-1 font-semibold">{{ t('ADMIN_UI.CHART_YEAR') }}</th>
           <th scope="col" class="py-1 text-right font-semibold">{{ title }}</th>
         </tr>
       </thead>

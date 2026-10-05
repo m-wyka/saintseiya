@@ -11,6 +11,8 @@ export const useAdminForm = async <Input extends Record<string, unknown>>(option
   const isNew = options.recordId === NEW_RECORD_PARAM;
   const input = ref({ ...options.emptyInput }) as Ref<Input>;
   const toasts = useToastStore();
+  const { t } = useI18n();
+  const localePath = useLocalePath();
   const { isBusy, errorMessage, run } = useApiAction();
 
   if (!isNew) {
@@ -18,7 +20,7 @@ export const useAdminForm = async <Input extends Record<string, unknown>>(option
       () => null,
     );
     if (!stored) {
-      throw createError({ statusCode: 404, statusMessage: 'Nie znaleziono', fatal: true });
+      throw createError({ statusCode: 404, statusMessage: t('ADMIN_UI.NOT_FOUND'), fatal: true });
     }
     const knownKeys = Object.keys(options.emptyInput) as (keyof Input)[];
     input.value = Object.fromEntries(
@@ -33,8 +35,9 @@ export const useAdminForm = async <Input extends Record<string, unknown>>(option
         : apiRequest(`/api/admin/${options.resource}/${options.recordId}`, { method: 'PUT', body: input.value }),
     );
     if (wasSaved) {
-      toasts.success('Zapisano');
-      await navigateTo(typeof options.listPath === 'function' ? options.listPath(input.value) : options.listPath);
+      toasts.success(t('GENERAL.SAVED'));
+      const listPath = typeof options.listPath === 'function' ? options.listPath(input.value) : options.listPath;
+      await navigateTo(localePath(listPath));
     }
   };
 

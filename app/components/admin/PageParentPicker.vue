@@ -8,6 +8,8 @@ interface ParentPage {
 const parentId = defineModel<number | null>({ required: true });
 const props = defineProps<{ movedPageId?: number }>();
 
+const { t } = useI18n();
+
 const SEARCH_DEBOUNCE_MS = 250;
 
 const search = ref('');
@@ -61,23 +63,25 @@ onBeforeUnmount(() => clearTimeout(searchTimer));
 
 <template>
   <fieldset class="flex flex-col gap-2">
-    <legend class="mb-1.5 text-xs font-semibold tracking-wide text-aqua-300 uppercase">Strona nadrzędna</legend>
+    <legend class="mb-1.5 text-xs font-semibold tracking-wide text-aqua-300 uppercase">
+      {{ t('ADMIN_FORMS.PARENT_LEGEND') }}
+    </legend>
     <div class="rounded-lg border border-aqua-500/30 bg-black/40 px-3 py-2 text-sm">
       <template v-if="parentId !== null">
         <p class="font-semibold text-mist">{{ chosenParent?.title ?? '…' }}</p>
         <p v-if="chosenParent" class="text-xs break-all text-aqua-500">/{{ chosenParent.path }}</p>
       </template>
-      <p v-else class="text-aqua-200">Brak — strona leży na poziomie głównym</p>
+      <p v-else class="text-aqua-200">{{ t('ADMIN_FORMS.PARENT_NONE') }}</p>
     </div>
     <BaseButton v-if="parentId !== null" variant="ghost" size="sm" class="self-start" @click="choose(null)">
       <AppIcon name="home" />
-      Przenieś na poziom główny
+      {{ t('ADMIN_FORMS.PARENT_MOVE_TO_ROOT') }}
     </BaseButton>
     <BaseInput
       v-model="search"
       type="search"
-      label="Zmień stronę nadrzędną"
-      placeholder="Wpisz fragment tytułu…"
+      :label="t('ADMIN_FORMS.PARENT_CHANGE')"
+      :placeholder="t('ADMIN_FORMS.PAGE_TITLE_PLACEHOLDER')"
       @keydown.enter.prevent
     />
     <ul v-if="candidates.length" class="flex max-h-72 flex-col overflow-y-auto rounded-lg border border-aqua-500/30">
@@ -92,6 +96,6 @@ onBeforeUnmount(() => clearTimeout(searchTimer));
         </button>
       </li>
     </ul>
-    <p v-else-if="hasNoCandidates" class="text-xs text-aqua-500">Żadna strona nie pasuje do tego tytułu.</p>
+    <p v-else-if="hasNoCandidates" class="text-xs text-aqua-500">{{ t('ADMIN_FORMS.PARENT_NO_MATCH') }}</p>
   </fieldset>
 </template>

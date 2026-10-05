@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm';
+import { MISSING_IMAGE_TITLE_KEY } from '#shared/utils/content';
 import { schema, useDb } from './db';
 
 const IMAGE_TAG_PATTERN = /<img\b[^>]*?\bsrc="([^"]+)"[^>]*>/gi;
 const KNOWN_URLS_LIFETIME_MS = 5 * 60 * 1000;
-const PLACEHOLDER_TITLE = 'Nie znaleziono zdjęcia';
 
 let missingImageUrls: Set<string> | null = null;
 let loadedAt = 0;
@@ -30,7 +30,7 @@ export const forgetMissingImages = (): void => {
 };
 
 const placeholderFor = (escapedUrl: string): string =>
-  `<a class="missing-image" href="${escapedUrl}" target="_blank" rel="noopener nofollow"><strong>${PLACEHOLDER_TITLE}</strong><span>${escapedUrl}</span></a>`;
+  `<a class="missing-image" href="${escapedUrl}" target="_blank" rel="noopener nofollow"><strong>${MISSING_IMAGE_TITLE_KEY}</strong><span>${escapedUrl}</span></a>`;
 
 export const markMissingImages = (html: string, now = Date.now()): string => {
   const missing = knownMissingImageUrls(now);

@@ -22,15 +22,17 @@ const props = withDefaults(defineProps<{ label: string; extended?: boolean; allo
   allowsUpload: false,
 });
 
-const INSERT_LABELS: Record<InsertKind, string> = {
-  link: 'Adres odnośnika',
-  image: 'Adres obrazka',
-  video: 'Adres filmu na YouTube',
+const { t } = useI18n();
+
+const INSERT_LABEL_KEYS: Record<InsertKind, string> = {
+  link: 'EDITOR.LINK_URL',
+  image: 'EDITOR.IMAGE_URL',
+  video: 'EDITOR.VIDEO_URL',
 };
-const ALIGNMENT_ACTIONS: Record<TextAlignment, { title: string; icon: IconName }> = {
-  left: { title: 'Do lewej', icon: 'alignLeft' },
-  center: { title: 'Wyśrodkuj', icon: 'alignCenter' },
-  right: { title: 'Do prawej', icon: 'alignRight' },
+const ALIGNMENT_ACTIONS: Record<TextAlignment, { titleKey: string; icon: IconName }> = {
+  left: { titleKey: 'EDITOR.ALIGN_LEFT', icon: 'alignLeft' },
+  center: { titleKey: 'EDITOR.ALIGN_CENTER', icon: 'alignCenter' },
+  right: { titleKey: 'EDITOR.ALIGN_RIGHT', icon: 'alignRight' },
 };
 const NEW_TABLE_SIZE = { rows: 3, cols: 3, withHeaderRow: false };
 
@@ -64,7 +66,7 @@ const isActive = (name: string | Record<string, unknown>, attributes?: Record<st
 const pendingInsert = ref<InsertKind | null>(null);
 const insertUrl = ref('');
 
-const insertLabel = computed(() => (pendingInsert.value ? INSERT_LABELS[pendingInsert.value] : ''));
+const insertLabel = computed(() => (pendingInsert.value ? t(INSERT_LABEL_KEYS[pendingInsert.value]) : ''));
 
 const startInsert = (kind: InsertKind) => {
   pendingInsert.value = pendingInsert.value === kind ? null : kind;
@@ -114,102 +116,128 @@ const uploadImage = async (event: Event) => {
 const basicActions = (): ToolbarAction[] => [
   {
     key: 'bold',
-    title: 'Pogrubienie',
+    title: t('EDITOR.BOLD'),
     glyph: 'B',
     isActive: isActive('bold'),
     run: () => command().toggleBold().run(),
   },
   {
     key: 'italic',
-    title: 'Kursywa',
+    title: t('EDITOR.ITALIC'),
     glyph: 'I',
     isActive: isActive('italic'),
     run: () => command().toggleItalic().run(),
   },
   {
     key: 'underline',
-    title: 'Podkreślenie',
+    title: t('EDITOR.UNDERLINE'),
     glyph: 'U',
     isActive: isActive('underline'),
     run: () => command().toggleUnderline().run(),
   },
   {
     key: 'strike',
-    title: 'Przekreślenie',
+    title: t('EDITOR.STRIKE'),
     glyph: 'S',
     isActive: isActive('strike'),
     run: () => command().toggleStrike().run(),
   },
   {
     key: 'quote',
-    title: 'Cytat',
+    title: t('EDITOR.QUOTE'),
     icon: 'quote',
     isActive: isActive('blockquote'),
     run: () => command().toggleBlockquote().run(),
   },
   {
     key: 'bullets',
-    title: 'Lista punktowana',
+    title: t('EDITOR.BULLET_LIST'),
     icon: 'list',
     isActive: isActive('bulletList'),
     run: () => command().toggleBulletList().run(),
   },
   {
     key: 'numbers',
-    title: 'Lista numerowana',
+    title: t('EDITOR.NUMBERED_LIST'),
     icon: 'numberedList',
     isActive: isActive('orderedList'),
     run: () => command().toggleOrderedList().run(),
   },
   {
     key: 'code',
-    title: 'Kod',
+    title: t('EDITOR.CODE'),
     icon: 'code',
     isActive: isActive('codeBlock'),
     run: () => command().toggleCodeBlock().run(),
   },
-  { key: 'link', title: 'Odnośnik', icon: 'link', isActive: isActive('link'), run: () => startInsert('link') },
-  { key: 'image', title: 'Obrazek z adresu', icon: 'image', run: () => startInsert('image') },
+  { key: 'link', title: t('EDITOR.LINK'), icon: 'link', isActive: isActive('link'), run: () => startInsert('link') },
+  { key: 'image', title: t('EDITOR.IMAGE_FROM_URL'), icon: 'image', run: () => startInsert('image') },
 ];
 
 const articleActions = (): ToolbarAction[] => [
   ...TOOLBAR_HEADING_LEVELS.map((level) => ({
     key: `heading-${level}`,
-    title: `Nagłówek ${level - 1}`,
+    title: t('EDITOR.HEADING', { level: level - 1 }),
     glyph: `H${level - 1}`,
     isActive: isActive('heading', { level }),
     run: () => command().toggleHeading({ level }).run(),
   })),
   ...TEXT_ALIGNMENTS.map((alignment) => ({
     key: `align-${alignment}`,
-    ...ALIGNMENT_ACTIONS[alignment],
+    title: t(ALIGNMENT_ACTIONS[alignment].titleKey),
+    icon: ALIGNMENT_ACTIONS[alignment].icon,
     isActive: isActive({ textAlign: alignment }),
     run: () => command().setTextAlign(alignment).run(),
   })),
-  { key: 'rule', title: 'Linia pozioma', icon: 'minus', run: () => command().setHorizontalRule().run() },
+  { key: 'rule', title: t('EDITOR.RULE'), icon: 'minus', run: () => command().setHorizontalRule().run() },
   {
     key: 'table',
-    title: 'Wstaw tabelę',
+    title: t('EDITOR.INSERT_TABLE'),
     icon: 'table',
     isActive: isActive('table'),
     run: () => command().insertTable(NEW_TABLE_SIZE).run(),
   },
-  { key: 'video', title: 'Film z YouTube', icon: 'play', run: () => startInsert('video') },
+  { key: 'video', title: t('EDITOR.YOUTUBE_VIDEO'), icon: 'play', run: () => startInsert('video') },
 ];
 
 const tableActions = (): ToolbarAction[] => [
-  { key: 'row-add', title: 'Dodaj wiersz', glyph: '+ wiersz', run: () => command().addRowAfter().run() },
-  { key: 'row-remove', title: 'Usuń wiersz', glyph: '− wiersz', run: () => command().deleteRow().run() },
-  { key: 'column-add', title: 'Dodaj kolumnę', glyph: '+ kolumna', run: () => command().addColumnAfter().run() },
-  { key: 'column-remove', title: 'Usuń kolumnę', glyph: '− kolumna', run: () => command().deleteColumn().run() },
-  { key: 'table-remove', title: 'Usuń tabelę', glyph: 'Usuń tabelę', run: () => command().deleteTable().run() },
+  {
+    key: 'row-add',
+    title: t('EDITOR.ADD_ROW'),
+    glyph: t('EDITOR.ADD_ROW_SHORT'),
+    run: () => command().addRowAfter().run(),
+  },
+  {
+    key: 'row-remove',
+    title: t('EDITOR.REMOVE_ROW'),
+    glyph: t('EDITOR.REMOVE_ROW_SHORT'),
+    run: () => command().deleteRow().run(),
+  },
+  {
+    key: 'column-add',
+    title: t('EDITOR.ADD_COLUMN'),
+    glyph: t('EDITOR.ADD_COLUMN_SHORT'),
+    run: () => command().addColumnAfter().run(),
+  },
+  {
+    key: 'column-remove',
+    title: t('EDITOR.REMOVE_COLUMN'),
+    glyph: t('EDITOR.REMOVE_COLUMN_SHORT'),
+    run: () => command().deleteColumn().run(),
+  },
+  {
+    key: 'table-remove',
+    title: t('EDITOR.REMOVE_TABLE'),
+    glyph: t('EDITOR.REMOVE_TABLE'),
+    run: () => command().deleteTable().run(),
+  },
 ];
 
 const actions = computed<ToolbarAction[]>(() => [
   ...basicActions(),
   ...(props.extended ? articleActions() : []),
   ...(props.allowsUpload
-    ? [{ key: 'upload', title: 'Wgraj obrazek z dysku', icon: 'plus' as const, run: () => uploadInput.value?.click() }]
+    ? [{ key: 'upload', title: t('EDITOR.UPLOAD_IMAGE'), icon: 'plus' as const, run: () => uploadInput.value?.click() }]
     : []),
 ]);
 
@@ -224,7 +252,7 @@ const isColorActive = (color: string) => editor.value?.isActive('textStyle', { c
     <div
       class="flex flex-wrap items-center gap-1 border-b border-aqua-500/20 bg-black/40 px-2 py-1.5"
       role="toolbar"
-      :aria-label="`Formatowanie: ${label}`"
+      :aria-label="t('EDITOR.TOOLBAR', { label })"
       @mousedown.prevent
     >
       <button
@@ -252,18 +280,18 @@ const isColorActive = (color: string) => editor.value?.isActive('textStyle', { c
           class="size-6 cursor-pointer rounded-full border-2 transition duration-150 hover:scale-110"
           :class="isColorActive(color.value) ? 'border-white' : 'border-transparent'"
           :style="{ backgroundColor: color.value }"
-          :title="`Kolor tekstu: ${color.label}`"
-          :aria-label="`Kolor tekstu: ${color.label}`"
+          :title="t('EDITOR.TEXT_COLOR', { color: t(color.labelKey) })"
+          :aria-label="t('EDITOR.TEXT_COLOR', { color: t(color.labelKey) })"
           :aria-pressed="isColorActive(color.value)"
           @click="command().setColor(color.value).run()"
         />
         <button
           type="button"
           class="h-8 cursor-pointer rounded-md px-2 text-xs font-semibold text-aqua-300 transition hover:bg-white/10 hover:text-gold-300"
-          title="Usuń kolor tekstu"
+          :title="t('EDITOR.REMOVE_COLOR')"
           @click="command().unsetColor().run()"
         >
-          Bez koloru
+          {{ t('EDITOR.NO_COLOR') }}
         </button>
       </template>
     </div>
@@ -272,7 +300,7 @@ const isColorActive = (color: string) => editor.value?.isActive('textStyle', { c
       v-if="isInsideTable"
       class="flex flex-wrap items-center gap-1 border-b border-aqua-500/20 bg-black/30 px-2 py-1.5"
       role="toolbar"
-      aria-label="Tabela"
+      :aria-label="t('EDITOR.TABLE')"
       @mousedown.prevent
     >
       <button
@@ -295,8 +323,8 @@ const isColorActive = (color: string) => editor.value?.isActive('textStyle', { c
         placeholder="https://"
         @keydown.enter.prevent="confirmInsert"
       />
-      <BaseButton size="sm" @click="confirmInsert">Wstaw</BaseButton>
-      <BaseButton variant="ghost" size="sm" @click="pendingInsert = null">Anuluj</BaseButton>
+      <BaseButton size="sm" @click="confirmInsert">{{ t('EDITOR.INSERT') }}</BaseButton>
+      <BaseButton variant="ghost" size="sm" @click="pendingInsert = null">{{ t('GENERAL.CANCEL') }}</BaseButton>
     </div>
 
     <input
@@ -305,7 +333,7 @@ const isColorActive = (color: string) => editor.value?.isActive('textStyle', { c
       type="file"
       accept="image/jpeg,image/png,image/gif,image/webp"
       class="sr-only"
-      aria-label="Wgraj obrazek z dysku"
+      :aria-label="t('EDITOR.UPLOAD_IMAGE')"
       @change="uploadImage"
     />
     <p v-if="upload.errorMessage.value" class="border-b border-aqua-500/20 px-3 py-2 text-xs text-danger" role="alert">

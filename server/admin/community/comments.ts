@@ -4,7 +4,7 @@ import { visibilityFilter } from './visibility';
 
 const COMMENTS_PAGE_SIZE = 30;
 const EXCERPT_LENGTH = 200;
-const COMMENT_NOT_FOUND = 'Nie znaleziono komentarza';
+const COMMENT_NOT_FOUND = 'ERRORS.COMMENT_NOT_FOUND';
 
 export const moderatedComments = ({ page, search, filter }: AdminListQuery) => {
   const db = useDb();

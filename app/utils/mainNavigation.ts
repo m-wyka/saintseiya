@@ -2,18 +2,18 @@ import { routes } from '#shared/utils/routes';
 import type { IconName } from './icons';
 
 export interface MainNavigationItem {
-  label: string;
+  labelKey: string;
   to: string;
   icon: IconName;
   matchesExactly?: boolean;
 }
 
 export const MAIN_NAVIGATION: MainNavigationItem[] = [
-  { label: 'Główna', to: routes.home(), icon: 'home', matchesExactly: true },
-  { label: 'Newsy', to: routes.newsList(), icon: 'star' },
-  { label: 'Forum', to: routes.forumIndex(), icon: 'forum' },
-  { label: 'Galeria', to: routes.gallery(), icon: 'image' },
-  { label: 'Video', to: routes.videos(), icon: 'play' },
-  { label: 'Mapy', to: routes.maps(), icon: 'map' },
-  { label: 'Szukaj', to: routes.search(), icon: 'search' },
+  { labelKey: 'GENERAL.HOME', to: routes.home(), icon: 'home', matchesExactly: true },
+  { labelKey: 'GENERAL.NEWS', to: routes.newsList(), icon: 'star' },
+  { labelKey: 'GENERAL.FORUM', to: routes.forumIndex(), icon: 'forum' },
+  { labelKey: 'GENERAL.GALLERY', to: routes.gallery(), icon: 'image' },
+  { labelKey: 'GENERAL.VIDEO', to: routes.videos(), icon: 'play' },
+  { labelKey: 'GENERAL.MAPS', to: routes.maps(), icon: 'map' },
+  { labelKey: 'GENERAL.SEARCH', to: routes.search(), icon: 'search' },
 ];

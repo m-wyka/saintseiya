@@ -14,47 +14,52 @@ interface NewsRow {
   authorName: string;
 }
 
-const STATUS_FILTERS = [
-  { value: '', label: 'Wszystkie' },
-  { value: 'published', label: 'Opublikowane' },
-  { value: 'draft', label: 'Szkice' },
-];
-const COLUMNS = [
-  { key: 'title', label: 'Tytuł' },
-  { key: 'categoryName', label: 'Kategoria' },
-  { key: 'authorName', label: 'Autor' },
-  { key: 'status', label: 'Status' },
-  { key: 'publishedAt', label: 'Data' },
-];
+const { t } = useI18n();
+
+const statusFilters = computed(() => [
+  { value: '', label: t('GENERAL.ALL') },
+  { value: 'published', label: t('ADMIN_NEWS.FILTER_PUBLISHED') },
+  { value: 'draft', label: t('ADMIN_NEWS.FILTER_DRAFTS') },
+]);
+const columns = computed(() => [
+  { key: 'title', label: t('GENERAL.TITLE') },
+  { key: 'categoryName', label: t('GENERAL.CATEGORY') },
+  { key: 'authorName', label: t('GENERAL.AUTHOR') },
+  { key: 'status', label: t('GENERAL.STATUS') },
+  { key: 'publishedAt', label: t('GENERAL.DATE') },
+]);
 
 const { rows, page, pageCount, total, search, filter, isLoading, remove } = useAdminList<NewsRow>('news');
 
-useSeoMeta({ title: 'Newsy' });
+useSeoMeta({ title: () => t('ADMIN_NAV.NEWS') });
 </script>
 
 <template>
   <div>
-    <AdminHeader title="Newsy" :subtitle="pluralize(total, 'news', 'newsy', 'newsów')">
+    <AdminHeader
+      :title="t('ADMIN_NAV.NEWS')"
+      :subtitle="t('ADMIN_NEWS.NEWS_COUNT', { count: formatNumber(total) }, total)"
+    >
       <BaseInput
         v-model="search"
         type="search"
-        label="Szukaj"
-        placeholder="Szukaj po tytule…"
+        :label="t('GENERAL.SEARCH')"
+        :placeholder="t('ADMIN_NEWS.SEARCH_PLACEHOLDER')"
         hide-label
         class="w-56"
       />
-      <BaseSelect v-model="filter" label="Status" :options="STATUS_FILTERS" hide-label class="w-40" />
+      <BaseSelect v-model="filter" :label="t('GENERAL.STATUS')" :options="statusFilters" hide-label class="w-40" />
       <BaseButton to="/admin/newsy/nowy">
         <AppIcon name="plus" />
-        Dodaj news
+        {{ t('ADMIN_NEWS.ADD_NEWS') }}
       </BaseButton>
     </AdminHeader>
 
-    <AdminTable :columns="COLUMNS" :rows="rows" :is-loading="isLoading">
+    <AdminTable :columns="columns" :rows="rows" :is-loading="isLoading">
       <template #cell-title="{ row }">
-        <NuxtLink :to="`/admin/newsy/${row.id}`" class="font-semibold text-gold-300 hover:text-cosmo-400">{{
+        <NuxtLinkLocale :to="`/admin/newsy/${row.id}`" class="font-semibold text-gold-300 hover:text-cosmo-400">{{
           row.title
-        }}</NuxtLink>
+        }}</NuxtLinkLocale>
       </template>
       <template #cell-status="{ row }">
         <StatusBadge :status="row.status" />
@@ -65,11 +70,11 @@ useSeoMeta({ title: 'Newsy' });
       <template #actions="{ row }">
         <BaseButton v-if="row.status === 'published'" :to="routes.news(row.slug)" variant="ghost" size="sm">
           <AppIcon name="eye" />
-          Zobacz
+          {{ t('ADMIN_NEWS.VIEW') }}
         </BaseButton>
         <BaseButton :to="`/admin/newsy/${row.id}`" variant="ghost" size="sm">
           <AppIcon name="edit" />
-          Edytuj
+          {{ t('GENERAL.EDIT') }}
         </BaseButton>
         <ConfirmButton @confirm="remove(row.id)" />
       </template>

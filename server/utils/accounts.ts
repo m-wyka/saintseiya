@@ -56,7 +56,7 @@ export const sessionUserOf = (account: Account): SessionUser => ({
 
 const assertNotBanned = (account: Account) => {
   if (account.bannedAt) {
-    throw createError({ statusCode: FORBIDDEN, statusMessage: 'To konto zostało zablokowane' });
+    throw createError({ statusCode: FORBIDDEN, statusMessage: 'ERRORS.ACCOUNT_BANNED' });
   }
 };
 
@@ -108,7 +108,7 @@ export const requireAccount = async (event: H3Event): Promise<Account> => {
   const account = useDb().select().from(schema.users).where(eq(schema.users.id, session.user.id)).get();
   if (!account || account.isGhost) {
     await clearUserSession(event);
-    throw createError({ statusCode: UNAUTHORIZED, statusMessage: 'Zaloguj się ponownie' });
+    throw createError({ statusCode: UNAUTHORIZED, statusMessage: 'ERRORS.SIGN_IN_AGAIN' });
   }
   if (account.bannedAt) {
     await clearUserSession(event);
@@ -120,7 +120,7 @@ export const requireAccount = async (event: H3Event): Promise<Account> => {
 export const requirePermission = async (event: H3Event, permission: ModeratorPermission): Promise<Account> => {
   const account = await requireAccount(event);
   if (!hasPermission(account, permission)) {
-    throw createError({ statusCode: FORBIDDEN, statusMessage: 'Brak uprawnień' });
+    throw createError({ statusCode: FORBIDDEN, statusMessage: 'ERRORS.FORBIDDEN' });
   }
   return account;
 };
@@ -128,14 +128,14 @@ export const requirePermission = async (event: H3Event, permission: ModeratorPer
 export const requireAdmin = async (event: H3Event): Promise<Account> => {
   const account = await requireAccount(event);
   if (account.role !== 'admin') {
-    throw createError({ statusCode: FORBIDDEN, statusMessage: 'Brak uprawnień' });
+    throw createError({ statusCode: FORBIDDEN, statusMessage: 'ERRORS.FORBIDDEN' });
   }
   return account;
 };
 
 export const renameAccount = (accountId: number, name: string): Account => {
   if (isNameTaken(name, accountId)) {
-    throw createError({ statusCode: CONFLICT, statusMessage: 'Ten nick jest już zajęty' });
+    throw createError({ statusCode: CONFLICT, statusMessage: 'ERRORS.USER_NAME_TAKEN' });
   }
   return useDb()
     .update(schema.users)

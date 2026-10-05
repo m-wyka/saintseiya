@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { routes } from '#shared/utils/routes';
 
-const route = useRoute();
-const pagePath = computed(() => [route.params.path].flat().filter(Boolean).join('/'));
+const { t } = useI18n();
+const pagePath = useRouteParam('path');
 const { data: page, error } = await useFetch(() => `/api/pages/${pagePath.value}`);
 
 if (error.value || !page.value) {
   throw createError({
     statusCode: error.value?.statusCode ?? 404,
-    statusMessage: 'Nie znaleziono strony',
+    statusMessage: t('PAGE.NOT_FOUND'),
     fatal: true,
   });
 }
@@ -35,7 +35,7 @@ useSeoMeta({ title: seoTitle });
     </div>
     <ul v-if="showsChildren" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" :class="{ 'mt-6': page.bodyHtml }">
       <li v-for="child in page.children" :key="child.path" class="reveal">
-        <NuxtLink
+        <NuxtLinkLocale
           :to="routes.page(child.path)"
           class="group flex h-full items-center gap-3 panel px-4 py-3 text-sm transition duration-300 ease-cosmo hover:-translate-y-0.5 hover:border-cosmo-500/60 hover:shadow-aura"
         >
@@ -49,10 +49,10 @@ useSeoMeta({ title: seoTitle });
               child.title
             }}</span>
             <span v-if="child.childCount" class="block text-xs text-aqua-500">
-              {{ pluralize(child.childCount, 'strona', 'strony', 'stron') }}
+              {{ t('PAGE.CHILD_COUNT', { count: formatNumber(child.childCount) }, child.childCount) }}
             </span>
           </span>
-        </NuxtLink>
+        </NuxtLinkLocale>
       </li>
     </ul>
     <CommentSection

@@ -78,11 +78,15 @@ describe('map administration', () => {
     const createWith = (area: Record<string, unknown>) => () =>
       mapsResource.create(mapInput({ areas: [{ ...frame, label: 'Filar', ...area }] }), editor);
 
-    expect(createWith({ targetKind: 'page', pageId: null })).toThrowError(/wybierz podstronę/);
-    expect(createWith({ targetKind: 'url', url: 'javascript:alert(1)' })).toThrowError(/podaj adres/);
-    expect(createWith({ targetKind: 'url', url: '//evil.example' })).toThrowError(/podaj adres/);
-    expect(createWith({ targetKind: 'content', contentHtml: '  ' })).toThrowError(/wpisz treść/);
-    expect(() => mapsResource.create(mapInput({ image: '' }), editor)).toThrowError(/Wgraj obraz/);
+    expect(createWith({ targetKind: 'page', pageId: null })).toThrowError('VALIDATION.MAP_AREA_PAGE_REQUIRED');
+    expect(createWith({ targetKind: 'url', url: 'javascript:alert(1)' })).toThrowError(
+      'VALIDATION.MAP_AREA_URL_REQUIRED',
+    );
+    expect(createWith({ targetKind: 'url', url: '//evil.example' })).toThrowError('VALIDATION.MAP_AREA_URL_REQUIRED');
+    expect(createWith({ targetKind: 'content', contentHtml: '  ' })).toThrowError(
+      'VALIDATION.MAP_AREA_CONTENT_REQUIRED',
+    );
+    expect(() => mapsResource.create(mapInput({ image: '' }), editor)).toThrowError('VALIDATION.MAP_IMAGE_REQUIRED');
   });
 
   it('keeps map addresses unique', () => {

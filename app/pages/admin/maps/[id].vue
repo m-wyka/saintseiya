@@ -2,7 +2,7 @@
 import { MAP_AREA_TARGETS } from '#shared/utils/content';
 import type { ContentStatus } from '#shared/utils/content';
 import { routes } from '#shared/utils/routes';
-import { MAP_AREA_TARGET_LABELS } from '~/utils/mapAreas';
+import { MAP_AREA_TARGET_LABEL_KEYS } from '~/utils/mapAreas';
 import type { EditableMapArea } from '~/utils/mapAreas';
 
 definePageMeta({ layout: 'admin' });
@@ -21,16 +21,21 @@ interface MapInput extends Record<string, unknown> {
 }
 
 const LIST_PATH = '/admin/mapy';
-const STATUS_OPTIONS: { value: ContentStatus; label: string }[] = [
-  { value: 'draft', label: 'Szkic' },
-  { value: 'published', label: 'Opublikowana' },
-];
-const TARGET_OPTIONS = MAP_AREA_TARGETS.map((value) => ({ value, label: MAP_AREA_TARGET_LABELS[value] }));
 
-const route = useRoute('admin-maps-id');
+const { t } = useI18n();
+
+const statusOptions = computed<{ value: ContentStatus; label: string }[]>(() => [
+  { value: 'draft', label: t('ADMIN_MAPS.STATUS_DRAFT') },
+  { value: 'published', label: t('ADMIN_MAPS.STATUS_PUBLISHED') },
+]);
+const targetOptions = computed(() =>
+  MAP_AREA_TARGETS.map((value) => ({ value, label: t(MAP_AREA_TARGET_LABEL_KEYS[value]) })),
+);
+
+const routeId = useRouteParam('id');
 const { input, isNew, isBusy, errorMessage, save } = await useAdminForm<MapInput>({
   resource: 'maps',
-  recordId: route.params.id,
+  recordId: routeId.value,
   listPath: LIST_PATH,
   emptyInput: {
     title: '',
@@ -101,14 +106,16 @@ const setAreaContent = (contentHtml: string) => {
   }
 };
 
-useSeoMeta({ title: isNew ? 'Nowa mapa' : 'Edycja mapy' });
+const pageTitle = computed(() => t(isNew ? 'ADMIN_MAPS.NEW_MAP' : 'ADMIN_MAPS.EDIT_MAP'));
+
+useSeoMeta({ title: pageTitle });
 </script>
 
 <template>
   <form @submit.self.prevent="save">
     <AdminHeader
-      :title="isNew ? 'Nowa mapa' : 'Edycja mapy'"
-      :subtitle="input.image ? `Obszarów: ${input.areas.length}` : undefined"
+      :title="pageTitle"
+      :subtitle="input.image ? t('ADMIN_MAPS.AREA_COUNT', { count: input.areas.length }) : undefined"
     />
 
     <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
@@ -119,18 +126,18 @@ useSeoMeta({ title: isNew ? 'Nowa mapa' : 'Edycja mapy' });
             type="file"
             accept="image/jpeg,image/png,image/gif,image/webp"
             class="sr-only"
-            aria-label="Obraz mapy"
+            :aria-label="t('ADMIN_MAPS.MAP_IMAGE')"
             @change="uploadMapImage"
           />
           <BaseButton variant="secondary" :busy="imageUpload.isBusy.value" @click="imageInput?.click()">
             <AppIcon name="image" />
-            {{ input.image ? 'Zmień obraz mapy' : 'Wgraj obraz mapy' }}
+            {{ input.image ? t('ADMIN_MAPS.CHANGE_IMAGE') : t('ADMIN_MAPS.UPLOAD_IMAGE') }}
           </BaseButton>
           <p class="text-xs text-aqua-500">
             {{
               input.image
-                ? `${input.imageWidth}×${input.imageHeight} px. Przeciągnij po obrazie, aby narysować obszar; kliknij obszar, aby go edytować.`
-                : 'Zacznij od wgrania obrazu — potem narysujesz na nim klikalne obszary.'
+                ? t('ADMIN_MAPS.DRAW_HINT', { width: input.imageWidth, height: input.imageHeight })
+                : t('ADMIN_MAPS.UPLOAD_HINT')
             }}
           </p>
           <p v-if="imageUpload.errorMessage.value" class="w-full text-sm text-danger" role="alert">
@@ -149,43 +156,45 @@ useSeoMeta({ title: isNew ? 'Nowa mapa' : 'Edycja mapy' });
 
         <section v-if="selectedArea" class="flex animate-rise flex-col gap-4 panel p-5">
           <div class="flex items-center justify-between gap-3">
-            <h2 class="heading-display text-lg text-gold-300">Wybrany obszar</h2>
+            <h2 class="heading-display text-lg text-gold-300">{{ t('ADMIN_MAPS.SELECTED_AREA') }}</h2>
             <BaseButton variant="danger" size="sm" @click="removeSelectedArea">
               <AppIcon name="trash" />
-              Usuń obszar
+              {{ t('ADMIN_MAPS.DELETE_AREA') }}
             </BaseButton>
           </div>
           <div class="grid gap-4 md:grid-cols-2">
             <BaseInput
               v-model="selectedArea.label"
-              label="Etykieta"
-              hint="Pokazuje się po najechaniu na obszar"
+              :label="t('ADMIN_MAPS.AREA_LABEL')"
+              :hint="t('ADMIN_MAPS.AREA_LABEL_HINT')"
               :maxlength="120"
               required
             />
-            <BaseSelect v-model="selectedArea.targetKind" label="Dokąd prowadzi" :options="TARGET_OPTIONS" />
+            <BaseSelect v-model="selectedArea.targetKind" :label="t('ADMIN_MAPS.TARGET')" :options="targetOptions" />
           </div>
           <PageLookup
             v-if="selectedArea.targetKind === 'page'"
-            label="Szukaj podstrony"
+            :label="t('ADMIN_MAPS.FIND_PAGE')"
             :selected-title="selectedArea.pageTitle"
             @select="choosePage"
           />
           <BaseInput
             v-else-if="selectedArea.targetKind === 'url'"
             :model-value="selectedArea.url ?? ''"
-            label="Adres"
-            placeholder="/forum albo https://…"
-            hint="Adres wewnętrzny zaczyna się od /, zewnętrzny od https://"
+            :label="t('GENERAL.ADDRESS')"
+            :placeholder="t('ADMIN_MAPS.URL_PLACEHOLDER')"
+            :hint="t('ADMIN_MAPS.URL_HINT')"
             @update:model-value="setAreaUrl"
           />
           <div v-else class="flex flex-col gap-1.5">
-            <p class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">Treść okienka</p>
+            <p class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">
+              {{ t('ADMIN_MAPS.POPUP_CONTENT') }}
+            </p>
             <ClientOnly>
               <RichTextEditor
                 :key="selectedIndex ?? -1"
                 :model-value="selectedContent"
-                label="Treść okienka"
+                :label="t('ADMIN_MAPS.POPUP_CONTENT')"
                 extended
                 allows-upload
                 @update:model-value="setAreaContent"
@@ -196,17 +205,17 @@ useSeoMeta({ title: isNew ? 'Nowa mapa' : 'Edycja mapy' });
       </div>
 
       <aside class="flex flex-col gap-5 self-start panel p-5">
-        <BaseInput v-model="input.title" label="Tytuł" :maxlength="120" required />
-        <BaseInput v-model="input.slug" label="Adres (slug)" hint="Puste pole = adres utworzy się z tytułu" />
-        <BaseTextarea v-model="input.description" label="Opis" :rows="3" :maxlength="600" />
-        <BaseSelect v-model="input.status" label="Status" :options="STATUS_OPTIONS" />
+        <BaseInput v-model="input.title" :label="t('GENERAL.TITLE')" :maxlength="120" required />
+        <BaseInput v-model="input.slug" :label="t('ADMIN_MAPS.SLUG')" :hint="t('ADMIN_MAPS.SLUG_HINT')" />
+        <BaseTextarea v-model="input.description" :label="t('GENERAL.DESCRIPTION')" :rows="3" :maxlength="600" />
+        <BaseSelect v-model="input.status" :label="t('GENERAL.STATUS')" :options="statusOptions" />
         <ImageField
           v-model="input.teaserImage"
-          label="Grafika zapowiedzi"
-          hint="Mały kafel pokazywany w stopce strony"
+          :label="t('ADMIN_MAPS.TEASER_IMAGE')"
+          :hint="t('ADMIN_MAPS.TEASER_IMAGE_HINT')"
         />
         <div v-if="input.areas.length" class="flex flex-col gap-1.5">
-          <p class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">Obszary</p>
+          <p class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">{{ t('ADMIN_MAPS.AREAS') }}</p>
           <ul class="max-h-64 overflow-y-auto rounded-lg border border-aqua-500/20">
             <li v-for="(area, index) in input.areas" :key="index">
               <button
@@ -218,7 +227,9 @@ useSeoMeta({ title: isNew ? 'Nowa mapa' : 'Edycja mapy' });
                 @click="selectedIndex = index"
               >
                 <span class="truncate">{{ area.label }}</span>
-                <span class="shrink-0 text-[0.65rem] opacity-70">{{ MAP_AREA_TARGET_LABELS[area.targetKind] }}</span>
+                <span class="shrink-0 text-[0.65rem] opacity-70">{{
+                  t(MAP_AREA_TARGET_LABEL_KEYS[area.targetKind])
+                }}</span>
               </button>
             </li>
           </ul>

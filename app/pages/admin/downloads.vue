@@ -14,12 +14,15 @@ interface DownloadRow {
 }
 
 const NEW_DOWNLOAD_FORM = 'new';
-const COLUMNS = [
-  { key: 'title', label: 'Tytuł' },
-  { key: 'fileSize', label: 'Rozmiar', alignsRight: true },
-  { key: 'downloadCount', label: 'Pobrań', alignsRight: true },
-  { key: 'createdAt', label: 'Dodano' },
-];
+
+const { t } = useI18n();
+
+const columns = computed(() => [
+  { key: 'title', label: t('GENERAL.TITLE') },
+  { key: 'fileSize', label: t('ADMIN_DOWNLOADS.FILE_SIZE'), alignsRight: true },
+  { key: 'downloadCount', label: t('ADMIN_DOWNLOADS.DOWNLOAD_COUNT'), alignsRight: true },
+  { key: 'createdAt', label: t('ADMIN_DOWNLOADS.ADDED') },
+]);
 
 const { rows, total, isLoading, refresh, remove } = useAdminList<DownloadRow>('downloads');
 const editedDownload = ref<DownloadRow | null>(null);
@@ -44,15 +47,18 @@ const showSaved = async () => {
   await refresh();
 };
 
-useSeoMeta({ title: 'Pliki' });
+useSeoMeta({ title: () => t('ADMIN_NAV.DOWNLOADS') });
 </script>
 
 <template>
   <div>
-    <AdminHeader title="Pliki" :subtitle="pluralize(total, 'plik', 'pliki', 'plików')">
+    <AdminHeader
+      :title="t('ADMIN_NAV.DOWNLOADS')"
+      :subtitle="t('ADMIN_DOWNLOADS.FILE_COUNT', { count: formatNumber(total) }, total)"
+    >
       <BaseButton @click="openNew">
         <AppIcon name="plus" />
-        Dodaj plik
+        {{ t('ADMIN_DOWNLOADS.ADD') }}
       </BaseButton>
     </AdminHeader>
 
@@ -64,12 +70,7 @@ useSeoMeta({ title: 'Pliki' });
       @cancel="closeForm"
     />
 
-    <AdminTable
-      :columns="COLUMNS"
-      :rows="rows"
-      :is-loading="isLoading"
-      empty-message="Nie ma jeszcze plików do pobrania."
-    >
+    <AdminTable :columns="columns" :rows="rows" :is-loading="isLoading" :empty-message="t('ADMIN_DOWNLOADS.EMPTY')">
       <template #cell-title="{ row }">
         <a :href="routes.media(row.file)" class="font-semibold text-gold-300 hover:text-cosmo-400">{{ row.title }}</a>
         <span v-if="row.description" class="line-clamp-2 max-w-md text-xs text-aqua-300">{{ row.description }}</span>
@@ -84,7 +85,7 @@ useSeoMeta({ title: 'Pliki' });
       <template #actions="{ row }">
         <BaseButton variant="ghost" size="sm" @click="openExisting(row)">
           <AppIcon name="edit" />
-          Edytuj
+          {{ t('GENERAL.EDIT') }}
         </BaseButton>
         <ConfirmButton @confirm="remove(row.id)" />
       </template>

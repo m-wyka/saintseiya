@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { messageKey } from '#shared/utils/messages';
 
 const MAX_TABS = 8;
 
@@ -6,11 +7,11 @@ const bodySchema = z.object({
   tabs: z
     .array(
       z.object({
-        title: z.string().trim().min(1, 'Każda zakładka potrzebuje tytułu').max(40, 'Tytuł zakładki jest za długi'),
+        title: z.string().trim().min(1, 'VALIDATION.TAB_TITLE_REQUIRED').max(40, 'VALIDATION.TAB_TITLE_TOO_LONG'),
         bodyHtml: richBodySchema,
       }),
     )
-    .max(MAX_TABS, `Najwyżej ${MAX_TABS} zakładek`),
+    .max(MAX_TABS, messageKey('VALIDATION.TOO_MANY_TABS', { max: MAX_TABS })),
 });
 
 export default defineEventHandler(async (event) => {

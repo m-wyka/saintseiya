@@ -9,34 +9,36 @@ interface VideoRow {
   createdAt: string;
 }
 
-const COLUMNS: CrudColumn[] = [
-  { key: 'youtubeId', label: 'Podgląd' },
-  { key: 'title', label: 'Tytuł' },
-  { key: 'categoryName', label: 'Kategoria' },
-  { key: 'createdAt', label: 'Dodano' },
-];
+const { t } = useI18n();
+
+const columns = computed<CrudColumn[]>(() => [
+  { key: 'youtubeId', label: t('ADMIN_VIDEO.PREVIEW') },
+  { key: 'title', label: t('GENERAL.TITLE') },
+  { key: 'categoryName', label: t('GENERAL.CATEGORY') },
+  { key: 'createdAt', label: t('ADMIN_VIDEO.ADDED') },
+]);
 
 const categories = await $fetch<{ id: number; name: string }[]>('/api/admin/video-categories');
 
-const FIELDS: CrudField[] = [
-  { key: 'title', label: 'Tytuł', kind: 'text', required: true },
+const fields = computed<CrudField[]>(() => [
+  { key: 'title', label: t('GENERAL.TITLE'), kind: 'text', required: true },
   {
     key: 'categoryId',
-    label: 'Kategoria',
+    label: t('GENERAL.CATEGORY'),
     kind: 'select',
     required: true,
     options: categories.map(({ id, name }) => ({ value: id, label: name })),
-    hint: categories.length ? undefined : 'Najpierw dodaj kategorię w zakładce „Kategorie”',
+    hint: categories.length ? undefined : t('ADMIN_VIDEO.CATEGORY_REQUIRED_HINT'),
   },
   {
     key: 'youtubeId',
-    label: 'Film z YouTube',
+    label: t('ADMIN_VIDEO.YOUTUBE_VIDEO'),
     kind: 'text',
     required: true,
-    hint: 'Adres filmu (youtube.com lub youtu.be) albo jego 11-znakowy identyfikator',
+    hint: t('ADMIN_VIDEO.YOUTUBE_VIDEO_HINT'),
   },
-  { key: 'description', label: 'Opis', kind: 'textarea' },
-];
+  { key: 'description', label: t('GENERAL.DESCRIPTION'), kind: 'textarea' },
+]);
 const EMPTY_INPUT = { title: '', categoryId: categories[0]?.id ?? 0, youtubeId: '', description: '' };
 
 const videoOf = (row: object) => row as VideoRow;
@@ -46,14 +48,14 @@ const posterUrlOf = (row: object) => `https://i.ytimg.com/vi/${videoOf(row).yout
 
 <template>
   <div>
-    <AdminTabs label="Galeria video" :tabs="VIDEO_ADMIN_TABS" />
+    <AdminTabs :label="t('ADMIN_VIDEO.GALLERY')" :tabs="VIDEO_ADMIN_TABS" />
     <SimpleCrud
       resource="videos"
-      title="Filmy"
-      subtitle="Filmy z YouTube pokazywane w galerii video."
-      add-label="Dodaj film"
-      :columns="COLUMNS"
-      :fields="FIELDS"
+      :title="t('ADMIN_NAV.VIDEOS')"
+      :subtitle="t('ADMIN_VIDEO.SUBTITLE')"
+      :add-label="t('ADMIN_VIDEO.ADD_VIDEO')"
+      :columns="columns"
+      :fields="fields"
       :empty-input="EMPTY_INPUT"
       searchable
     >
@@ -63,7 +65,7 @@ const posterUrlOf = (row: object) => `https://i.ytimg.com/vi/${videoOf(row).yout
           target="_blank"
           rel="noopener"
           class="inline-block"
-          :aria-label="`Otwórz w YouTube: ${videoOf(row).title}`"
+          :aria-label="t('ADMIN_VIDEO.OPEN_IN_YOUTUBE', { title: videoOf(row).title })"
         >
           <img
             :src="posterUrlOf(row)"

@@ -85,8 +85,8 @@ describe('comment moderation', () => {
 
     expect(removeComment(comment.id)).toEqual({ id: comment.id });
     expect(moderatedComments(everything).total).toBe(0);
-    expect(() => removeComment(comment.id)).toThrowError(/Nie znaleziono komentarza/);
-    expect(() => setCommentHidden(comment.id, true)).toThrowError(/Nie znaleziono komentarza/);
+    expect(() => removeComment(comment.id)).toThrowError('ERRORS.COMMENT_NOT_FOUND');
+    expect(() => setCommentHidden(comment.id, true)).toThrowError('ERRORS.COMMENT_NOT_FOUND');
   });
 });
 
@@ -121,7 +121,7 @@ describe('shoutbox moderation', () => {
 
     expect(removeShout(shout.id)).toEqual({ id: shout.id });
     expect(moderatedShouts(everything).total).toBe(0);
-    expect(() => removeShout(shout.id)).toThrowError(/Nie znaleziono wpisu/);
+    expect(() => removeShout(shout.id)).toThrowError('ERRORS.SHOUT_NOT_FOUND');
   });
 });
 
@@ -175,10 +175,10 @@ describe('user administration', () => {
     const moderator = createAccount({ role: 'moderator', permissions: ['users'] });
     const ghost = createAccount({ isGhost: true });
 
-    expect(() => setAccountBan(admin, admin.id, true)).toThrowError(/własnego konta/);
-    expect(() => setAccountBan(admin, ghost.id, true)).toThrowError(/usuniętego/);
-    expect(() => setAccountBan(moderator, admin.id, true)).toThrowError(/tylko administrator/);
-    expect(() => setAccountBan(admin, 999_999, true)).toThrowError(/Nie znaleziono użytkownika/);
+    expect(() => setAccountBan(admin, admin.id, true)).toThrowError('ERRORS.CANNOT_BAN_SELF');
+    expect(() => setAccountBan(admin, ghost.id, true)).toThrowError('ERRORS.DELETED_ACCOUNT_IMMUTABLE');
+    expect(() => setAccountBan(moderator, admin.id, true)).toThrowError('ERRORS.ADMIN_BAN_REQUIRES_ADMIN');
+    expect(() => setAccountBan(admin, 999_999, true)).toThrowError('ERRORS.USER_NOT_FOUND');
     expect(storedAccount(admin.id).bannedAt).toBeNull();
 
     setAccountBan(admin, otherAdmin.id, true);
@@ -205,11 +205,15 @@ describe('user administration', () => {
     const formerAdmin = createAccount({ role: 'admin' });
     useDb().update(schema.users).set({ role: 'user' }).where(eq(schema.users.id, formerAdmin.id)).run();
 
-    expect(() => changeAccountRole(admin, admin.id, { role: 'user', permissions: [] })).toThrowError(/sobie roli/);
-    expect(() => changeAccountRole(formerAdmin, admin.id, { role: 'user', permissions: [] })).toThrowError(
-      /ostatniemu administratorowi/,
+    expect(() => changeAccountRole(admin, admin.id, { role: 'user', permissions: [] })).toThrowError(
+      'ERRORS.CANNOT_DEMOTE_SELF',
     );
-    expect(() => changeAccountRole(admin, ghost.id, { role: 'moderator', permissions: [] })).toThrowError(/usuniętego/);
+    expect(() => changeAccountRole(formerAdmin, admin.id, { role: 'user', permissions: [] })).toThrowError(
+      'ERRORS.LAST_ADMIN_REQUIRED',
+    );
+    expect(() => changeAccountRole(admin, ghost.id, { role: 'moderator', permissions: [] })).toThrowError(
+      'ERRORS.DELETED_ACCOUNT_IMMUTABLE',
+    );
     expect(storedAccount(admin.id).role).toBe('admin');
     expect(storedAccount(ghost.id).role).toBe('user');
   });
@@ -253,9 +257,13 @@ describe('forum structure administration', () => {
     const admin = createAccount({ role: 'admin' });
     const category = forumCategoriesResource.create({ name: 'Saint Seiya', sortOrder: 1 }, admin);
 
-    expect(() => forumsResource.create(forumInput(999_999), admin)).toThrowError(/Wybierz kategorię/);
-    expect(() => forumsResource.create({ ...forumInput(category.id), sortOrder: -1 }, admin)).toThrowError(/Kolejność/);
-    expect(() => forumCategoriesResource.create({ name: 'A', sortOrder: 0 }, admin)).toThrowError(/za krótka/);
+    expect(() => forumsResource.create(forumInput(999_999), admin)).toThrowError('VALIDATION.FORUM_CATEGORY_REQUIRED');
+    expect(() => forumsResource.create({ ...forumInput(category.id), sortOrder: -1 }, admin)).toThrowError(
+      'VALIDATION.SORT_ORDER_INVALID',
+    );
+    expect(() => forumCategoriesResource.create({ name: 'A', sortOrder: 0 }, admin)).toThrowError(
+      'VALIDATION.NAME_TOO_SHORT',
+    );
   });
 
   it('refuses to remove a forum with threads and a category with forums', () => {
@@ -263,8 +271,10 @@ describe('forum structure administration', () => {
     const forum = createForum();
     createThread(forum, admin, 'Temat', '<p>A</p>');
 
-    expect(() => forumsResource.remove(forum.id, admin)).toThrowError(/są tematy/);
-    expect(() => forumCategoriesResource.remove(forum.categoryId, admin)).toThrowError(/są działy/);
+    expect(() => forumsResource.remove(forum.id, admin)).toThrowError('ERRORS.FORUM_HAS_THREADS');
+    expect(() => forumCategoriesResource.remove(forum.categoryId, admin)).toThrowError(
+      'ERRORS.FORUM_CATEGORY_HAS_FORUMS',
+    );
     expect(forumsResource.find(forum.id)).toBeDefined();
     expect(useDb().select().from(schema.threads).all()).toHaveLength(1);
   });

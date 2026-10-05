@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { routes } from '#shared/utils/routes';
 
-const route = useRoute('news-slug');
-const { data: news, error } = await useFetch(() => `/api/news/${route.params.slug}`);
+const { t } = useI18n();
+const routeSlug = useRouteParam('slug');
+const { data: news, error } = await useFetch(() => `/api/news/${routeSlug.value}`);
 
 if (error.value || !news.value) {
-  throw createError({ statusCode: error.value?.statusCode ?? 404, statusMessage: 'Nie znaleziono newsa', fatal: true });
+  throw createError({ statusCode: error.value?.statusCode ?? 404, statusMessage: t('NEWS.NOT_FOUND'), fatal: true });
 }
 
 useSeoMeta({ title: () => news.value?.title ?? '', ogType: 'article' });
@@ -15,7 +16,7 @@ useSeoMeta({ title: () => news.value?.title ?? '', ogType: 'article' });
   <article v-if="news">
     <BreadcrumbTrail
       :items="[
-        { title: 'Newsy', to: routes.newsList() },
+        { title: t('GENERAL.NEWS'), to: routes.newsList() },
         ...(news.category ? [{ title: news.category.name, to: routes.newsCategory(news.category.slug) }] : []),
       ]"
     />
@@ -31,7 +32,7 @@ useSeoMeta({ title: () => news.value?.title ?? '', ogType: 'article' });
       </time>
       <span class="flex items-center gap-1.5">
         <AppIcon name="eye" class="text-cosmo-500" />
-        {{ pluralize(news.viewCount, 'odsłona', 'odsłony', 'odsłon') }}
+        {{ t('NEWS.VIEW_COUNT', { count: formatNumber(news.viewCount) }, news.viewCount) }}
       </span>
     </p>
     <div class="panel p-6 sm:p-8">
@@ -48,13 +49,13 @@ useSeoMeta({ title: () => news.value?.title ?? '', ogType: 'article' });
     </div>
     <ul v-if="news.tags.length" class="mt-4 flex flex-wrap gap-2">
       <li v-for="tag in news.tags" :key="tag.slug">
-        <NuxtLink
+        <NuxtLinkLocale
           :to="routes.tag(tag.slug)"
           class="flex items-center gap-1 rounded-full border border-aqua-500/30 px-3 py-1 text-xs text-aqua-200 transition hover:border-cosmo-500 hover:text-gold-300"
         >
           <AppIcon name="tag" class="text-cosmo-500" />
           {{ tag.name }}
-        </NuxtLink>
+        </NuxtLinkLocale>
       </li>
     </ul>
     <CommentSection target-kind="news" :target-id="news.id" :enabled="news.commentsEnabled" />

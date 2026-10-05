@@ -38,7 +38,7 @@ describe('rate limit', () => {
 
     assertWithinRateLimit('user:1', limit, start);
     assertWithinRateLimit('user:1', limit, start + 1000);
-    expect(() => assertWithinRateLimit('user:1', limit, start + 2000)).toThrowError(/Zwolnij/);
+    expect(() => assertWithinRateLimit('user:1', limit, start + 2000)).toThrowError('ERRORS.RATE_LIMITED');
     expect(() => assertWithinRateLimit('user:2', limit, start + 2000)).not.toThrow();
     expect(() => assertWithinRateLimit('user:1', limit, start + 11_000)).not.toThrow();
   });
@@ -55,7 +55,7 @@ describe('user content', () => {
   });
 
   it('refuses content that is empty after cleaning', () => {
-    expect(() => cleanUserHtml('<p>   </p><script>alert(1)</script>')).toThrowError(/pusta/);
+    expect(() => cleanUserHtml('<p>   </p><script>alert(1)</script>')).toThrowError('ERRORS.CONTENT_EMPTY');
   });
 
   it('accepts a post that is only an image', () => {

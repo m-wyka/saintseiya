@@ -7,7 +7,7 @@ const pageQuerySchema = z.object({ page: pageNumberSchema });
 export const requiredIdParam = (event: H3Event, name = 'id'): number => {
   const parsed = identifierSchema.safeParse(getRouterParam(event, name));
   if (!parsed.success) {
-    throw createError({ statusCode: 404, statusMessage: 'Nie znaleziono' });
+    throw createError({ statusCode: 404, statusMessage: 'ERRORS.NOT_FOUND' });
   }
   return parsed.data;
 };
@@ -15,7 +15,7 @@ export const requiredIdParam = (event: H3Event, name = 'id'): number => {
 export const pageQuery = async (event: H3Event): Promise<number> =>
   (await getValidatedQuery(event, pageQuerySchema.parse)).page;
 
-export const foundOr404 = <Value>(value: Value | null | undefined, message = 'Nie znaleziono'): Value => {
+export const foundOr404 = <Value>(value: Value | null | undefined, message = 'ERRORS.NOT_FOUND'): Value => {
   if (value === null || value === undefined) {
     throw createError({ statusCode: 404, statusMessage: message });
   }

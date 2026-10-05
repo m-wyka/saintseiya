@@ -3,33 +3,35 @@ import type { CrudColumn, CrudField } from '~/utils/crud';
 
 definePageMeta({ layout: 'admin' });
 
-const COLUMNS: CrudColumn[] = [
-  { key: 'title', label: 'Tytuł' },
-  { key: 'url', label: 'Adres' },
-  { key: 'categoryName', label: 'Kategoria' },
-];
+const { t } = useI18n();
+
+const columns = computed<CrudColumn[]>(() => [
+  { key: 'title', label: t('GENERAL.TITLE') },
+  { key: 'url', label: t('GENERAL.ADDRESS') },
+  { key: 'categoryName', label: t('GENERAL.CATEGORY') },
+]);
 
 const categories = await $fetch<{ id: number; name: string }[]>('/api/admin/link-categories');
 
-const FIELDS: CrudField[] = [
-  { key: 'title', label: 'Tytuł', kind: 'text', required: true },
+const fields = computed<CrudField[]>(() => [
+  { key: 'title', label: t('GENERAL.TITLE'), kind: 'text', required: true },
   {
     key: 'categoryId',
-    label: 'Kategoria',
+    label: t('GENERAL.CATEGORY'),
     kind: 'select',
     required: true,
     options: categories.map(({ id, name }) => ({ value: id, label: name })),
-    hint: categories.length ? undefined : 'Najpierw dodaj kategorię w zakładce „Kategorie”',
+    hint: categories.length ? undefined : t('ADMIN_LINKS.CATEGORY_REQUIRED_HINT'),
   },
   {
     key: 'url',
-    label: 'Adres strony',
+    label: t('ADMIN_LINKS.SITE_ADDRESS'),
     kind: 'url',
     required: true,
-    hint: 'Pełny adres zaczynający się od http:// lub https://',
+    hint: t('ADMIN_LINKS.SITE_ADDRESS_HINT'),
   },
-  { key: 'description', label: 'Opis', kind: 'textarea' },
-];
+  { key: 'description', label: t('GENERAL.DESCRIPTION'), kind: 'textarea' },
+]);
 const EMPTY_INPUT = { title: '', categoryId: categories[0]?.id ?? 0, url: '', description: '' };
 
 const urlOf = (row: object) => (row as { url: string }).url;
@@ -37,14 +39,14 @@ const urlOf = (row: object) => (row as { url: string }).url;
 
 <template>
   <div>
-    <AdminTabs label="Katalog linków" :tabs="LINK_ADMIN_TABS" />
+    <AdminTabs :label="t('ADMIN_LINKS.CATALOG')" :tabs="LINK_ADMIN_TABS" />
     <SimpleCrud
       resource="links"
-      title="Linki"
-      subtitle="Zaprzyjaźnione strony pokazywane w katalogu linków."
-      add-label="Dodaj link"
-      :columns="COLUMNS"
-      :fields="FIELDS"
+      :title="t('ADMIN_NAV.LINKS')"
+      :subtitle="t('ADMIN_LINKS.SUBTITLE')"
+      :add-label="t('ADMIN_LINKS.ADD_LINK')"
+      :columns="columns"
+      :fields="fields"
       :empty-input="EMPTY_INPUT"
       searchable
     >

@@ -3,27 +3,29 @@ import type { CrudColumn, CrudField } from '~/utils/crud';
 
 definePageMeta({ layout: 'admin' });
 
-const COLUMNS: CrudColumn[] = [
-  { key: 'name', label: 'Nazwa' },
-  { key: 'sortOrder', label: 'Kolejność', alignsRight: true },
-  { key: 'linkCount', label: 'Linków', alignsRight: true },
-];
-const FIELDS: CrudField[] = [
-  { key: 'name', label: 'Nazwa', kind: 'text', required: true },
-  { key: 'sortOrder', label: 'Kolejność', kind: 'number', hint: 'Mniejsza liczba = wyżej na liście' },
-];
+const { t } = useI18n();
+
+const columns = computed<CrudColumn[]>(() => [
+  { key: 'name', label: t('GENERAL.NAME') },
+  { key: 'sortOrder', label: t('GENERAL.SORT_ORDER'), alignsRight: true },
+  { key: 'linkCount', label: t('ADMIN_LINKS.LINKS_COLUMN'), alignsRight: true },
+]);
+const fields = computed<CrudField[]>(() => [
+  { key: 'name', label: t('GENERAL.NAME'), kind: 'text', required: true },
+  { key: 'sortOrder', label: t('GENERAL.SORT_ORDER'), kind: 'number', hint: t('ADMIN_LINKS.SORT_ORDER_HINT') },
+]);
 </script>
 
 <template>
   <div>
-    <AdminTabs label="Katalog linków" :tabs="LINK_ADMIN_TABS" />
+    <AdminTabs :label="t('ADMIN_LINKS.CATALOG')" :tabs="LINK_ADMIN_TABS" />
     <SimpleCrud
       resource="link-categories"
-      title="Kategorie linków"
-      subtitle="Kategoria bez linków nie pokazuje się na stronie. Usunąć da się tylko pustą."
-      add-label="Dodaj kategorię"
-      :columns="COLUMNS"
-      :fields="FIELDS"
+      :title="t('ADMIN_LINKS.CATEGORIES_TITLE')"
+      :subtitle="t('ADMIN_LINKS.CATEGORIES_SUBTITLE')"
+      :add-label="t('ADMIN_LINKS.ADD_CATEGORY')"
+      :columns="columns"
+      :fields="fields"
       :empty-input="{ name: '', sortOrder: 0 }"
     />
   </div>

@@ -18,6 +18,6 @@ export const verifyCaptcha = async (event: H3Event, token: string | undefined): 
       }).catch(() => ({ success: false }))
     : { success: false };
   if (!verdict.success) {
-    throw createError({ statusCode: 400, statusMessage: 'Potwierdź, że nie jesteś robotem' });
+    throw createError({ statusCode: 400, statusMessage: 'ERRORS.CAPTCHA_REQUIRED' });
   }
 };

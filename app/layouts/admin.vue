@@ -4,6 +4,8 @@ import { ADMIN_HOME, ADMIN_NAVIGATION } from '~/utils/adminNavigation';
 
 const { user } = useUserSession();
 const route = useRoute();
+const sitePath = useCurrentSitePath();
+const { t } = useI18n();
 const isMenuOpen = ref(false);
 
 const visibleGroups = computed(() =>
@@ -14,25 +16,25 @@ const visibleGroups = computed(() =>
 );
 
 const isCurrent = (to: string) =>
-  to === ADMIN_HOME ? route.path === ADMIN_HOME : route.path === to || route.path.startsWith(`${to}/`);
+  to === ADMIN_HOME ? sitePath.value === ADMIN_HOME : sitePath.value === to || sitePath.value.startsWith(`${to}/`);
 
 watch(
   () => route.fullPath,
   () => (isMenuOpen.value = false),
 );
 
-useHead({ titleTemplate: (title) => (title ? `${title} · Panel SSR` : 'Panel SSR') });
+useHead({ titleTemplate: (title) => (title ? `${title} · ${t('ADMIN_NAV.PANEL_NAME')}` : t('ADMIN_NAV.PANEL_NAME')) });
 useSeoMeta({ robots: 'noindex, nofollow' });
 </script>
 
 <template>
   <div class="flex min-h-dvh flex-col bg-abyss-950 lg:flex-row">
     <header class="flex items-center justify-between gap-3 cosmo-bar px-4 py-2 lg:hidden">
-      <p class="heading-display text-lg text-abyss-950">Panel SSR</p>
+      <p class="heading-display text-lg text-abyss-950">{{ t('ADMIN_NAV.PANEL_NAME') }}</p>
       <button
         type="button"
         class="cursor-pointer rounded-full p-2 text-abyss-950 hover:bg-black/15"
-        aria-label="Menu panelu"
+        :aria-label="t('ADMIN_NAV.PANEL_MENU')"
         @click="isMenuOpen = !isMenuOpen"
       >
         <AppIcon :name="isMenuOpen ? 'close' : 'menu'" class="text-xl" />
@@ -43,22 +45,22 @@ useSeoMeta({ robots: 'noindex, nofollow' });
       class="w-full shrink-0 flex-col gap-5 border-aqua-500/15 bg-abyss-900 p-4 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-64 lg:overflow-y-auto lg:border-r"
       :class="isMenuOpen ? 'flex' : 'hidden'"
     >
-      <NuxtLink
+      <NuxtLinkLocale
         to="/"
         class="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-aqua-300 transition hover:text-gold-300"
       >
         <AppIcon name="chevronLeft" />
-        Wróć na stronę
-      </NuxtLink>
-      <p class="px-2 heading-display text-xl text-gold-300 max-lg:hidden">Panel SSR</p>
-      <nav class="flex flex-col gap-4" aria-label="Panel administratora">
-        <div v-for="group in visibleGroups" :key="group.title">
+        {{ t('ADMIN_NAV.BACK_TO_SITE') }}
+      </NuxtLinkLocale>
+      <p class="px-2 heading-display text-xl text-gold-300 max-lg:hidden">{{ t('ADMIN_NAV.PANEL_NAME') }}</p>
+      <nav class="flex flex-col gap-4" :aria-label="t('ADMIN_NAV.ADMIN_PANEL')">
+        <div v-for="group in visibleGroups" :key="group.titleKey">
           <p class="mb-1 px-2 text-[0.65rem] font-semibold tracking-widest text-aqua-500 uppercase">
-            {{ group.title }}
+            {{ t(group.titleKey) }}
           </p>
           <ul>
             <li v-for="item in group.items" :key="item.to">
-              <NuxtLink
+              <NuxtLinkLocale
                 :to="item.to"
                 class="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm transition duration-150"
                 :class="
@@ -69,14 +71,18 @@ useSeoMeta({ robots: 'noindex, nofollow' });
                 :aria-current="isCurrent(item.to) ? 'page' : undefined"
               >
                 <AppIcon :name="item.icon" />
-                {{ item.label }}
-              </NuxtLink>
+                {{ t(item.labelKey) }}
+              </NuxtLinkLocale>
             </li>
           </ul>
         </div>
       </nav>
       <p v-if="user" class="mt-auto border-t border-aqua-500/15 px-2 pt-3 text-xs text-aqua-500">
-        Zalogowano jako <strong class="text-aqua-200">{{ user.name }}</strong>
+        <i18n-t keypath="ADMIN_NAV.SIGNED_IN_AS" scope="global">
+          <template #name>
+            <strong class="text-aqua-200">{{ user.name }}</strong>
+          </template>
+        </i18n-t>
       </p>
     </aside>
 

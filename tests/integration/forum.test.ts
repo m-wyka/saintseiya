@@ -54,7 +54,7 @@ describe('forum writing', () => {
     const { threadId } = createThread(forum, author, 'Temat', '<p>A</p>');
     useDb().update(schema.threads).set({ isLocked: true }).where(eq(schema.threads.id, threadId)).run();
 
-    expect(() => replyToThread(threadId, author, '<p>B</p>')).toThrowError(/zamknięty/);
+    expect(() => replyToThread(threadId, author, '<p>B</p>')).toThrowError('ERRORS.THREAD_LOCKED');
     expect(replyToThread(threadId, moderator, '<p>B</p>').threadId).toBe(threadId);
   });
 
@@ -63,7 +63,7 @@ describe('forum writing', () => {
     const admin = createAccount({ role: 'admin' });
     const forum = createForum({ isStaffOnly: true });
 
-    expect(() => createThread(forum, user, 'Temat', '<p>A</p>')).toThrowError(/redakcji/);
+    expect(() => createThread(forum, user, 'Temat', '<p>A</p>')).toThrowError('ERRORS.FORUM_STAFF_ONLY');
     expect(createThread(forum, admin, 'Temat', '<p>A</p>').threadId).toBeGreaterThan(0);
   });
 
@@ -74,8 +74,8 @@ describe('forum writing', () => {
     const moderatorWithoutForum = createAccount({ role: 'moderator', permissions: ['news'] });
     const { postId } = createThread(createForum(), author, 'Temat', '<p>A</p>');
 
-    expect(() => editPost(postId, stranger, '<p>X</p>')).toThrowError(/własne/);
-    expect(() => editPost(postId, moderatorWithoutForum, '<p>X</p>')).toThrowError(/własne/);
+    expect(() => editPost(postId, stranger, '<p>X</p>')).toThrowError('ERRORS.POST_NOT_OWNED');
+    expect(() => editPost(postId, moderatorWithoutForum, '<p>X</p>')).toThrowError('ERRORS.POST_NOT_OWNED');
     editPost(postId, author, '<p>Autor</p>');
     editPost(postId, moderator, '<p>Moderator</p>');
 
@@ -155,7 +155,7 @@ describe('forum moderation', () => {
     expect(setThreadSticky(threadId, true)).toMatchObject({ isLocked: true, isSticky: true });
     expect(setThreadLocked(threadId, false)).toMatchObject({ isLocked: false, isSticky: true });
     expect(setThreadSticky(threadId, false)).toMatchObject({ isLocked: false, isSticky: false });
-    expect(() => setThreadLocked(999_999, true)).toThrowError(/Nie znaleziono tematu/);
+    expect(() => setThreadLocked(999_999, true)).toThrowError('ERRORS.THREAD_NOT_FOUND');
   });
 
   it('deletes a reply and moves the counters and the last-post marker back', () => {
@@ -204,8 +204,8 @@ describe('forum moderation', () => {
     const forum = createForum();
     const { threadId, postId } = createThread(forum, createAccount(), 'Temat', '<p>A</p>');
 
-    expect(() => deletePost(postId)).toThrowError(/usuń cały temat/);
-    expect(() => deletePost(999_999)).toThrowError(/Nie znaleziono posta/);
+    expect(() => deletePost(postId)).toThrowError('ERRORS.FIRST_POST_NOT_REMOVABLE');
+    expect(() => deletePost(999_999)).toThrowError('ERRORS.POST_NOT_FOUND');
     expect(threadRow(threadId).postCount).toBe(1);
     expect(forumRow(forum.id)).toMatchObject({ threadCount: 1, postCount: 1 });
   });
@@ -230,7 +230,7 @@ describe('forum moderation', () => {
     expect(postCountIn(removed.threadId)).toBe(0);
     expect(postCountIn(staying.threadId)).toBe(1);
     expect(forumRow(forum.id)).toMatchObject({ threadCount: 1, postCount: 1, lastPostAt: stayingLastPostAt });
-    expect(() => deleteThread(removed.threadId)).toThrowError(/Nie znaleziono tematu/);
+    expect(() => deleteThread(removed.threadId)).toThrowError('ERRORS.THREAD_NOT_FOUND');
   });
 
   it('leaves an emptied forum with zeroed counters and no last-post date', () => {
@@ -267,9 +267,9 @@ describe('forum moderation', () => {
     const forum = createForum();
     const { threadId } = createThread(forum, createAccount(), 'Temat', '<p>A</p>');
 
-    expect(() => moveThread(threadId, forum.id)).toThrowError(/już jest w tym dziale/);
-    expect(() => moveThread(threadId, 999_999)).toThrowError(/Nie znaleziono działu/);
-    expect(() => moveThread(999_999, forum.id)).toThrowError(/Nie znaleziono tematu/);
+    expect(() => moveThread(threadId, forum.id)).toThrowError('ERRORS.THREAD_ALREADY_IN_FORUM');
+    expect(() => moveThread(threadId, 999_999)).toThrowError('ERRORS.FORUM_NOT_FOUND');
+    expect(() => moveThread(999_999, forum.id)).toThrowError('ERRORS.THREAD_NOT_FOUND');
     expect(forumRow(forum.id)).toMatchObject({ threadCount: 1, postCount: 1 });
   });
 });

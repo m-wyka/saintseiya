@@ -17,6 +17,7 @@ const props = defineProps<{
 const { rows, page, pageCount, search, isLoading, refresh, remove } = useAdminList<Row>(props.resource);
 const { isBusy, errorMessage, run } = useApiAction();
 const toasts = useToastStore();
+const { t } = useI18n();
 
 const editedId = ref<number | null>(null);
 const isFormOpen = ref(false);
@@ -44,7 +45,7 @@ const save = async () => {
       : apiRequest(`/api/admin/${props.resource}/${editedId.value}`, { method: 'PUT', body: input.value }),
   );
   if (wasSaved) {
-    toasts.success('Zapisano');
+    toasts.success(t('GENERAL.SAVED'));
     isFormOpen.value = false;
     await refresh();
   }
@@ -60,8 +61,8 @@ useSeoMeta({ title: props.title });
         v-if="searchable"
         v-model="search"
         type="search"
-        label="Szukaj"
-        placeholder="Szukaj…"
+        :label="t('GENERAL.SEARCH')"
+        :placeholder="t('GENERAL.SEARCH_PLACEHOLDER')"
         hide-label
         class="w-56"
       />
@@ -73,7 +74,7 @@ useSeoMeta({ title: props.title });
 
     <form v-if="isFormOpen" class="mb-6 flex animate-rise flex-col gap-4 panel p-5" @submit.prevent="save">
       <h2 class="heading-display text-lg text-gold-300">
-        {{ editedId === null ? addLabel : 'Edycja' }}
+        {{ editedId === null ? addLabel : t('GENERAL.EDITING') }}
       </h2>
       <div class="grid gap-4 md:grid-cols-2">
         <template v-for="field in fields" :key="field.key">
@@ -131,9 +132,9 @@ useSeoMeta({ title: props.title });
       <div class="flex flex-wrap gap-2">
         <BaseButton type="submit" :busy="isBusy">
           <AppIcon name="check" />
-          Zapisz
+          {{ t('GENERAL.SAVE') }}
         </BaseButton>
-        <BaseButton variant="ghost" @click="isFormOpen = false">Anuluj</BaseButton>
+        <BaseButton variant="ghost" @click="isFormOpen = false">{{ t('GENERAL.CANCEL') }}</BaseButton>
       </div>
     </form>
 
@@ -145,7 +146,7 @@ useSeoMeta({ title: props.title });
         <slot name="row-actions" :row="row" />
         <BaseButton variant="ghost" size="sm" @click="openExisting(row.id)">
           <AppIcon name="edit" />
-          Edytuj
+          {{ t('GENERAL.EDIT') }}
         </BaseButton>
         <ConfirmButton @confirm="remove(row.id)" />
       </template>

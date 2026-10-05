@@ -3,6 +3,7 @@ import { routes } from '#shared/utils/routes';
 
 const props = defineProps<{ categorySlug?: string }>();
 
+const { t } = useI18n();
 const route = useRoute();
 const page = computed(() => Number(route.query.page) || 1);
 const { data, error } = await useFetch('/api/videos', {
@@ -12,7 +13,7 @@ const { data, error } = await useFetch('/api/videos', {
 if (error.value) {
   throw createError({
     statusCode: error.value.statusCode ?? 500,
-    statusMessage: 'Nie udało się wczytać filmów',
+    statusMessage: t('VIDEO_LIST.LOAD_FAILED'),
     fatal: true,
   });
 }
@@ -20,22 +21,27 @@ if (error.value) {
 const currentCategory = computed(() => data.value?.categories.find((category) => category.slug === props.categorySlug));
 
 if (props.categorySlug && !currentCategory.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Nie znaleziono kategorii', fatal: true });
+  throw createError({ statusCode: 404, statusMessage: t('VIDEO_LIST.CATEGORY_NOT_FOUND'), fatal: true });
 }
 
-useSeoMeta({ title: () => (currentCategory.value ? `${currentCategory.value.name} – Video` : 'Galeria video') });
+useSeoMeta({
+  title: () =>
+    currentCategory.value
+      ? t('VIDEO_LIST.CATEGORY_TITLE', { name: currentCategory.value.name })
+      : t('VIDEO_LIST.TITLE'),
+});
 </script>
 
 <template>
   <div v-if="data">
-    <BreadcrumbTrail v-if="currentCategory" :items="[{ title: 'Video', to: routes.videos() }]" />
+    <BreadcrumbTrail v-if="currentCategory" :items="[{ title: t('GENERAL.VIDEO'), to: routes.videos() }]" />
     <PageHeading
-      :title="currentCategory?.name ?? 'Galeria video'"
-      :subtitle="currentCategory?.description ?? 'AMV, openingi, zwiastuny i relacje ze świata Saint Seiya.'"
+      :title="currentCategory?.name ?? t('VIDEO_LIST.TITLE')"
+      :subtitle="currentCategory?.description ?? t('VIDEO_LIST.SUBTITLE')"
     />
     <ul class="mb-6 flex flex-wrap gap-2">
       <li>
-        <NuxtLink
+        <NuxtLinkLocale
           :to="routes.videos()"
           class="rounded-full border px-3 py-1 text-xs transition duration-200"
           :class="
@@ -44,11 +50,11 @@ useSeoMeta({ title: () => (currentCategory.value ? `${currentCategory.value.name
               : 'border-transparent cosmo-bar font-semibold text-abyss-950'
           "
         >
-          Wszystkie
-        </NuxtLink>
+          {{ t('GENERAL.ALL') }}
+        </NuxtLinkLocale>
       </li>
       <li v-for="category in data.categories" :key="category.slug">
-        <NuxtLink
+        <NuxtLinkLocale
           :to="routes.videoCategory(category.slug)"
           class="flex items-center gap-2 rounded-full border px-3 py-1 text-xs transition duration-200"
           :class="
@@ -59,13 +65,13 @@ useSeoMeta({ title: () => (currentCategory.value ? `${currentCategory.value.name
         >
           {{ category.name }}
           <span class="opacity-70">{{ category.videoCount }}</span>
-        </NuxtLink>
+        </NuxtLinkLocale>
       </li>
     </ul>
     <div v-if="data.videos.items.length" class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
       <VideoCard v-for="video in data.videos.items" :key="video.id" :video="video" />
     </div>
-    <EmptyState v-else message="W tej kategorii nie ma jeszcze filmów." />
+    <EmptyState v-else :message="t('VIDEO_LIST.EMPTY')" />
     <PaginationNav :page="data.videos.page" :page-count="data.videos.pageCount" />
   </div>
 </template>

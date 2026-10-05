@@ -36,7 +36,7 @@ const isExternal = (url: string) => /^https?:\/\//.test(url);
           </h3>
           <ul class="flex flex-col gap-0.5">
             <li v-for="link in group.links" :key="link.id">
-              <NuxtLink
+              <NuxtLinkLocale
                 :to="link.url"
                 :target="isExternal(link.url) ? '_blank' : undefined"
                 :rel="isExternal(link.url) ? 'noopener' : undefined"
@@ -46,7 +46,7 @@ const isExternal = (url: string) => /^https?:\/\//.test(url);
                 <span class="size-1 shrink-0 rounded-full bg-cosmo-500" aria-hidden="true" />
                 <span class="min-w-0 flex-1">{{ link.label }}</span>
                 <AppIcon v-if="isExternal(link.url)" name="external" class="text-xs text-aqua-500" />
-              </NuxtLink>
+              </NuxtLinkLocale>
             </li>
           </ul>
         </div>

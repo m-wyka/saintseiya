@@ -14,7 +14,7 @@ export const assertWithinRateLimit = (key: string, limit: RateLimit = WRITE_RATE
   const recentAttempts = (attemptsByKey.get(key) ?? []).filter((attemptedAt) => attemptedAt > windowStart);
   if (recentAttempts.length >= limit.attempts) {
     attemptsByKey.set(key, recentAttempts);
-    throw createError({ statusCode: TOO_MANY_REQUESTS, statusMessage: 'Zwolnij trochę — za dużo wiadomości naraz' });
+    throw createError({ statusCode: TOO_MANY_REQUESTS, statusMessage: 'ERRORS.RATE_LIMITED' });
   }
   attemptsByKey.set(key, [...recentAttempts, now]);
 };

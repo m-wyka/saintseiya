@@ -13,10 +13,10 @@ export interface EditableMapArea {
   contentHtml: string | null;
 }
 
-export const MAP_AREA_TARGET_LABELS: Record<MapAreaTarget, string> = {
-  page: 'Podstrona portalu',
-  url: 'Dowolny adres',
-  content: 'Okienko z treścią',
+export const MAP_AREA_TARGET_LABEL_KEYS: Record<MapAreaTarget, string> = {
+  page: 'ADMIN_SHARED.MAP_TARGET_PAGE',
+  url: 'ADMIN_SHARED.MAP_TARGET_URL',
+  content: 'ADMIN_SHARED.MAP_TARGET_CONTENT',
 };
 
 const PERCENT_MAX = 100;

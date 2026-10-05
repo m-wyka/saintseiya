@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { GHOST_USER_CAPTION } from '#shared/utils/content';
 import { routes } from '#shared/utils/routes';
 
 const props = withDefaults(
@@ -7,7 +6,8 @@ const props = withDefaults(
   { linked: true },
 );
 
-const NuxtLink = resolveComponent('NuxtLink');
+const { t } = useI18n();
+const NuxtLink = resolveComponent('NuxtLinkLocale');
 const profileAddress = computed(() => (props.linked && props.author?.id ? routes.user(props.author.id) : undefined));
 </script>
 
@@ -25,7 +25,7 @@ const profileAddress = computed(() => (props.linked && props.author?.id ? routes
       {{ author.name }}
     </component>
     <span v-if="author.isGhost" class="text-[0.7em] tracking-wide text-aqua-500 uppercase">{{
-      GHOST_USER_CAPTION
+      t('GENERAL.DELETED_ACCOUNT')
     }}</span>
   </span>
 </template>

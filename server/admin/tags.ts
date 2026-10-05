@@ -2,7 +2,7 @@ import { and, asc, eq, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 const inputSchema = z.object({
-  name: z.string().trim().min(2, 'Nazwa jest za krótka').max(60),
+  name: z.string().trim().min(2, 'VALIDATION.NAME_TOO_SHORT').max(60),
   slug: slugInputSchema,
 });
 

@@ -19,26 +19,10 @@ export type ModeratorPermission = (typeof MODERATOR_PERMISSIONS)[number];
 
 export type AdminAccess = ModeratorPermission | 'admin' | 'staff';
 
-export const MODERATOR_PERMISSION_LABELS: Record<ModeratorPermission, string> = {
-  news: 'Newsy, kategorie i tagi',
-  pages: 'Podstrony',
-  maps: 'Mapy interaktywne',
-  gallery: 'Galeria zdjęć',
-  videos: 'Galeria video',
-  forum: 'Moderacja forum',
-  comments: 'Moderacja komentarzy',
-  shoutbox: 'Moderacja shoutboxa',
-  polls: 'Ankiety',
-  links: 'Katalog linków',
-  downloads: 'Pliki do pobrania',
-  users: 'Blokowanie użytkowników',
-};
+export const userRoleLabelKey = (role: UserRole): string => `GENERAL.ROLE_${role.toUpperCase()}`;
 
-export const USER_ROLE_LABELS: Record<UserRole, string> = {
-  user: 'Użytkownik',
-  moderator: 'Moderator',
-  admin: 'Administrator',
-};
+export const moderatorPermissionLabelKey = (permission: ModeratorPermission): string =>
+  `PERMISSIONS.${permission.toUpperCase()}`;
 
 interface StaffIdentity {
   role: UserRole;

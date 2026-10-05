@@ -1,12 +1,13 @@
 <script setup lang="ts">
+const { t } = useI18n();
 const { data: downloads } = await useFetch('/api/downloads');
 
-useSeoMeta({ title: 'Pliki do pobrania' });
+useSeoMeta({ title: () => t('DOWNLOADS.TITLE') });
 </script>
 
 <template>
   <div>
-    <PageHeading title="Pliki do pobrania" />
+    <PageHeading :title="t('DOWNLOADS.TITLE')" />
     <ul v-if="downloads?.length" class="flex flex-col gap-3">
       <li
         v-for="download in downloads"
@@ -21,7 +22,7 @@ useSeoMeta({ title: 'Pliki do pobrania' });
           <p v-if="download.description" class="text-xs text-aqua-300">{{ download.description }}</p>
           <p class="text-[0.7rem] text-aqua-500">
             {{ formatFileSize(download.fileSize) }} ·
-            {{ pluralize(download.downloadCount, 'pobranie', 'pobrania', 'pobrań') }}
+            {{ t('DOWNLOADS.DOWNLOAD_COUNT', { count: formatNumber(download.downloadCount) }, download.downloadCount) }}
           </p>
         </div>
         <a
@@ -29,10 +30,10 @@ useSeoMeta({ title: 'Pliki do pobrania' });
           class="inline-flex items-center gap-2 rounded-full cosmo-bar px-4 py-2 text-sm font-semibold text-abyss-950 transition duration-200 hover:shadow-aura hover:brightness-110"
         >
           <AppIcon name="download" />
-          Pobierz
+          {{ t('DOWNLOADS.DOWNLOAD') }}
         </a>
       </li>
     </ul>
-    <EmptyState v-else message="Nie ma jeszcze plików do pobrania." />
+    <EmptyState v-else :message="t('DOWNLOADS.EMPTY')" />
   </div>
 </template>

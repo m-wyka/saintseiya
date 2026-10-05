@@ -6,7 +6,7 @@ export default defineNitroPlugin(() => {
     const account = findActiveAccount(session.user.id);
     if (!account) {
       await clearUserSession(event);
-      throw createError({ statusCode: 401, statusMessage: 'Sesja wygasła' });
+      throw createError({ statusCode: 401, statusMessage: 'ERRORS.SESSION_EXPIRED' });
     }
     session.user = sessionUserOf(account);
     await setUserSession(event, { user: session.user });

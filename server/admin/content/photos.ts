@@ -43,7 +43,7 @@ const storedPhoto = (photoId: number) =>
       .from(schema.photos)
       .where(eq(schema.photos.id, photoId))
       .get(),
-    'Nie znaleziono zdjęcia',
+    'ERRORS.PHOTO_NOT_FOUND',
   );
 
 const insertPhoto = (albumId: number, stored: StoredImage, uploader: Account) =>
@@ -65,7 +65,7 @@ const storedAlbum = (albumId: number) =>
       .from(schema.albums)
       .where(eq(schema.albums.id, albumId))
       .get(),
-    'Nie znaleziono albumu',
+    'ERRORS.ALBUM_NOT_FOUND',
   );
 
 export const listAlbumPhotos = (albumId: number) => {
@@ -102,7 +102,7 @@ export const updatePhoto = (photoId: number, rawInput: unknown) => {
     .where(eq(schema.photos.id, photoId))
     .returning({ id: schema.photos.id })
     .get();
-  return foundOr404(updated, 'Nie znaleziono zdjęcia');
+  return foundOr404(updated, 'ERRORS.PHOTO_NOT_FOUND');
 };
 
 export const removePhoto = async (event: H3Event, photoId: number) => {

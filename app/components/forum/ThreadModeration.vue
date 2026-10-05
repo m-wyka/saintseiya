@@ -12,6 +12,8 @@ const props = defineProps<{ thread: ModeratedThread }>();
 const emit = defineEmits<{ changed: [] }>();
 
 const moderate = useModerationAction();
+const { t } = useI18n();
+const localePath = useLocalePath();
 const threadApiUrl = computed(() => `/api/forum/threads/${props.thread.id}`);
 
 const changeThread = async (action: string, body: Record<string, unknown>, successMessage: string) => {
@@ -29,20 +31,23 @@ const toggleLock = () =>
   changeThread(
     'lock',
     { isLocked: !props.thread.isLocked },
-    props.thread.isLocked ? 'Temat otwarty' : 'Temat zamknięty',
+    props.thread.isLocked ? t('POSTS.THREAD_OPENED') : t('POSTS.THREAD_LOCKED'),
   );
 
 const toggleSticky = () =>
   changeThread(
     'sticky',
     { isSticky: !props.thread.isSticky },
-    props.thread.isSticky ? 'Temat odklejony' : 'Temat przyklejony',
+    props.thread.isSticky ? t('POSTS.THREAD_UNPINNED') : t('POSTS.THREAD_PINNED'),
   );
 
 const removeThread = async () => {
-  const wasRemoved = await moderate(() => apiRequest(threadApiUrl.value, { method: 'DELETE' }), 'Temat usunięty');
+  const wasRemoved = await moderate(
+    () => apiRequest(threadApiUrl.value, { method: 'DELETE' }),
+    t('POSTS.THREAD_DELETED'),
+  );
   if (wasRemoved) {
-    await navigateTo(routes.forum(props.thread.forum.slug));
+    await navigateTo(localePath(routes.forum(props.thread.forum.slug)));
   }
 };
 
@@ -64,7 +69,7 @@ const moveThread = async () => {
   if (targetForumId.value === undefined) {
     return;
   }
-  const wasMoved = await changeThread('forum', { forumId: targetForumId.value }, 'Temat przeniesiony');
+  const wasMoved = await changeThread('forum', { forumId: targetForumId.value }, t('POSTS.THREAD_MOVED'));
   if (wasMoved) {
     isChoosingForum.value = false;
   }
@@ -72,30 +77,39 @@ const moveThread = async () => {
 </script>
 
 <template>
-  <section class="mb-4 flex flex-col gap-3 panel px-4 py-3" aria-label="Moderacja tematu">
+  <section class="mb-4 flex flex-col gap-3 panel px-4 py-3" :aria-label="t('POSTS.MODERATION')">
     <div class="flex flex-wrap items-center gap-1.5">
-      <p class="mr-auto text-xs font-semibold tracking-wide text-aqua-500 uppercase">Moderacja tematu</p>
+      <p class="mr-auto text-xs font-semibold tracking-wide text-aqua-500 uppercase">{{ t('POSTS.MODERATION') }}</p>
       <BaseButton variant="ghost" size="sm" @click="toggleLock">
         <AppIcon name="lock" />
-        {{ thread.isLocked ? 'Otwórz' : 'Zamknij' }}
+        {{ thread.isLocked ? t('POSTS.UNLOCK') : t('POSTS.LOCK') }}
       </BaseButton>
       <BaseButton variant="ghost" size="sm" @click="toggleSticky">
         <AppIcon name="pin" />
-        {{ thread.isSticky ? 'Odklej' : 'Przyklej' }}
+        {{ thread.isSticky ? t('POSTS.UNPIN') : t('POSTS.PIN') }}
       </BaseButton>
       <BaseButton variant="ghost" size="sm" :aria-expanded="isChoosingForum" @click="startMove">
         <AppIcon name="folder" />
-        Przenieś
+        {{ t('POSTS.MOVE') }}
       </BaseButton>
-      <ConfirmButton label="Usuń temat" confirm-label="Usunąć cały temat?" @confirm="removeThread" />
+      <ConfirmButton
+        :label="t('POSTS.DELETE_THREAD')"
+        :confirm-label="t('POSTS.CONFIRM_DELETE_THREAD')"
+        @confirm="removeThread"
+      />
     </div>
     <form v-if="isChoosingForum" class="flex flex-wrap items-end gap-2" @submit.prevent="moveThread">
-      <BaseSelect v-model="targetForumId" label="Dział docelowy" :options="otherForums" class="min-w-56 flex-1" />
+      <BaseSelect
+        v-model="targetForumId"
+        :label="t('POSTS.TARGET_FORUM')"
+        :options="otherForums"
+        class="min-w-56 flex-1"
+      />
       <BaseButton type="submit" size="sm" :disabled="targetForumId === undefined">
         <AppIcon name="check" />
-        Przenieś temat
+        {{ t('POSTS.MOVE_THREAD') }}
       </BaseButton>
-      <BaseButton variant="ghost" size="sm" @click="isChoosingForum = false">Anuluj</BaseButton>
+      <BaseButton variant="ghost" size="sm" @click="isChoosingForum = false">{{ t('GENERAL.CANCEL') }}</BaseButton>
     </form>
   </section>
 </template>

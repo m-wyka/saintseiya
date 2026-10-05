@@ -9,6 +9,7 @@ const emit = defineEmits<{ voted: [] }>();
 const PERCENT = 100;
 
 const { loggedIn } = useUserSession();
+const { t } = useI18n();
 const { isBusy, errorMessage, run } = useApiAction();
 
 const totalVotes = computed(() => props.poll.options.reduce((total, option) => total + option.voteCount, 0));
@@ -33,7 +34,7 @@ const vote = async (optionId: number) => {
         class="rounded-full border px-2.5 py-0.5 text-[0.7rem] font-semibold tracking-wide uppercase"
         :class="poll.isOpen ? 'border-cosmo-500/60 text-cosmo-400' : 'border-aqua-500/30 text-aqua-500'"
       >
-        {{ poll.isOpen ? 'Trwa' : 'Zakończona' }}
+        {{ poll.isOpen ? t('POLL_CARD.OPEN') : t('POLL_CARD.CLOSED') }}
       </span>
     </header>
     <ul class="flex flex-col gap-2.5">
@@ -58,15 +59,15 @@ const vote = async (optionId: number) => {
               :style="{ width: `${shareOf(option.voteCount)}%` }"
             />
           </div>
-          <BaseButton v-if="canVote" variant="secondary" size="sm" :busy="isBusy" @click="vote(option.id)"
-            >Głosuję</BaseButton
-          >
+          <BaseButton v-if="canVote" variant="secondary" size="sm" :busy="isBusy" @click="vote(option.id)">
+            {{ t('POLL_CARD.VOTE') }}
+          </BaseButton>
         </div>
       </li>
     </ul>
     <p v-if="errorMessage" class="mt-3 text-sm text-danger" role="alert">{{ errorMessage }}</p>
     <footer class="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-aqua-500">
-      <span>{{ pluralize(totalVotes, 'głos', 'głosy', 'głosów') }}</span>
+      <span>{{ t('POLL_CARD.VOTE_COUNT', { count: formatNumber(totalVotes) }, totalVotes) }}</span>
       <time :datetime="poll.startedAt">{{ formatLongDate(poll.startedAt) }}</time>
     </footer>
   </article>

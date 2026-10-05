@@ -3,18 +3,19 @@ import { routes } from '#shared/utils/routes';
 
 const PARTNERS = [
   {
-    name: 'RyuuTsuru Teikoku — napisy anime',
+    nameKey: 'FOOTER.PARTNER_RYUUTSURU_TEIKOKU',
     url: 'http://ryuutsuruteikoku.eu/',
     image: '/theme/partners/ryuutsuru-teikoku.png',
   },
   {
-    name: 'Saint Seiya Legends — rycerskie RPG',
+    nameKey: 'FOOTER.PARTNER_SAINT_SEIYA_LEGENDS',
     url: 'http://saintseiyalegends.bestdiscussion.net/',
     image: '/theme/partners/saint-seiya-legends.png',
   },
 ];
 const FOUNDING_YEAR = 2006;
 const layout = useLayoutStore();
+const { t } = useI18n();
 const currentYear = new Date().getFullYear();
 </script>
 
@@ -23,11 +24,11 @@ const currentYear = new Date().getFullYear();
     <div class="mx-auto flex max-w-page flex-col gap-6 px-4 py-8">
       <section v-if="layout.maps.length" aria-labelledby="projects-heading">
         <h2 id="projects-heading" class="mb-4 text-center heading-display text-lg text-gold-300">
-          Rewolucyjne projekty
+          {{ t('FOOTER.PROJECTS') }}
         </h2>
         <ul class="flex flex-wrap items-end justify-center gap-x-8 gap-y-4">
           <li v-for="map in layout.maps" :key="map.slug">
-            <NuxtLink
+            <NuxtLinkLocale
               :to="routes.map(map.slug)"
               class="group flex flex-col items-center gap-1 text-xs text-aqua-300 transition duration-300 ease-cosmo hover:-translate-y-1 hover:text-gold-300"
             >
@@ -45,7 +46,7 @@ const currentYear = new Date().getFullYear();
                 <AppIcon name="map" />
               </span>
               {{ map.title }}
-            </NuxtLink>
+            </NuxtLinkLocale>
           </li>
         </ul>
       </section>
@@ -57,14 +58,14 @@ const currentYear = new Date().getFullYear();
             rel="noopener"
             class="block opacity-60 grayscale transition duration-300 ease-cosmo hover:scale-105 hover:opacity-100 hover:grayscale-0"
           >
-            <img :src="partner.image" :alt="partner.name" class="h-10 w-auto" loading="lazy" />
+            <img :src="partner.image" :alt="t(partner.nameKey)" class="h-10 w-auto" loading="lazy" />
           </a>
         </li>
       </ul>
       <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-aqua-500">
         <p>
           © <strong class="text-aqua-200">Saint Seiya Revolution</strong> {{ FOUNDING_YEAR }}–{{ currentYear }}.
-          Fanowski portal o Rycerzach Zodiaku.
+          {{ t('FOOTER.TAGLINE') }}
         </p>
         <p>Saint Seiya © Masami Kurumada, Shueisha, Toei Animation.</p>
       </div>

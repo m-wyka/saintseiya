@@ -1,29 +1,39 @@
 const SITE_TIME_ZONE = 'Europe/Warsaw';
-const SITE_LOCALE = 'pl-PL';
+const DEFAULT_LANGUAGE = 'pl-PL';
 
-const longDateFormat = new Intl.DateTimeFormat(SITE_LOCALE, { dateStyle: 'long', timeZone: SITE_TIME_ZONE });
-const dateTimeFormat = new Intl.DateTimeFormat(SITE_LOCALE, {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-  timeZone: SITE_TIME_ZONE,
-});
-const numberFormat = new Intl.NumberFormat(SITE_LOCALE);
+interface LanguageFormats {
+  longDate: Intl.DateTimeFormat;
+  dateTime: Intl.DateTimeFormat;
+  number: Intl.NumberFormat;
+}
+
+const formatsByLanguage = new Map<string, LanguageFormats>();
+
+const currentFormats = (): LanguageFormats => {
+  const language = tryUseNuxtApp()?.$i18n.localeProperties.value.language ?? DEFAULT_LANGUAGE;
+  let formats = formatsByLanguage.get(language);
+  if (!formats) {
+    formats = {
+      longDate: new Intl.DateTimeFormat(language, { dateStyle: 'long', timeZone: SITE_TIME_ZONE }),
+      dateTime: new Intl.DateTimeFormat(language, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: SITE_TIME_ZONE,
+      }),
+      number: new Intl.NumberFormat(language),
+    };
+    formatsByLanguage.set(language, formats);
+  }
+  return formats;
+};
 
 type DateInput = string | number | Date;
 
-export const formatLongDate = (value: DateInput): string => longDateFormat.format(new Date(value));
+export const formatLongDate = (value: DateInput): string => currentFormats().longDate.format(new Date(value));
 
-export const formatDateTime = (value: DateInput): string => dateTimeFormat.format(new Date(value));
+export const formatDateTime = (value: DateInput): string => currentFormats().dateTime.format(new Date(value));
 
-export const formatNumber = (value: number): string => numberFormat.format(value);
-
-const PLURAL_RULES = new Intl.PluralRules(SITE_LOCALE);
-
-export const pluralize = (count: number, one: string, few: string, many: string): string => {
-  const form = PLURAL_RULES.select(count);
-  const word = form === 'one' ? one : form === 'few' ? few : many;
-  return `${formatNumber(count)} ${word}`;
-};
+export const formatNumber = (value: number): string => currentFormats().number.format(value);
 
 const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB'];
 const FILE_SIZE_STEP = 1024;
@@ -34,5 +44,5 @@ export const formatFileSize = (bytes: number): string => {
     Math.floor(Math.log(Math.max(bytes, 1)) / Math.log(FILE_SIZE_STEP)),
   );
   const value = bytes / FILE_SIZE_STEP ** unitIndex;
-  return `${numberFormat.format(Number(value.toFixed(unitIndex === 0 ? 0 : 1)))} ${FILE_SIZE_UNITS[unitIndex]}`;
+  return `${formatNumber(Number(value.toFixed(unitIndex === 0 ? 0 : 1)))} ${FILE_SIZE_UNITS[unitIndex]}`;
 };

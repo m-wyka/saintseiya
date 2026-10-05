@@ -13,7 +13,7 @@ const SLUG_FALLBACK = 'strona';
 const BAD_REQUEST = 400;
 
 const inputSchema = z.object({
-  title: z.string().trim().min(1, 'Podaj tytuł strony').max(200),
+  title: z.string().trim().min(1, 'VALIDATION.PAGE_TITLE_REQUIRED').max(200),
   slug: slugInputSchema,
   parentId: z.number().int().positive().nullable(),
   kind: z.enum(PAGE_KINDS),
@@ -63,7 +63,7 @@ const parentPathOf = (tx: Tx, parentId: number | null): string | null => {
   }
   const parent = tx.select({ path: schema.pages.path }).from(schema.pages).where(eq(schema.pages.id, parentId)).get();
   if (!parent) {
-    throw createError({ statusCode: BAD_REQUEST, statusMessage: 'Wybrana strona nadrzędna nie istnieje' });
+    throw createError({ statusCode: BAD_REQUEST, statusMessage: 'ERRORS.PARENT_PAGE_NOT_FOUND' });
   }
   return parent.path;
 };
@@ -142,7 +142,7 @@ const updatePage = (tx: Tx, id: number, input: PageInput) => {
     .from(schema.pages)
     .all();
   if (isInsideSubtree(nodes, id, input.parentId)) {
-    throw conflict('Strona nie może być podstroną samej siebie ani żadnej ze swoich podstron');
+    throw conflict('ERRORS.PAGE_PARENT_CYCLE');
   }
   const current = foundOr404(
     tx
@@ -185,7 +185,7 @@ const removePage = (tx: Tx, id: number) => {
   );
   const firstChild = tx.select({ id: schema.pages.id }).from(schema.pages).where(eq(schema.pages.parentId, id)).get();
   if (firstChild) {
-    throw conflict('Ta strona ma podstrony. Najpierw przenieś je lub usuń.');
+    throw conflict('ERRORS.PAGE_HAS_CHILDREN');
   }
   tx.delete(schema.comments)
     .where(and(eq(schema.comments.targetKind, 'page'), eq(schema.comments.targetId, id)))
@@ -237,7 +237,7 @@ export const listPageLevel = (parentId: number | null) => {
       ? null
       : foundOr404(
           db.select({ path: schema.pages.path }).from(schema.pages).where(eq(schema.pages.id, parentId)).get(),
-          'Nie znaleziono strony',
+          'ERRORS.PAGE_NOT_FOUND',
         );
   const breadcrumbs = parent
     ? db

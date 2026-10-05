@@ -1,19 +1,21 @@
 <script setup lang="ts">
 const { loggedIn, user, clear } = useUserSession();
+const { t } = useI18n();
+const localePath = useLocalePath();
 
 const signOut = async () => {
   await clear();
-  await navigateTo('/');
+  await navigateTo(localePath('/'));
 };
 </script>
 
 <template>
   <div class="flex items-center gap-2">
     <template v-if="loggedIn && user">
-      <NuxtLink
+      <NuxtLinkLocale
         to="/konto"
         class="flex items-center gap-2 text-gold-300 transition hover:text-cosmo-400"
-        title="Twoje konto"
+        :title="t('LAYOUT.YOUR_ACCOUNT')"
       >
         <img
           v-if="user.avatarUrl"
@@ -24,14 +26,14 @@ const signOut = async () => {
         />
         <AppIcon v-else name="user" />
         <span class="max-w-40 truncate font-semibold">{{ user.name }}</span>
-      </NuxtLink>
+      </NuxtLinkLocale>
       <BaseButton v-if="user.role !== 'user'" to="/admin" variant="secondary" size="sm">
         <AppIcon name="settings" />
-        Panel
+        {{ t('LAYOUT.PANEL') }}
       </BaseButton>
       <BaseButton variant="ghost" size="sm" @click="signOut">
         <AppIcon name="logout" />
-        <span class="max-sm:sr-only">Wyloguj</span>
+        <span class="max-sm:sr-only">{{ t('LAYOUT.SIGN_OUT') }}</span>
       </BaseButton>
     </template>
     <LoginLink v-else />

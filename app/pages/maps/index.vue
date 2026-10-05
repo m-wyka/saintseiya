@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { routes } from '#shared/utils/routes';
 
+const { t } = useI18n();
 const { data: maps } = await useFetch('/api/maps');
 
-useSeoMeta({ title: 'Mapy interaktywne' });
+useSeoMeta({ title: () => t('MAPS.TITLE') });
 </script>
 
 <template>
   <div>
-    <PageHeading title="Mapy interaktywne" subtitle="Rewolucyjne projekty: klikalne mapy światów Saint Seiya." />
+    <PageHeading :title="t('MAPS.TITLE')" :subtitle="t('MAPS.SUBTITLE')" />
     <ul v-if="maps?.length" class="grid gap-5 sm:grid-cols-2">
       <li v-for="map in maps" :key="map.slug" class="reveal">
-        <NuxtLink
+        <NuxtLinkLocale
           :to="routes.map(map.slug)"
           class="group relative block overflow-hidden panel transition duration-300 ease-cosmo hover:-translate-y-1 hover:border-cosmo-500/60 hover:shadow-aura"
         >
@@ -36,9 +37,9 @@ useSeoMeta({ title: 'Mapy interaktywne' });
               <AppIcon name="chevronRight" />
             </span>
           </div>
-        </NuxtLink>
+        </NuxtLinkLocale>
       </li>
     </ul>
-    <EmptyState v-else message="Nie ma jeszcze żadnych map." />
+    <EmptyState v-else :message="t('MAPS.EMPTY')" />
   </div>
 </template>

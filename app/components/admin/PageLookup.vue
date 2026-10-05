@@ -8,6 +8,8 @@ interface FoundPage {
 defineProps<{ label: string; selectedTitle: string | null }>();
 const emit = defineEmits<{ select: [page: FoundPage] }>();
 
+const { t } = useI18n();
+
 const SEARCH_DEBOUNCE_MS = 250;
 const search = ref('');
 const results = ref<FoundPage[]>([]);
@@ -36,10 +38,12 @@ onBeforeUnmount(() => clearTimeout(searchTimer));
 <template>
   <div class="flex flex-col gap-2">
     <p class="text-sm text-aqua-200">
-      <span class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">Wybrana podstrona:</span>
-      {{ selectedTitle ?? 'brak' }}
+      <span class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">
+        {{ t('ADMIN_FORMS.PAGE_SELECTED') }}
+      </span>
+      {{ selectedTitle ?? t('ADMIN_FORMS.PAGE_NONE') }}
     </p>
-    <BaseInput v-model="search" type="search" :label="label" placeholder="Wpisz fragment tytułu…" />
+    <BaseInput v-model="search" type="search" :label="label" :placeholder="t('ADMIN_FORMS.PAGE_TITLE_PLACEHOLDER')" />
     <ul v-if="results.length" class="max-h-56 overflow-y-auto rounded-lg border border-aqua-500/30 bg-black/40">
       <li v-for="page in results" :key="page.id">
         <button

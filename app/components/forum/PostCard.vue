@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { InternalApi } from 'nitropack';
-import { GHOST_USER_CAPTION } from '#shared/utils/content';
 import { routes } from '#shared/utils/routes';
 
 type Post = InternalApi['/api/forum/threads/:id']['get']['posts']['items'][number];
@@ -10,6 +9,7 @@ const emit = defineEmits<{ changed: [] }>();
 
 const isEditing = ref(false);
 const moderate = useModerationAction();
+const { t } = useI18n();
 
 const initialOf = (name: string) => name.trim().charAt(0).toLocaleUpperCase('pl');
 
@@ -21,7 +21,7 @@ const onEdited = () => {
 const removePost = async () => {
   const wasRemoved = await moderate(
     () => apiRequest(`/api/forum/posts/${props.post.id}`, { method: 'DELETE' }),
-    'Post usunięty',
+    t('POSTS.DELETED'),
   );
   if (wasRemoved) {
     emit('changed');
@@ -58,9 +58,11 @@ const removePost = async () => {
           {{ post.author.name }}
         </p>
         <p v-if="post.author.isGhost" class="text-[0.65rem] tracking-wide text-aqua-500 uppercase">
-          {{ GHOST_USER_CAPTION }}
+          {{ t('GENERAL.DELETED_ACCOUNT') }}
         </p>
-        <p class="text-xs text-aqua-500">{{ pluralize(post.author.postCount, 'post', 'posty', 'postów') }}</p>
+        <p class="text-xs text-aqua-500">
+          {{ t('POSTS.POST_COUNT', { count: formatNumber(post.author.postCount) }, post.author.postCount) }}
+        </p>
       </div>
     </aside>
     <div class="flex min-w-0 flex-col">
@@ -71,13 +73,13 @@ const removePost = async () => {
         <div class="flex items-center gap-1.5">
           <BaseButton v-if="canEdit && !isEditing" variant="ghost" size="sm" @click="isEditing = true">
             <AppIcon name="edit" />
-            Edytuj
+            {{ t('GENERAL.EDIT') }}
           </BaseButton>
           <ConfirmButton v-if="canDelete" @confirm="removePost" />
           <a
             :href="routes.post(post.id)"
             class="ml-1.5 font-semibold text-cosmo-400 hover:text-gold-300"
-            :aria-label="`Odnośnik do posta numer ${position}`"
+            :aria-label="t('POSTS.PERMALINK', { position })"
           >
             #{{ position }}
           </a>
@@ -93,7 +95,7 @@ const removePost = async () => {
       <template v-else>
         <RichContent :html="post.bodyHtml" class="flex-1 px-5 py-4" />
         <p v-if="post.editedAt" class="px-5 pb-3 text-[0.7rem] text-aqua-500 italic">
-          Edytowano {{ formatDateTime(post.editedAt) }}
+          {{ t('POSTS.EDITED_AT', { date: formatDateTime(post.editedAt) }) }}
         </p>
       </template>
     </div>

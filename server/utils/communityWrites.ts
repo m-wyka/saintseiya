@@ -6,7 +6,7 @@ const CONFLICT = 409;
 
 export const createComment = (targetKind: CommentTarget, targetId: number, author: Account, bodyHtml: string) => {
   if (!acceptsComments(targetKind, targetId)) {
-    throw createError({ statusCode: 404, statusMessage: 'Tutaj nie można komentować' });
+    throw createError({ statusCode: 404, statusMessage: 'ERRORS.COMMENTS_UNAVAILABLE' });
   }
   return useDb()
     .insert(schema.comments)
@@ -24,7 +24,7 @@ export const createShout = (author: Account, message: string) =>
 
 export const castPollVote = (pollId: number, optionId: number, voter: Account) => {
   if (!findOpenPollOption(pollId, optionId)) {
-    throw createError({ statusCode: 404, statusMessage: 'Ta ankieta jest zakończona lub nie istnieje' });
+    throw createError({ statusCode: 404, statusMessage: 'ERRORS.POLL_UNAVAILABLE' });
   }
   const inserted = useDb()
     .insert(schema.pollVotes)
@@ -32,6 +32,6 @@ export const castPollVote = (pollId: number, optionId: number, voter: Account) =
     .onConflictDoNothing()
     .run();
   if (!inserted.changes) {
-    throw createError({ statusCode: CONFLICT, statusMessage: 'Twój głos w tej ankiecie jest już oddany' });
+    throw createError({ statusCode: CONFLICT, statusMessage: 'ERRORS.POLL_ALREADY_VOTED' });
   }
 };

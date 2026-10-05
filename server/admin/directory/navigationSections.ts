@@ -4,7 +4,7 @@ import { withMovedItem } from '#shared/utils/ordering';
 import type { MoveDirection } from '#shared/utils/ordering';
 
 const inputSchema = z.object({
-  title: z.string().trim().min(2, 'Tytuł jest za krótki').max(60, 'Tytuł jest za długi'),
+  title: z.string().trim().min(2, 'VALIDATION.TITLE_TOO_SHORT').max(60, 'VALIDATION.TITLE_TOO_LONG'),
 });
 
 const orderedSections = () =>

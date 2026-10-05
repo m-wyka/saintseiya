@@ -13,7 +13,7 @@ interface ForumRef {
 
 const assertCanWriteIn = (forum: ForumRef, author: Account) => {
   if (forum.isStaffOnly && !isStaff(author)) {
-    throw createError({ statusCode: FORBIDDEN, statusMessage: 'Ten dział jest tylko dla redakcji' });
+    throw createError({ statusCode: FORBIDDEN, statusMessage: 'ERRORS.FORUM_STAFF_ONLY' });
   }
 };
 
@@ -79,10 +79,10 @@ const findThreadForWriting = (threadId: number) =>
     .get();
 
 export const replyToThread = (threadId: number, author: Account, bodyHtml: string) => {
-  const thread = foundOr404(findThreadForWriting(threadId), 'Nie znaleziono tematu');
+  const thread = foundOr404(findThreadForWriting(threadId), 'ERRORS.THREAD_NOT_FOUND');
   assertCanWriteIn(thread.forum, author);
   if (thread.isLocked && !hasPermission(author, 'forum')) {
-    throw createError({ statusCode: FORBIDDEN, statusMessage: 'Temat jest zamknięty' });
+    throw createError({ statusCode: FORBIDDEN, statusMessage: 'ERRORS.THREAD_LOCKED' });
   }
   const post = useDb().transaction((tx) => insertPost(tx, thread.id, thread.forum.id, author, bodyHtml, new Date()));
   return { threadId: thread.id, postId: post.id };
@@ -92,10 +92,10 @@ export const editPost = (postId: number, editor: Account, bodyHtml: string) => {
   const db = useDb();
   const post = foundOr404(
     db.select().from(schema.posts).where(eq(schema.posts.id, postId)).get(),
-    'Nie znaleziono posta',
+    'ERRORS.POST_NOT_FOUND',
   );
   if (post.authorId !== editor.id && !hasPermission(editor, 'forum')) {
-    throw createError({ statusCode: FORBIDDEN, statusMessage: 'Możesz edytować tylko własne posty' });
+    throw createError({ statusCode: FORBIDDEN, statusMessage: 'ERRORS.POST_NOT_OWNED' });
   }
   db.update(schema.posts)
     .set({ bodyHtml, editedAt: new Date(), editedById: editor.id })
@@ -154,7 +154,7 @@ const updateThreadFlags = (threadId: number, flags: { isLocked?: boolean; isStic
       .where(eq(schema.threads.id, threadId))
       .returning({ id: schema.threads.id, isLocked: schema.threads.isLocked, isSticky: schema.threads.isSticky })
       .get(),
-    'Nie znaleziono tematu',
+    'ERRORS.THREAD_NOT_FOUND',
   );
 
 export const setThreadLocked = (threadId: number, isLocked: boolean) => updateThreadFlags(threadId, { isLocked });
@@ -162,7 +162,7 @@ export const setThreadLocked = (threadId: number, isLocked: boolean) => updateTh
 export const setThreadSticky = (threadId: number, isSticky: boolean) => updateThreadFlags(threadId, { isSticky });
 
 export const deleteThread = (threadId: number) => {
-  const thread = foundOr404(findThreadForWriting(threadId), 'Nie znaleziono tematu');
+  const thread = foundOr404(findThreadForWriting(threadId), 'ERRORS.THREAD_NOT_FOUND');
   useDb().transaction((tx) => {
     tx.delete(schema.posts).where(eq(schema.posts.threadId, thread.id)).run();
     tx.delete(schema.threads).where(eq(schema.threads.id, thread.id)).run();
@@ -173,17 +173,17 @@ export const deleteThread = (threadId: number) => {
 
 export const moveThread = (threadId: number, targetForumId: number) => {
   const db = useDb();
-  const thread = foundOr404(findThreadForWriting(threadId), 'Nie znaleziono tematu');
+  const thread = foundOr404(findThreadForWriting(threadId), 'ERRORS.THREAD_NOT_FOUND');
   const targetForum = foundOr404(
     db
       .select({ id: schema.forums.id, slug: schema.forums.slug })
       .from(schema.forums)
       .where(eq(schema.forums.id, targetForumId))
       .get(),
-    'Nie znaleziono działu',
+    'ERRORS.FORUM_NOT_FOUND',
   );
   if (targetForum.id === thread.forum.id) {
-    throw conflict('Temat już jest w tym dziale');
+    throw conflict('ERRORS.THREAD_ALREADY_IN_FORUM');
   }
   db.transaction((tx) => {
     tx.update(schema.threads).set({ forumId: targetForum.id }).where(eq(schema.threads.id, thread.id)).run();
@@ -211,10 +211,10 @@ export const deletePost = (postId: number) => {
       .innerJoin(schema.threads, eq(schema.threads.id, schema.posts.threadId))
       .where(eq(schema.posts.id, postId))
       .get(),
-    'Nie znaleziono posta',
+    'ERRORS.POST_NOT_FOUND',
   );
   if (firstPostIdOf(post.threadId) === post.id) {
-    throw conflict('Pierwszego posta nie da się usunąć osobno — usuń cały temat');
+    throw conflict('ERRORS.FIRST_POST_NOT_REMOVABLE');
   }
   db.transaction((tx) => {
     tx.delete(schema.posts).where(eq(schema.posts.id, post.id)).run();

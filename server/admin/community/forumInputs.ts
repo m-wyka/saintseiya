@@ -1,7 +1,8 @@
 import { z } from 'zod';
+import { messageKey } from '#shared/utils/messages';
 
 const MAX_SORT_ORDER = 9999;
-const INVALID_SORT_ORDER = `Kolejność to liczba całkowita od 0 do ${MAX_SORT_ORDER}`;
+const INVALID_SORT_ORDER = messageKey('VALIDATION.SORT_ORDER_INVALID', { max: MAX_SORT_ORDER });
 
 export const forumSortOrderSchema = z
   .number(INVALID_SORT_ORDER)

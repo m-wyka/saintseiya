@@ -11,13 +11,15 @@ interface NewsCenterTab {
 
 const MAX_TABS = 8;
 
+const { t } = useI18n();
+
 const tabs = ref(await $fetch<NewsCenterTab[]>('/api/admin/settings/news-center'));
 const openedIndex = ref<number | null>(null);
 const toasts = useToastStore();
 const { isBusy, errorMessage, run } = useApiAction();
 
 const addTab = () => {
-  tabs.value = [...tabs.value, { title: 'Nowa zakładka', bodyHtml: '' }];
+  tabs.value = [...tabs.value, { title: t('ADMIN_SETTINGS.NEW_TAB_TITLE'), bodyHtml: '' }];
   openedIndex.value = tabs.value.length - 1;
 };
 
@@ -36,23 +38,23 @@ const save = async () => {
     apiRequest('/api/admin/settings/news-center', { method: 'PUT', body: { tabs: tabs.value } }),
   );
   if (wasSaved) {
-    toasts.success('Zapisano ustawienia');
+    toasts.success(t('ADMIN_SETTINGS.SAVED'));
   }
 };
 
-useSeoMeta({ title: 'Ustawienia' });
+useSeoMeta({ title: () => t('ADMIN_NAV.SETTINGS') });
 </script>
 
 <template>
   <form @submit.self.prevent="save">
-    <AdminHeader title="Ustawienia" subtitle="News Center — zakładki z wyróżnionymi treściami na stronie głównej.">
+    <AdminHeader :title="t('ADMIN_NAV.SETTINGS')" :subtitle="t('ADMIN_SETTINGS.SUBTITLE')">
       <BaseButton variant="secondary" :disabled="tabs.length >= MAX_TABS" @click="addTab">
         <AppIcon name="plus" />
-        Dodaj zakładkę
+        {{ t('ADMIN_SETTINGS.ADD_TAB') }}
       </BaseButton>
       <BaseButton type="submit" :busy="isBusy">
         <AppIcon name="check" />
-        Zapisz
+        {{ t('GENERAL.SAVE') }}
       </BaseButton>
     </AdminHeader>
 
@@ -77,23 +79,23 @@ useSeoMeta({ title: 'Ustawienia' });
           />
           <BaseButton variant="ghost" size="sm" @click="openedIndex = openedIndex === index ? null : index">
             <AppIcon name="edit" />
-            {{ openedIndex === index ? 'Zwiń' : 'Edytuj' }}
+            {{ openedIndex === index ? t('ADMIN_SETTINGS.COLLAPSE') : t('GENERAL.EDIT') }}
           </BaseButton>
           <ConfirmButton @confirm="removeTab(index)" />
         </div>
         <div v-if="openedIndex === index" class="flex flex-col gap-4 border-t border-aqua-500/15 p-4">
-          <BaseInput v-model="tab.title" label="Tytuł zakładki" :maxlength="40" required />
+          <BaseInput v-model="tab.title" :label="t('ADMIN_SETTINGS.TAB_TITLE')" :maxlength="40" required />
           <div class="flex flex-col gap-1.5">
-            <p class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">Treść</p>
+            <p class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">{{ t('GENERAL.CONTENT') }}</p>
             <ClientOnly
-              ><RichTextEditor v-model="tab.bodyHtml" label="Treść zakładki" extended allows-upload
+              ><RichTextEditor v-model="tab.bodyHtml" :label="t('ADMIN_SETTINGS.TAB_CONTENT')" extended allows-upload
             /></ClientOnly>
           </div>
         </div>
       </li>
     </ol>
     <p v-else class="panel px-6 py-10 text-center text-sm text-aqua-300">
-      News Center jest pusty — blok nie pokazuje się na stronie głównej. Dodaj pierwszą zakładkę.
+      {{ t('ADMIN_SETTINGS.EMPTY') }}
     </p>
   </form>
 </template>

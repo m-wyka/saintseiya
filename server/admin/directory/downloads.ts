@@ -5,8 +5,8 @@ import type { StoredFile } from '../../utils/uploads';
 const BAD_REQUEST = 400;
 
 const inputSchema = z.object({
-  title: z.string().trim().min(2, 'Tytuł jest za krótki').max(200, 'Tytuł jest za długi'),
-  description: z.string().trim().max(1000, 'Opis jest za długi').default(''),
+  title: z.string().trim().min(2, 'VALIDATION.TITLE_TOO_SHORT').max(200, 'VALIDATION.TITLE_TOO_LONG'),
+  description: z.string().trim().max(1000, 'VALIDATION.DESCRIPTION_TOO_LONG').default(''),
 });
 
 type DownloadDetails = z.infer<typeof inputSchema>;
@@ -42,7 +42,7 @@ export const downloadsResource = defineAdminResource({
       .all(),
   find: findDownload,
   create: () => {
-    throw createError({ statusCode: BAD_REQUEST, statusMessage: 'Nowy plik dodaje się, wgrywając go z dysku' });
+    throw createError({ statusCode: BAD_REQUEST, statusMessage: 'ERRORS.DOWNLOAD_REQUIRES_UPLOAD' });
   },
   update: (id, input) => {
     useDb().update(schema.downloads).set(input).where(eq(schema.downloads.id, id)).run();

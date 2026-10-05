@@ -18,6 +18,7 @@ import { linkDirectory, listDownloads } from '../../server/utils/directory';
 import { siteLayout } from '../../server/utils/layout';
 import { listPolls } from '../../server/utils/polls';
 import { listVideoCategories, listVideos } from '../../server/utils/videos';
+import { messageKey } from '../../shared/utils/messages';
 import { withMovedItem } from '../../shared/utils/ordering';
 import { createAccount, createPoll, resetDatabase } from './fixtures';
 
@@ -114,14 +115,18 @@ describe('video administration', () => {
     const video = { title: 'Pegasus Fantasy', description: '', categoryId: category.id, youtubeId: 'dQw4w9WgXcQ' };
 
     expect(() => videosResource.create({ ...video, youtubeId: 'https://vimeo.com/123456789' }, editor)).toThrowError(
-      /YouTube/,
+      'VALIDATION.YOUTUBE_VIDEO_REQUIRED',
     );
-    expect(() => videosResource.create({ ...video, youtubeId: 'za-krotkie' }, editor)).toThrowError(/YouTube/);
-    expect(() => videosResource.create({ ...video, youtubeId: '' }, editor)).toThrowError(/YouTube/);
+    expect(() => videosResource.create({ ...video, youtubeId: 'za-krotkie' }, editor)).toThrowError(
+      'VALIDATION.YOUTUBE_VIDEO_REQUIRED',
+    );
+    expect(() => videosResource.create({ ...video, youtubeId: '' }, editor)).toThrowError(
+      'VALIDATION.YOUTUBE_VIDEO_REQUIRED',
+    );
     expect(() => videosResource.create({ ...video, categoryId: category.id + 1 }, editor)).toThrowError(
-      /Wybierz kategorię/,
+      'VALIDATION.CATEGORY_REQUIRED',
     );
-    expect(() => videosResource.create({ ...video, title: 'A' }, editor)).toThrowError(/Tytuł jest za krótki/);
+    expect(() => videosResource.create({ ...video, title: 'A' }, editor)).toThrowError('VALIDATION.TITLE_TOO_SHORT');
   });
 
   it('updates a video and finds it by title', () => {
@@ -156,7 +161,7 @@ describe('video administration', () => {
     );
     createComment('video', id, editor, '<p>Komentarz</p>');
 
-    expect(() => videoCategoriesResource.remove(category.id, editor)).toThrowError(/są filmy/);
+    expect(() => videoCategoriesResource.remove(category.id, editor)).toThrowError('ERRORS.VIDEO_CATEGORY_HAS_VIDEOS');
 
     videosResource.remove(id, editor);
     videoCategoriesResource.remove(category.id, editor);
@@ -195,10 +200,10 @@ describe('link administration', () => {
     const link = { title: 'Strona', description: '', url: 'https://example.com/', categoryId: category.id };
 
     ['javascript:alert(1)', 'ftp://example.com/plik', 'example.com', '/linki', ''].forEach((url) =>
-      expect(() => linksResource.create({ ...link, url }, editor)).toThrowError(/http:\/\/ lub https:\/\//),
+      expect(() => linksResource.create({ ...link, url }, editor)).toThrowError('VALIDATION.WEB_URL_REQUIRED'),
     );
     expect(() => linksResource.create({ ...link, categoryId: category.id + 1 }, editor)).toThrowError(
-      /Wybierz kategorię/,
+      'VALIDATION.CATEGORY_REQUIRED',
     );
   });
 
@@ -223,7 +228,7 @@ describe('link administration', () => {
 
     const byAddress = linksResource.list({ ...EVERYTHING, search: 'wiki.example' }) as { items: { title: string }[] };
     expect(byAddress.items.map((link) => link.title)).toEqual(['Saint Seiya Wiki']);
-    expect(() => linkCategoriesResource.remove(category.id, editor)).toThrowError(/są linki/);
+    expect(() => linkCategoriesResource.remove(category.id, editor)).toThrowError('ERRORS.LINK_CATEGORY_HAS_LINKS');
 
     linksResource.remove(id, editor);
     linkCategoriesResource.remove(category.id, editor);
@@ -251,8 +256,10 @@ describe('download administration', () => {
   });
 
   it('requires a title and an uploaded file', () => {
-    expect(() => downloadDetailsFrom({ title: 'A', description: '' })).toThrowError(/Tytuł jest za krótki/);
-    expect(() => downloadsResource.create({ title: 'Napisy PL', description: '' }, admin())).toThrowError(/wgrywając/);
+    expect(() => downloadDetailsFrom({ title: 'A', description: '' })).toThrowError('VALIDATION.TITLE_TOO_SHORT');
+    expect(() => downloadsResource.create({ title: 'Napisy PL', description: '' }, admin())).toThrowError(
+      'ERRORS.DOWNLOAD_REQUIRES_UPLOAD',
+    );
   });
 });
 
@@ -276,10 +283,10 @@ describe('poll administration', () => {
     const create = (options: { label: string }[]) =>
       pollsResource.create({ question: 'Ulubiona saga?', options }, editor);
 
-    expect(() => create(labelled(1))).toThrowError(/co najmniej 2/);
-    expect(() => create(labelled(11))).toThrowError(/najwyżej 10/);
-    expect(() => create([{ label: 'Hades' }, { label: '  ' }])).toThrowError(/nie może być pusta/);
-    expect(() => create([{ label: 'Hades' }, { label: 'hades' }])).toThrowError(/nie mogą się powtarzać/);
+    expect(() => create(labelled(1))).toThrowError(messageKey('VALIDATION.POLL_TOO_FEW_OPTIONS', { min: 2 }));
+    expect(() => create(labelled(11))).toThrowError(messageKey('VALIDATION.POLL_TOO_MANY_OPTIONS', { max: 10 }));
+    expect(() => create([{ label: 'Hades' }, { label: '  ' }])).toThrowError('VALIDATION.POLL_OPTION_EMPTY');
+    expect(() => create([{ label: 'Hades' }, { label: 'hades' }])).toThrowError('VALIDATION.POLL_OPTIONS_NOT_DISTINCT');
     expect(create(labelled(10)).id).toBeGreaterThan(0);
   });
 
@@ -327,7 +334,7 @@ describe('poll administration', () => {
         },
         admin(),
       ),
-    ).toThrowError(/zmieniła się/);
+    ).toThrowError('ERRORS.POLL_CHANGED');
     expect(storedPoll(poll.id)).toMatchObject({
       question: 'Ulubiony rycerz?',
       options: [{ label: 'Seiya' }, { label: 'Shiryu' }],
@@ -341,7 +348,7 @@ describe('poll administration', () => {
 
     pollsResource.update(poll.id, { ...kept, isClosed: true }, editor);
     expect(storedPoll(poll.id)).toMatchObject({ isClosed: true, endedAt: poll.endedAt });
-    expect(() => castPollVote(poll.id, options[0]!.id, createAccount())).toThrowError(/zakończona/);
+    expect(() => castPollVote(poll.id, options[0]!.id, createAccount())).toThrowError('ERRORS.POLL_UNAVAILABLE');
 
     pollsResource.update(poll.id, { ...kept, isClosed: false }, editor);
     expect(storedPoll(poll.id)).toMatchObject({ isClosed: false, endedAt: null });
@@ -413,12 +420,16 @@ describe('navigation administration', () => {
     expect(findNavigationLink(internal.id)).toMatchObject({ groupTitle: null, url: '/forum' });
     expect(findNavigationLink(external.id)).toMatchObject({ groupTitle: 'Partnerzy', url: 'https://example.com/' });
     ['forum', '//example.com', '/\\example.com', 'javascript:alert(1)', 'mailto:a@example.com', ''].forEach((url) =>
-      expect(() => navigationLinksResource.create({ ...link, url }, editor)).toThrowError(/Adres zaczyna się od/),
+      expect(() => navigationLinksResource.create({ ...link, url }, editor)).toThrowError(
+        'VALIDATION.INTERNAL_OR_WEB_URL_REQUIRED',
+      ),
     );
     expect(() => navigationLinksResource.create({ ...link, sectionId: section.id + 1 }, editor)).toThrowError(
-      /Wybierz sekcję/,
+      'VALIDATION.SECTION_REQUIRED',
     );
-    expect(() => navigationLinksResource.create({ ...link, label: ' ' }, editor)).toThrowError(/Podaj nazwę/);
+    expect(() => navigationLinksResource.create({ ...link, label: ' ' }, editor)).toThrowError(
+      'VALIDATION.LINK_LABEL_REQUIRED',
+    );
   });
 
   it('moves sections and links one place at a time', () => {
@@ -483,6 +494,6 @@ describe('navigation administration', () => {
 
     expect(menu()).toEqual([['Portal', []]]);
     expect(navigationLinksResource.list(EVERYTHING)).toEqual([]);
-    expect(() => navigationSectionsResource.create({ title: 'A' }, editor)).toThrowError(/Tytuł jest za krótki/);
+    expect(() => navigationSectionsResource.create({ title: 'A' }, editor)).toThrowError('VALIDATION.TITLE_TOO_SHORT');
   });
 });

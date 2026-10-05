@@ -7,6 +7,7 @@ defineProps<{ label: string; hint?: string }>();
 
 const { isBusy, errorMessage, run } = useApiAction();
 const fileInput = ref<HTMLInputElement | null>(null);
+const { t } = useI18n();
 
 const upload = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
@@ -52,11 +53,11 @@ const upload = async (event: Event) => {
         />
         <BaseButton variant="secondary" size="sm" :busy="isBusy" @click="fileInput?.click()">
           <AppIcon name="plus" />
-          {{ storedPath ? 'Zmień obrazek' : 'Wgraj obrazek' }}
+          {{ storedPath ? t('ADMIN_FORMS.IMAGE_CHANGE') : t('ADMIN_FORMS.IMAGE_UPLOAD') }}
         </BaseButton>
         <BaseButton v-if="storedPath" variant="ghost" size="sm" @click="storedPath = null">
           <AppIcon name="trash" />
-          Usuń obrazek
+          {{ t('ADMIN_FORMS.IMAGE_REMOVE') }}
         </BaseButton>
       </div>
     </div>

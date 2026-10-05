@@ -18,6 +18,8 @@ interface LinkRow {
 
 const NEW_SECTION_FORM = 'new-section';
 
+const { t } = useI18n();
+
 const sectionFormOf = (sectionId: number) => `section-${sectionId}`;
 const newLinkFormOf = (sectionId: number) => `new-link-${sectionId}`;
 const linkFormOf = (linkId: number) => `link-${linkId}`;
@@ -64,20 +66,20 @@ const move = async (kind: 'sections' | 'links', id: number, direction: MoveDirec
   }
 };
 
-useSeoMeta({ title: 'Nawigacja' });
+useSeoMeta({ title: () => t('ADMIN_NAV.NAVIGATION') });
 </script>
 
 <template>
   <div>
-    <AdminHeader title="Nawigacja" subtitle="Lewe menu portalu: sekcje i ich odnośniki.">
+    <AdminHeader :title="t('ADMIN_NAV.NAVIGATION')" :subtitle="t('ADMIN_NAVIGATION.SUBTITLE')">
       <BaseButton @click="openForm = NEW_SECTION_FORM">
         <AppIcon name="plus" />
-        Dodaj sekcję
+        {{ t('ADMIN_NAVIGATION.ADD_SECTION') }}
       </BaseButton>
     </AdminHeader>
 
     <div v-if="openForm === NEW_SECTION_FORM" class="mb-6 animate-rise panel p-5">
-      <h2 class="mb-4 heading-display text-lg text-gold-300">Dodaj sekcję</h2>
+      <h2 class="mb-4 heading-display text-lg text-gold-300">{{ t('ADMIN_NAVIGATION.ADD_SECTION') }}</h2>
       <NavigationSectionForm :section="null" @saved="showSaved" @cancel="closeForm" />
     </div>
 
@@ -105,13 +107,16 @@ useSeoMeta({ title: 'Nawigacja' });
             />
             <BaseButton variant="ghost" size="sm" @click="openForm = newLinkFormOf(section.id)">
               <AppIcon name="plus" />
-              Dodaj odnośnik
+              {{ t('ADMIN_NAVIGATION.ADD_LINK') }}
             </BaseButton>
             <BaseButton variant="ghost" size="sm" @click="openForm = sectionFormOf(section.id)">
               <AppIcon name="edit" />
-              Edytuj
+              {{ t('GENERAL.EDIT') }}
             </BaseButton>
-            <ConfirmButton confirm-label="Usunąć z odnośnikami?" @confirm="removeSection(section.id)" />
+            <ConfirmButton
+              :confirm-label="t('ADMIN_NAVIGATION.CONFIRM_REMOVE_SECTION')"
+              @confirm="removeSection(section.id)"
+            />
           </div>
         </div>
       </header>
@@ -151,7 +156,7 @@ useSeoMeta({ title: 'Nawigacja' });
               />
               <BaseButton variant="ghost" size="sm" @click="openForm = linkFormOf(link.id)">
                 <AppIcon name="edit" />
-                Edytuj
+                {{ t('GENERAL.EDIT') }}
               </BaseButton>
               <ConfirmButton @confirm="removeLink(link.id)" />
             </div>
@@ -170,12 +175,12 @@ useSeoMeta({ title: 'Nawigacja' });
         v-if="!section.links.length && openForm !== newLinkFormOf(section.id)"
         class="px-4 py-6 text-center text-sm text-aqua-500"
       >
-        Ta sekcja nie ma jeszcze odnośników.
+        {{ t('ADMIN_NAVIGATION.SECTION_EMPTY') }}
       </p>
     </section>
 
     <p v-if="!sectionsWithLinks.length" class="panel px-4 py-10 text-center text-sm text-aqua-500">
-      Menu jest puste. Dodaj pierwszą sekcję.
+      {{ t('ADMIN_NAVIGATION.EMPTY') }}
     </p>
   </div>
 </template>

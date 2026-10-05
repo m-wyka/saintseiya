@@ -159,9 +159,9 @@ describe('page administration', () => {
     editPage(page, { bodyHtml: '<p>Nowa<iframe src="https://evil.example/x"></iframe></p>' });
 
     expect(storedPage(page).bodyHtml).toBe('<p>Nowa</p>');
-    expect(() => addPage('   ')).toThrowError(/Podaj tytuł strony/);
-    expect(() => addPage('Ataki', null, { slug: 'Zły Adres' })).toThrowError(/małe litery/);
-    expect(() => addPage('Ataki', 999_999)).toThrowError(/strona nadrzędna nie istnieje/);
+    expect(() => addPage('   ')).toThrowError('VALIDATION.PAGE_TITLE_REQUIRED');
+    expect(() => addPage('Ataki', null, { slug: 'Zły Adres' })).toThrowError('VALIDATION.SLUG_INVALID');
+    expect(() => addPage('Ataki', 999_999)).toThrowError('ERRORS.PARENT_PAGE_NOT_FOUND');
   });
 
   it('recomputes the address of a page and all its descendants when the slug changes', () => {
@@ -223,9 +223,9 @@ describe('page administration', () => {
     const greek = addPage('Grecka', root);
     const gods = addPage('Bogowie', greek);
 
-    expect(() => editPage(root, { parentId: root })).toThrowError(/nie może być podstroną samej siebie/);
-    expect(() => editPage(root, { parentId: gods })).toThrowError(/nie może być podstroną samej siebie/);
-    expect(() => editPage(greek, { parentId: gods, slug: 'inna' })).toThrowError(/żadnej ze swoich podstron/);
+    expect(() => editPage(root, { parentId: root })).toThrowError('ERRORS.PAGE_PARENT_CYCLE');
+    expect(() => editPage(root, { parentId: gods })).toThrowError('ERRORS.PAGE_PARENT_CYCLE');
+    expect(() => editPage(greek, { parentId: gods, slug: 'inna' })).toThrowError('ERRORS.PAGE_PARENT_CYCLE');
     expect([root, greek, gods].map(pathOf)).toEqual(['mitologia', 'mitologia/grecka', 'mitologia/grecka/bogowie']);
     expect(storedPage(root).parentId).toBeNull();
   });
@@ -318,7 +318,7 @@ describe('page administration', () => {
     const greek = addPage('Grecka', root);
     const editor = createAccount({ role: 'admin' });
 
-    expect(() => pagesResource.remove(root, editor)).toThrowError(/Najpierw przenieś je lub usuń/);
+    expect(() => pagesResource.remove(root, editor)).toThrowError('ERRORS.PAGE_HAS_CHILDREN');
     expect(pagesResource.find(root)).toBeDefined();
 
     pagesResource.remove(greek, editor);
@@ -393,7 +393,7 @@ describe('page administration', () => {
       ],
     });
     expect(listPageLevel(greek).breadcrumbs.map((crumb) => crumb.title)).toEqual(['Mitologia', 'Grecka']);
-    expect(() => listPageLevel(999_999)).toThrowError(/Nie znaleziono strony/);
+    expect(() => listPageLevel(999_999)).toThrowError('ERRORS.PAGE_NOT_FOUND');
   });
 
   it('searches all pages by title and shows their full address', () => {
@@ -466,7 +466,9 @@ describe('album administration', () => {
     expect(albumsResource.find(first.id)).toMatchObject({ slug: 'fan-arty', description: 'Prace fanów', sortOrder: 3 });
     expect(albumsResource.find(second.id)).toMatchObject({ slug: 'fan-arty-2' });
     expect(albumsResource.find(reserved.id)).toMatchObject({ slug: 'zdjecie-2' });
-    expect(() => albumsResource.create({ ...albumInput, title: 'A' }, editor)).toThrowError(/Tytuł jest za krótki/);
+    expect(() => albumsResource.create({ ...albumInput, title: 'A' }, editor)).toThrowError(
+      'VALIDATION.TITLE_TOO_SHORT',
+    );
   });
 
   it('updates an album and keeps its own address', () => {
@@ -495,7 +497,7 @@ describe('album administration', () => {
     const album = createAlbum();
     const photo = createPhoto(album.id);
 
-    expect(() => albumsResource.remove(album.id, editor)).toThrowError(/Najpierw usuń wszystkie zdjęcia/);
+    expect(() => albumsResource.remove(album.id, editor)).toThrowError('ERRORS.ALBUM_HAS_PHOTOS');
     expect(albumsResource.find(album.id)).toBeDefined();
 
     await removePhoto(event, photo.id);
@@ -538,9 +540,11 @@ describe('photo administration', () => {
     const album = createAlbum();
     const notAnImage: MultiPartData = { name: 'file', filename: 'wirus.png', data: Buffer.from('<?php echo 1;') };
 
-    await expect(uploadPhotos(event, album.id, [notAnImage], uploader)).rejects.toThrowError(/Dozwolone formaty/);
+    await expect(uploadPhotos(event, album.id, [notAnImage], uploader)).rejects.toThrowError(
+      'ERRORS.IMAGE_FORMAT_NOT_ALLOWED',
+    );
     await expect(uploadPhotos(event, 999_999, [await imageUpload('a.png')], uploader)).rejects.toThrowError(
-      /Nie znaleziono albumu/,
+      'ERRORS.ALBUM_NOT_FOUND',
     );
     expect(useDb().select().from(schema.photos).all()).toHaveLength(0);
   });
@@ -554,7 +558,7 @@ describe('photo administration', () => {
     expect(listAlbumPhotos(album.id).photos).toEqual([
       expect.objectContaining({ id: photo.id, title: 'Pegasus Seiya', description: 'Brązowy rycerz' }),
     ]);
-    expect(() => updatePhoto(999_999, { title: 'Brak' })).toThrowError(/Nie znaleziono zdjęcia/);
+    expect(() => updatePhoto(999_999, { title: 'Brak' })).toThrowError('ERRORS.PHOTO_NOT_FOUND');
     expect(() => updatePhoto(photo.id, { title: 'x'.repeat(201) })).toThrowError();
   });
 
@@ -582,7 +586,7 @@ describe('photo administration', () => {
         .all()
         .map((comment) => comment.targetId),
     ).toEqual([kept!.id]);
-    await expect(removePhoto(event, removed!.id)).rejects.toThrowError(/Nie znaleziono zdjęcia/);
+    await expect(removePhoto(event, removed!.id)).rejects.toThrowError('ERRORS.PHOTO_NOT_FOUND');
   });
 
   it('sets a photo as the album cover and clears the cover when that photo is deleted', async () => {
@@ -604,7 +608,7 @@ describe('photo administration', () => {
     await removePhoto(event, cover.id);
 
     expect(listAlbumPhotos(album.id).album.coverImage).toBeNull();
-    expect(() => setAlbumCover(cover.id)).toThrowError(/Nie znaleziono zdjęcia/);
+    expect(() => setAlbumCover(cover.id)).toThrowError('ERRORS.PHOTO_NOT_FOUND');
   });
 
   it('moves a photo left and right within its album and keeps the order gap-free', () => {
@@ -629,6 +633,6 @@ describe('photo administration', () => {
 
     expect(photoOrder(album.id).map((photo) => photo.title)).toEqual(['B', 'A', 'C']);
     expect(photoOrder(other.id)).toEqual([{ title: 'Obca', sortOrder: 9 }]);
-    expect(() => movePhoto(foreign.id + 1000, 'next')).toThrowError(/Nie znaleziono zdjęcia/);
+    expect(() => movePhoto(foreign.id + 1000, 'next')).toThrowError('ERRORS.PHOTO_NOT_FOUND');
   });
 });

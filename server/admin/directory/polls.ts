@@ -1,5 +1,6 @@
 import { and, asc, count, desc, eq, inArray, isNotNull, isNull, like, sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { messageKey } from '#shared/utils/messages';
 import { MAX_POLL_OPTIONS, MIN_POLL_OPTIONS } from '#shared/utils/pollLimits';
 import type { Tx } from '../../db';
 
@@ -7,7 +8,7 @@ const POLLS_PAGE_SIZE = 20;
 
 const optionSchema = z.object({
   id: z.number().int().positive().nullable().default(null),
-  label: z.string().trim().min(1, 'Odpowiedź nie może być pusta').max(200, 'Odpowiedź jest za długa'),
+  label: z.string().trim().min(1, 'VALIDATION.POLL_OPTION_EMPTY').max(200, 'VALIDATION.POLL_OPTION_TOO_LONG'),
 });
 
 type PollOptionInput = z.infer<typeof optionSchema>;
@@ -23,13 +24,17 @@ const hasDistinctLabels = (options: PollOptionInput[]): boolean =>
   new Set(options.map((option) => option.label.toLocaleLowerCase('pl'))).size === options.length;
 
 const inputSchema = z.object({
-  question: z.string().trim().min(5, 'Pytanie jest za krótkie').max(300, 'Pytanie jest za długie'),
+  question: z
+    .string()
+    .trim()
+    .min(5, 'VALIDATION.POLL_QUESTION_TOO_SHORT')
+    .max(300, 'VALIDATION.POLL_QUESTION_TOO_LONG'),
   options: z
     .array(optionSchema)
-    .min(MIN_POLL_OPTIONS, `Ankieta potrzebuje co najmniej ${MIN_POLL_OPTIONS} odpowiedzi`)
-    .max(MAX_POLL_OPTIONS, `Ankieta może mieć najwyżej ${MAX_POLL_OPTIONS} odpowiedzi`)
-    .refine(hasEachStoredOptionOnce, 'Ta sama odpowiedź jest na liście dwa razy')
-    .refine(hasDistinctLabels, 'Odpowiedzi nie mogą się powtarzać'),
+    .min(MIN_POLL_OPTIONS, messageKey('VALIDATION.POLL_TOO_FEW_OPTIONS', { min: MIN_POLL_OPTIONS }))
+    .max(MAX_POLL_OPTIONS, messageKey('VALIDATION.POLL_TOO_MANY_OPTIONS', { max: MAX_POLL_OPTIONS }))
+    .refine(hasEachStoredOptionOnce, 'VALIDATION.POLL_OPTION_LISTED_TWICE')
+    .refine(hasDistinctLabels, 'VALIDATION.POLL_OPTIONS_NOT_DISTINCT'),
   isClosed: z.boolean().default(false),
 });
 
@@ -87,7 +92,7 @@ const replaceOptions = (tx: Tx, pollId: number, options: PollOptionInput[]) => {
   const storedIds = storedOptionIdsOf(tx, pollId);
   const keptIds = storedIdsOf(options);
   if (keptIds.some((id) => !storedIds.includes(id))) {
-    throw conflict('Ankieta zmieniła się w międzyczasie. Odśwież stronę i spróbuj ponownie.');
+    throw conflict('ERRORS.POLL_CHANGED');
   }
   removeDroppedOptions(tx, storedIds, keptIds);
   options.forEach((option, sortOrder) => storeOption(tx, pollId, option, sortOrder));

@@ -1,5 +1,5 @@
 export const VISIBILITY_FILTERS = [
-  { value: '', label: 'Wszystkie' },
-  { value: 'visible', label: 'Widoczne' },
-  { value: 'hidden', label: 'Ukryte' },
+  { value: '', labelKey: 'GENERAL.ALL' },
+  { value: 'visible', labelKey: 'GENERAL.VISIBLE' },
+  { value: 'hidden', labelKey: 'GENERAL.HIDDEN' },
 ];

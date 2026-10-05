@@ -13,19 +13,25 @@ interface CommentRow {
   target: { title: string; url: string } | null;
 }
 
-const TARGET_KIND_LABELS: Record<CommentTarget, string> = {
-  news: 'News',
-  page: 'Podstrona',
-  photo: 'Zdjęcie',
-  video: 'Film',
+const TARGET_KIND_LABEL_KEYS: Record<CommentTarget, string> = {
+  news: 'ADMIN_COMMENTS.TARGET_NEWS',
+  page: 'ADMIN_COMMENTS.TARGET_PAGE',
+  photo: 'ADMIN_COMMENTS.TARGET_PHOTO',
+  video: 'ADMIN_COMMENTS.TARGET_VIDEO',
 };
-const COLUMNS = [
-  { key: 'author', label: 'Autor' },
-  { key: 'target', label: 'Dotyczy' },
-  { key: 'excerpt', label: 'Treść' },
-  { key: 'createdAt', label: 'Data' },
-  { key: 'isHidden', label: 'Widoczność' },
-];
+
+const { t } = useI18n();
+
+const columns = computed(() => [
+  { key: 'author', label: t('GENERAL.AUTHOR') },
+  { key: 'target', label: t('ADMIN_COMMENTS.TARGET') },
+  { key: 'excerpt', label: t('GENERAL.CONTENT') },
+  { key: 'createdAt', label: t('GENERAL.DATE') },
+  { key: 'isHidden', label: t('ADMIN_COMMENTS.VISIBILITY') },
+]);
+const visibilityOptions = computed(() =>
+  VISIBILITY_FILTERS.map(({ value, labelKey }) => ({ value, label: t(labelKey) })),
+);
 
 const { rows, page, pageCount, total, search, filter, isLoading, refresh, remove } =
   useAdminList<CommentRow>('comments');
@@ -34,40 +40,51 @@ const moderate = useModerationAction();
 const setHidden = async (comment: CommentRow, isHidden: boolean) => {
   const wasChanged = await moderate(
     () => apiRequest(`/api/admin/comments/${comment.id}/visibility`, { method: 'PATCH', body: { isHidden } }),
-    isHidden ? 'Komentarz ukryty' : 'Komentarz znów widoczny',
+    isHidden ? t('ADMIN_COMMENTS.HIDDEN_TOAST') : t('ADMIN_COMMENTS.VISIBLE_TOAST'),
   );
   if (wasChanged) {
     await refresh();
   }
 };
 
-useSeoMeta({ title: 'Komentarze' });
+useSeoMeta({ title: () => t('ADMIN_NAV.COMMENTS') });
 </script>
 
 <template>
   <div>
-    <AdminHeader title="Komentarze" :subtitle="pluralize(total, 'komentarz', 'komentarze', 'komentarzy')">
-      <BaseInput v-model="search" type="search" label="Szukaj" placeholder="Szukaj w treści…" hide-label class="w-56" />
-      <BaseSelect v-model="filter" label="Widoczność" :options="VISIBILITY_FILTERS" hide-label class="w-40" />
+    <AdminHeader
+      :title="t('ADMIN_NAV.COMMENTS')"
+      :subtitle="t('ADMIN_COMMENTS.COMMENT_COUNT', { count: formatNumber(total) }, total)"
+    >
+      <BaseInput
+        v-model="search"
+        type="search"
+        :label="t('GENERAL.SEARCH')"
+        :placeholder="t('ADMIN_COMMENTS.SEARCH_PLACEHOLDER')"
+        hide-label
+        class="w-56"
+      />
+      <BaseSelect
+        v-model="filter"
+        :label="t('ADMIN_COMMENTS.VISIBILITY')"
+        :options="visibilityOptions"
+        hide-label
+        class="w-40"
+      />
     </AdminHeader>
 
-    <AdminTable
-      :columns="COLUMNS"
-      :rows="rows"
-      :is-loading="isLoading"
-      empty-message="Brak komentarzy do wyświetlenia."
-    >
+    <AdminTable :columns="columns" :rows="rows" :is-loading="isLoading" :empty-message="t('ADMIN_COMMENTS.EMPTY')">
       <template #cell-author="{ row }">
         <AuthorName :author="row.author" />
       </template>
       <template #cell-target="{ row }">
         <span class="block text-[0.7rem] tracking-wide text-aqua-500 uppercase">
-          {{ TARGET_KIND_LABELS[row.targetKind] }}
+          {{ t(TARGET_KIND_LABEL_KEYS[row.targetKind]) }}
         </span>
-        <NuxtLink v-if="row.target" :to="row.target.url" class="font-semibold text-gold-300 hover:text-cosmo-400">
+        <NuxtLinkLocale v-if="row.target" :to="row.target.url" class="font-semibold text-gold-300 hover:text-cosmo-400">
           {{ row.target.title }}
-        </NuxtLink>
-        <span v-else class="text-aqua-500">Treść niedostępna publicznie</span>
+        </NuxtLinkLocale>
+        <span v-else class="text-aqua-500">{{ t('ADMIN_COMMENTS.TARGET_UNAVAILABLE') }}</span>
       </template>
       <template #cell-excerpt="{ row }">
         <span class="line-clamp-3 max-w-md">{{ row.excerpt }}</span>
@@ -81,7 +98,7 @@ useSeoMeta({ title: 'Komentarze' });
       <template #actions="{ row }">
         <BaseButton variant="ghost" size="sm" @click="setHidden(row, !row.isHidden)">
           <AppIcon name="eye" />
-          {{ row.isHidden ? 'Pokaż' : 'Ukryj' }}
+          {{ row.isHidden ? t('ADMIN_COMMENTS.SHOW') : t('ADMIN_COMMENTS.HIDE') }}
         </BaseButton>
         <ConfirmButton @confirm="remove(row.id)" />
       </template>

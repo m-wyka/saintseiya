@@ -5,9 +5,9 @@ import { sortOrderSchema } from './inputs';
 const SLUG_FALLBACK = 'kategoria';
 
 const inputSchema = z.object({
-  name: z.string().trim().min(2, 'Nazwa jest za krótka').max(100, 'Nazwa jest za długa'),
+  name: z.string().trim().min(2, 'VALIDATION.NAME_TOO_SHORT').max(100, 'VALIDATION.NAME_TOO_LONG'),
   slug: slugInputSchema,
-  description: z.string().trim().max(500, 'Opis jest za długi').default(''),
+  description: z.string().trim().max(500, 'VALIDATION.DESCRIPTION_TOO_LONG').default(''),
   sortOrder: sortOrderSchema,
 });
 
@@ -69,7 +69,7 @@ export const videoCategoriesResource = defineAdminResource({
   },
   remove: (id) => {
     if (hasVideos(id)) {
-      throw conflict('W tej kategorii są filmy. Najpierw przenieś je lub usuń.');
+      throw conflict('ERRORS.VIDEO_CATEGORY_HAS_VIDEOS');
     }
     useDb().delete(schema.videoCategories).where(eq(schema.videoCategories.id, id)).run();
   },

@@ -4,19 +4,21 @@ import type { CrudColumn, CrudField } from '~/utils/crud';
 
 definePageMeta({ layout: 'admin' });
 
-const COLUMNS: CrudColumn[] = [
-  { key: 'coverImage', label: 'Okładka' },
-  { key: 'title', label: 'Tytuł' },
-  { key: 'slug', label: 'Adres' },
-  { key: 'photoCount', label: 'Zdjęć', alignsRight: true },
-  { key: 'sortOrder', label: 'Kolejność', alignsRight: true },
-];
-const FIELDS: CrudField[] = [
-  { key: 'title', label: 'Tytuł', kind: 'text', required: true },
-  { key: 'slug', label: 'Adres (slug)', kind: 'text', hint: 'Puste pole = adres utworzy się z tytułu' },
-  { key: 'description', label: 'Opis', kind: 'textarea' },
-  { key: 'sortOrder', label: 'Kolejność', kind: 'number', hint: 'Albumy z mniejszą liczbą są wyżej na liście' },
-];
+const { t } = useI18n();
+
+const columns = computed<CrudColumn[]>(() => [
+  { key: 'coverImage', label: t('ADMIN_GALLERY.COVER') },
+  { key: 'title', label: t('GENERAL.TITLE') },
+  { key: 'slug', label: t('GENERAL.ADDRESS') },
+  { key: 'photoCount', label: t('ADMIN_GALLERY.PHOTOS_COLUMN'), alignsRight: true },
+  { key: 'sortOrder', label: t('GENERAL.SORT_ORDER'), alignsRight: true },
+]);
+const fields = computed<CrudField[]>(() => [
+  { key: 'title', label: t('GENERAL.TITLE'), kind: 'text', required: true },
+  { key: 'slug', label: t('ADMIN_GALLERY.SLUG'), kind: 'text', hint: t('ADMIN_GALLERY.SLUG_HINT') },
+  { key: 'description', label: t('GENERAL.DESCRIPTION'), kind: 'textarea' },
+  { key: 'sortOrder', label: t('GENERAL.SORT_ORDER'), kind: 'number', hint: t('ADMIN_GALLERY.SORT_ORDER_HINT') },
+]);
 
 const photosPathOf = (row: { id: number }) => `/admin/galeria/${row.id}`;
 const coverOf = (row: object): string | null => (row as { coverImage?: string | null }).coverImage ?? null;
@@ -25,11 +27,11 @@ const coverOf = (row: object): string | null => (row as { coverImage?: string | 
 <template>
   <SimpleCrud
     resource="albums"
-    title="Galeria"
-    subtitle="Okładkę albumu wybierasz spośród jego zdjęć. Album można usunąć dopiero po usunięciu wszystkich jego zdjęć."
-    add-label="Dodaj album"
-    :columns="COLUMNS"
-    :fields="FIELDS"
+    :title="t('ADMIN_NAV.GALLERY')"
+    :subtitle="t('ADMIN_GALLERY.SUBTITLE')"
+    :add-label="t('ADMIN_GALLERY.ADD_ALBUM')"
+    :columns="columns"
+    :fields="fields"
     :empty-input="{ title: '', slug: '', description: '', sortOrder: 0 }"
   >
     <template #cell-coverImage="{ row }">
@@ -44,14 +46,14 @@ const coverOf = (row: object): string | null => (row as { coverImage?: string | 
       </span>
     </template>
     <template #cell-title="{ row }">
-      <NuxtLink :to="photosPathOf(row)" class="font-semibold text-gold-300 hover:text-cosmo-400">{{
+      <NuxtLinkLocale :to="photosPathOf(row)" class="font-semibold text-gold-300 hover:text-cosmo-400">{{
         cellText(row, 'title')
-      }}</NuxtLink>
+      }}</NuxtLinkLocale>
     </template>
     <template #row-actions="{ row }">
       <BaseButton :to="photosPathOf(row)" variant="ghost" size="sm">
         <AppIcon name="image" />
-        Zdjęcia
+        {{ t('ADMIN_GALLERY.PHOTOS') }}
       </BaseButton>
     </template>
   </SimpleCrud>

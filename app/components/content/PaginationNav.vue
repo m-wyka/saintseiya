@@ -3,6 +3,7 @@ const props = defineProps<{ page: number; pageCount: number }>();
 
 const NEIGHBOUR_COUNT = 2;
 const route = useRoute();
+const { t } = useI18n();
 
 const visiblePages = computed(() => {
   const pages = new Set([1, props.pageCount]);
@@ -20,10 +21,14 @@ const linkTo = (page: number) => ({ path: route.path, query: { ...route.query, p
 </script>
 
 <template>
-  <nav v-if="pageCount > 1" class="mt-8 flex flex-wrap items-center justify-center gap-1.5" aria-label="Stronicowanie">
+  <nav
+    v-if="pageCount > 1"
+    class="mt-8 flex flex-wrap items-center justify-center gap-1.5"
+    :aria-label="t('CONTENT.PAGINATION')"
+  >
     <template v-for="(candidate, index) in visiblePages" :key="candidate">
       <span v-if="hasGapBefore(index)" class="px-1 text-aqua-500" aria-hidden="true">…</span>
-      <NuxtLink
+      <NuxtLinkLocale
         :to="linkTo(candidate)"
         class="grid h-9 min-w-9 place-items-center rounded-full px-2 text-sm font-semibold transition duration-200"
         :class="
@@ -32,10 +37,10 @@ const linkTo = (page: number) => ({ path: route.path, query: { ...route.query, p
             : 'border border-aqua-500/30 text-aqua-200 hover:border-cosmo-500 hover:text-gold-300'
         "
         :aria-current="candidate === page ? 'page' : undefined"
-        :aria-label="`Strona ${candidate}`"
+        :aria-label="t('CONTENT.PAGE_NUMBER', { page: candidate })"
       >
         {{ candidate }}
-      </NuxtLink>
+      </NuxtLinkLocale>
     </template>
   </nav>
 </template>

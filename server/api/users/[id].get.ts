@@ -1,3 +1,1 @@
-export default defineEventHandler((event) =>
-  foundOr404(findProfile(requiredIdParam(event)), 'Nie znaleziono użytkownika'),
-);
+export default defineEventHandler((event) => foundOr404(findProfile(requiredIdParam(event)), 'ERRORS.USER_NOT_FOUND'));

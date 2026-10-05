@@ -25,6 +25,7 @@ export const useAdminList = <Row extends { id: number }>(resource: string) => {
   const filter = ref('');
   const settledSearch = debounced(search);
   const toasts = useToastStore();
+  const { t } = useI18n();
 
   watch([settledSearch, filter], () => (page.value = 1));
 
@@ -39,7 +40,7 @@ export const useAdminList = <Row extends { id: number }>(resource: string) => {
   const remove = async (id: number) => {
     try {
       await apiRequest(`/api/admin/${resource}/${id}`, { method: 'DELETE' });
-      toasts.success('Usunięto');
+      toasts.success(t('GENERAL.DELETED'));
       await refresh();
     } catch (error) {
       toasts.error(apiErrorMessage(error));

@@ -8,8 +8,8 @@ Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportow
 
 | Kontrola | Wynik | Kiedy |
 |---|---|---|
-| `pnpm check` (lint, format, typy, Vitest) | zielone, 256 testów w 21 plikach | po ostatniej zmianie kodu, na Windows |
-| `pnpm test:e2e` (Playwright) | zielone, 33 testy | po ostatniej zmianie kodu, na Windows |
+| `pnpm check` (lint, format, typy, Vitest) | zielone, 262 testy w 22 plikach | po ostatniej zmianie kodu, na Windows |
+| `pnpm test:e2e` (Playwright) | zielone, 34 testy | po ostatniej zmianie kodu, na Windows |
 | `pnpm build` | nie ponawiany w tej sesji | ostatnio przechodził w poprzedniej sesji (macOS) |
 
 - **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**). Cały kod jest na gałęzi `staging`. `main` ma tylko początkowy commit z pustym README i na razie go nie ruszamy; `staging` wyrasta z niego, więc da się je później scalić. `legacy/`, `.data/`, `.env` są ignorowane.
@@ -87,7 +87,21 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 - Tabele panelu — akcje wiersza są grupą z etykietą „Akcje: <nazwa wiersza>” (`AdminTable`).
 - `UserRoleForm` — podpowiedź mówiła o ponownym zalogowaniu; zmiana roli działa od najbliższego wczytania strony.
 
-**Angielska struktura plików** (czwarta sesja 2026-10-05) — pliki i katalogi w `app/pages` przemianowane na angielskie (`newsy/` → `news/`, `forum/dzial` → `forum/section`, `admin/uzytkownicy.vue` → `admin/users.vue` itd.). Adresy URL zostały polskie: tłumaczy je słownik `PAGE_FILE_SEGMENT_URLS` w `shared/utils/routes.ts` przez hook `pages:extend`. `pnpm check` i `pnpm test:e2e` zielone po zmianie; niezacommitowane.
+**Angielska struktura plików** (czwarta sesja 2026-10-05) — pliki i katalogi w `app/pages` przemianowane na angielskie (`newsy/` → `news/`, `forum/dzial` → `forum/section`, `admin/uzytkownicy.vue` → `admin/users.vue` itd.). Polskie adresy URL zostały.
+
+**i18n, etap 1 — teksty statyczne** (ta sama sesja; niezacommitowane):
+
+- `@nuxtjs/i18n` 10: `pl` domyślny bez prefiksu, `en` pod `/en` z angielskimi adresami (`/en/news`, `/en/forum/thread/1`, `/en/admin/users`). Przełącznik PL/EN w pasku górnym, `lang` i `hreflang` w nagłówku strony. Bez automatycznego przekierowania według języka przeglądarki.
+- 736 kluczy w `i18n/locales/pl.json` i `en.json` (płaskie `SEKCJA.NAZWA`), wyniesione ze stron, komponentów, panelu administratora i komunikatów serwera (serwer zwraca klucze `ERRORS.*` / `VALIDATION.*`). Daty i liczby formatowane według języka.
+- Typowane trasy (`experimental.typedPages`) wyłączone — kłóciły się z trasami i18n; parametry trasy czyta `useRouteParam()`.
+- Angielskie tłumaczenia napisał Claude — do przejrzenia przez Mateusza.
+
+**Etap 2 (nie zaczęty)** — treści z bazy i grafiki w wersjach PL/EN, wybór języka przy edycji w panelu. Do tego etapu należą też:
+
+- w wersji EN treści z bazy (newsy, podstrony, menu boczne, nazwy działów) są nadal po polsku, a ich adresy mają polskie slugi (`/en/mitologia/grecka`);
+- odnośniki wewnątrz treści HTML i odnośnik „permalink” posta (`/forum/post/<id>`) prowadzą na polskie adresy, więc z wersji EN przełączają na PL;
+- po logowaniu Google i w razie jego błędu użytkownik wraca na polską stronę główną;
+- tytuł `Film YouTube` wstawiany do osadzonych filmów przy zapisie treści oraz domyślne komunikaty Zod (reguły bez własnego tekstu) nie są tłumaczone.
 
 ## Co jest zrobione
 

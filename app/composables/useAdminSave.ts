@@ -1,6 +1,7 @@
 export const useAdminSave = (resource: string) => {
   const { isBusy, errorMessage, run } = useApiAction();
   const toasts = useToastStore();
+  const { t } = useI18n();
 
   const save = async (id: number | null, input: Record<string, unknown>): Promise<boolean> => {
     const wasSaved = await run(() =>
@@ -9,7 +10,7 @@ export const useAdminSave = (resource: string) => {
         : apiRequest(`/api/admin/${resource}/${id}`, { method: 'PUT', body: input }),
     );
     if (wasSaved) {
-      toasts.success('Zapisano');
+      toasts.success(t('GENERAL.SAVED'));
     }
     return wasSaved;
   };

@@ -8,12 +8,12 @@ import type { AdminListQuery } from '../../utils/adminResource';
 const USERS_PAGE_SIZE = 30;
 const FORBIDDEN = 403;
 
-export const banInputSchema = z.object({ isBanned: z.boolean('Podaj, czy konto ma być zablokowane') });
+export const banInputSchema = z.object({ isBanned: z.boolean('VALIDATION.BAN_FLAG_REQUIRED') });
 
 export const roleInputSchema = z.object({
-  role: z.enum(USER_ROLES, 'Nieznana rola'),
+  role: z.enum(USER_ROLES, 'VALIDATION.ROLE_UNKNOWN'),
   permissions: z
-    .array(z.enum(MODERATOR_PERMISSIONS, 'Nieznane uprawnienie'))
+    .array(z.enum(MODERATOR_PERMISSIONS, 'VALIDATION.PERMISSION_UNKNOWN'))
     .max(MODERATOR_PERMISSIONS.length)
     .default([]),
 });
@@ -63,10 +63,10 @@ export const listUsers = ({ page, search, filter }: AdminListQuery, viewer: Acco
 const findEditableAccount = (userId: number): Account => {
   const account = foundOr404(
     useDb().select().from(schema.users).where(eq(schema.users.id, userId)).get(),
-    'Nie znaleziono użytkownika',
+    'ERRORS.USER_NOT_FOUND',
   );
   if (account.isGhost) {
-    throw conflict('Konta usuniętego nie można zmieniać');
+    throw conflict('ERRORS.DELETED_ACCOUNT_IMMUTABLE');
   }
   return account;
 };
@@ -74,10 +74,10 @@ const findEditableAccount = (userId: number): Account => {
 export const setAccountBan = (actor: Account, userId: number, isBanned: boolean) => {
   const target = findEditableAccount(userId);
   if (target.id === actor.id) {
-    throw conflict('Nie możesz zablokować własnego konta');
+    throw conflict('ERRORS.CANNOT_BAN_SELF');
   }
   if (target.role === 'admin' && actor.role !== 'admin') {
-    throw createError({ statusCode: FORBIDDEN, statusMessage: 'Administratora może zablokować tylko administrator' });
+    throw createError({ statusCode: FORBIDDEN, statusMessage: 'ERRORS.ADMIN_BAN_REQUIRES_ADMIN' });
   }
   return useDb()
     .update(schema.users)
@@ -94,10 +94,10 @@ export const changeAccountRole = (actor: Account, userId: number, input: RoleInp
   const target = findEditableAccount(userId);
   const losesAdministratorRole = target.role === 'admin' && input.role !== 'admin';
   if (losesAdministratorRole && target.id === actor.id) {
-    throw conflict('Nie możesz odebrać sobie roli administratora');
+    throw conflict('ERRORS.CANNOT_DEMOTE_SELF');
   }
   if (losesAdministratorRole && administratorCount() <= 1) {
-    throw conflict('Nie można odebrać roli ostatniemu administratorowi');
+    throw conflict('ERRORS.LAST_ADMIN_REQUIRED');
   }
   return useDb()
     .update(schema.users)

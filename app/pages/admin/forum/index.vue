@@ -10,37 +10,39 @@ interface ForumRow {
   isStaffOnly: boolean;
 }
 
-const COLUMNS: CrudColumn[] = [
-  { key: 'name', label: 'Nazwa' },
-  { key: 'categoryName', label: 'Kategoria' },
-  { key: 'slug', label: 'Adres' },
-  { key: 'isStaffOnly', label: 'Dostęp' },
-  { key: 'sortOrder', label: 'Kolejność', alignsRight: true },
-  { key: 'threadCount', label: 'Tematów', alignsRight: true },
-  { key: 'postCount', label: 'Postów', alignsRight: true },
-];
+const { t } = useI18n();
+
+const columns = computed<CrudColumn[]>(() => [
+  { key: 'name', label: t('GENERAL.NAME') },
+  { key: 'categoryName', label: t('GENERAL.CATEGORY') },
+  { key: 'slug', label: t('GENERAL.ADDRESS') },
+  { key: 'isStaffOnly', label: t('ADMIN_FORUM.ACCESS') },
+  { key: 'sortOrder', label: t('GENERAL.SORT_ORDER'), alignsRight: true },
+  { key: 'threadCount', label: t('ADMIN_FORUM.THREADS_COLUMN'), alignsRight: true },
+  { key: 'postCount', label: t('ADMIN_FORUM.POSTS_COLUMN'), alignsRight: true },
+]);
 
 const categories = await $fetch<{ id: number; name: string }[]>('/api/admin/forum-categories');
 
-const FIELDS: CrudField[] = [
-  { key: 'name', label: 'Nazwa', kind: 'text', required: true },
+const fields = computed<CrudField[]>(() => [
+  { key: 'name', label: t('GENERAL.NAME'), kind: 'text', required: true },
   {
     key: 'categoryId',
-    label: 'Kategoria',
+    label: t('GENERAL.CATEGORY'),
     kind: 'select',
     required: true,
     options: categories.map(({ id, name }) => ({ value: id, label: name })),
   },
-  { key: 'slug', label: 'Adres (slug)', kind: 'text', hint: 'Puste pole = adres utworzy się z nazwy' },
-  { key: 'sortOrder', label: 'Kolejność', kind: 'number', hint: 'Mniejsza liczba = wyżej na liście' },
-  { key: 'description', label: 'Opis', kind: 'textarea' },
+  { key: 'slug', label: t('ADMIN_FORUM.SLUG'), kind: 'text', hint: t('ADMIN_FORUM.SLUG_HINT') },
+  { key: 'sortOrder', label: t('GENERAL.SORT_ORDER'), kind: 'number', hint: t('ADMIN_FORUM.SORT_ORDER_HINT') },
+  { key: 'description', label: t('GENERAL.DESCRIPTION'), kind: 'textarea' },
   {
     key: 'isStaffOnly',
-    label: 'Tylko dla redakcji',
+    label: t('ADMIN_FORUM.STAFF_ONLY'),
     kind: 'checkbox',
-    hint: 'Dział widzą i piszą w nim wyłącznie moderatorzy i administratorzy',
+    hint: t('ADMIN_FORUM.STAFF_ONLY_HINT'),
   },
-];
+]);
 const EMPTY_INPUT = {
   name: '',
   categoryId: categories[0]?.id ?? 0,
@@ -55,24 +57,24 @@ const forumOf = (row: object) => row as ForumRow;
 
 <template>
   <div>
-    <AdminTabs label="Struktura forum" :tabs="FORUM_ADMIN_TABS" />
+    <AdminTabs :label="t('ADMIN_FORUM.STRUCTURE')" :tabs="FORUM_ADMIN_TABS" />
     <SimpleCrud
       resource="forums"
-      title="Działy forum"
-      subtitle="Dział da się usunąć dopiero wtedy, gdy nie ma w nim żadnego tematu."
-      add-label="Dodaj dział"
-      :columns="COLUMNS"
-      :fields="FIELDS"
+      :title="t('ADMIN_FORUM.SECTIONS_TITLE')"
+      :subtitle="t('ADMIN_FORUM.SECTIONS_SUBTITLE')"
+      :add-label="t('ADMIN_FORUM.ADD_SECTION')"
+      :columns="columns"
+      :fields="fields"
       :empty-input="EMPTY_INPUT"
     >
       <template #cell-isStaffOnly="{ row }">
-        <StateBadge v-if="forumOf(row).isStaffOnly" label="Redakcja" icon="lock" tone="muted" />
-        <StateBadge v-else label="Publiczny" icon="eye" tone="positive" />
+        <StateBadge v-if="forumOf(row).isStaffOnly" :label="t('ADMIN_FORUM.BADGE_STAFF')" icon="lock" tone="muted" />
+        <StateBadge v-else :label="t('ADMIN_FORUM.BADGE_PUBLIC')" icon="eye" tone="positive" />
       </template>
       <template #row-actions="{ row }">
         <BaseButton :to="routes.forum(forumOf(row).slug)" variant="ghost" size="sm">
           <AppIcon name="eye" />
-          Zobacz
+          {{ t('ADMIN_FORUM.VIEW') }}
         </BaseButton>
       </template>
     </SimpleCrud>

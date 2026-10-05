@@ -20,7 +20,7 @@ const ADMIN_RESOURCES: Record<string, AdminResource> = {
 export const adminResourceNamed = (name: string | undefined): AdminResource => {
   const resource = ADMIN_RESOURCES[name ?? ''];
   if (!resource) {
-    throw createError({ statusCode: 404, statusMessage: 'Nie znaleziono zasobu' });
+    throw createError({ statusCode: 404, statusMessage: 'ERRORS.RESOURCE_NOT_FOUND' });
   }
   return resource;
 };

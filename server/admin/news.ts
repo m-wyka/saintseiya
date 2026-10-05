@@ -5,7 +5,7 @@ import { CONTENT_STATUSES } from '#shared/utils/content';
 const NEWS_PAGE_SIZE = 20;
 
 const inputSchema = z.object({
-  title: z.string().trim().min(3, 'Tytuł jest za krótki').max(200),
+  title: z.string().trim().min(3, 'VALIDATION.TITLE_TOO_SHORT').max(200),
   slug: slugInputSchema,
   categoryId: z.number().int().positive().nullable(),
   tagIds: z.array(z.number().int().positive()).max(30).default([]),

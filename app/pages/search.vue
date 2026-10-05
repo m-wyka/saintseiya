@@ -1,7 +1,11 @@
 <script setup lang="ts">
-const MINIMUM_PHRASE_LENGTH = 3;
-const NuxtLink = resolveComponent('NuxtLink');
+import { routes } from '#shared/utils/routes';
 
+const MINIMUM_PHRASE_LENGTH = 3;
+const NuxtLinkLocale = resolveComponent('NuxtLinkLocale');
+
+const { t } = useI18n();
+const localePath = useLocalePath();
 const route = useRoute();
 const phrase = computed(() => String(route.query.q ?? '').trim());
 const typedPhrase = ref(phrase.value);
@@ -9,9 +13,9 @@ const typedPhrase = ref(phrase.value);
 const { data: results, status } = await useFetch('/api/search', { query: { q: phrase } });
 
 const sections = computed(() => [
-  { title: 'Podstrony', items: results.value?.pages ?? [] },
-  { title: 'Newsy', items: results.value?.news ?? [] },
-  { title: 'Forum', items: results.value?.forum ?? [] },
+  { title: t('SEARCH.PAGES'), items: results.value?.pages ?? [] },
+  { title: t('GENERAL.NEWS'), items: results.value?.news ?? [] },
+  { title: t('GENERAL.FORUM'), items: results.value?.forum ?? [] },
 ]);
 const resultCount = computed(() => sections.value.reduce((total, section) => total + section.items.length, 0));
 const isPhraseTooShort = computed(() => phrase.value.length > 0 && phrase.value.length < MINIMUM_PHRASE_LENGTH);
@@ -21,44 +25,50 @@ const search = () => navigateTo({ query: { q: typedPhrase.value.trim() || undefi
 
 watch(phrase, (current) => (typedPhrase.value = current));
 
-useSeoMeta({ title: () => (phrase.value ? `Szukaj: ${phrase.value}` : 'Szukaj'), robots: 'noindex' });
+useSeoMeta({
+  title: () => (phrase.value ? t('SEARCH.TITLE_WITH_PHRASE', { phrase: phrase.value }) : t('GENERAL.SEARCH')),
+  robots: 'noindex',
+});
 </script>
 
 <template>
   <div>
-    <PageHeading title="Szukaj" subtitle="Przeszukuje podstrony, newsy i forum." />
+    <PageHeading :title="t('GENERAL.SEARCH')" :subtitle="t('SEARCH.SUBTITLE')" />
     <form
       class="mb-6 flex items-end gap-3 panel p-4"
       role="search"
       method="get"
-      action="/szukaj"
+      :action="localePath(routes.search())"
       @submit.prevent="search"
     >
       <BaseInput
         v-model="typedPhrase"
         class="flex-1"
         type="search"
-        label="Szukana fraza"
+        :label="t('SEARCH.PHRASE_LABEL')"
         name="q"
-        placeholder="np. Posejdon, Lost Canvas, zbroja…"
+        :placeholder="t('SEARCH.PHRASE_PLACEHOLDER')"
         :maxlength="100"
       />
       <BaseButton type="submit">
         <AppIcon name="search" />
-        Szukaj
+        {{ t('GENERAL.SEARCH') }}
       </BaseButton>
     </form>
 
-    <EmptyState v-if="!phrase" message="Wpisz frazę, aby rozpocząć wyszukiwanie." />
-    <EmptyState v-else-if="isPhraseTooShort" :message="`Fraza musi mieć co najmniej ${MINIMUM_PHRASE_LENGTH} znaki.`" />
-    <EmptyState v-else-if="status === 'success' && !resultCount" :message="`Nic nie znaleziono dla „${phrase}”.`" />
+    <EmptyState v-if="!phrase" :message="t('SEARCH.ENTER_PHRASE')" />
+    <EmptyState
+      v-else-if="isPhraseTooShort"
+      :message="t('SEARCH.PHRASE_TOO_SHORT', { count: MINIMUM_PHRASE_LENGTH })"
+    />
+    <EmptyState v-else-if="status === 'success' && !resultCount" :message="t('SEARCH.NOTHING_FOUND', { phrase })" />
     <div v-else class="flex flex-col gap-8" :class="{ 'opacity-60': status === 'pending' }">
       <section v-for="section in sections.filter((candidate) => candidate.items.length)" :key="section.title">
         <SectionHeading :title="`${section.title} (${section.items.length})`" />
         <ul class="flex flex-col gap-3">
           <li v-for="result in section.items" :key="result.url" class="reveal">
             <component
-              :is="isForumPost(result.url) ? 'a' : NuxtLink"
+              :is="isForumPost(result.url) ? 'a' : NuxtLinkLocale"
               :href="isForumPost(result.url) ? result.url : undefined"
               :to="isForumPost(result.url) ? undefined : result.url"
               class="block panel px-5 py-3 transition duration-300 ease-cosmo hover:-translate-y-0.5 hover:border-cosmo-500/60"

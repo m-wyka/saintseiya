@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { messageKey } from './messages';
 
 const USER_NAME_MIN_LENGTH = 3;
 const USER_NAME_MAX_LENGTH = 30;
@@ -13,9 +14,9 @@ export const userNameSchema = z
   .pipe(
     z
       .string()
-      .min(USER_NAME_MIN_LENGTH, `Nick musi mieć co najmniej ${USER_NAME_MIN_LENGTH} znaki`)
-      .max(USER_NAME_MAX_LENGTH, `Nick może mieć najwyżej ${USER_NAME_MAX_LENGTH} znaków`)
-      .regex(USER_NAME_PATTERN, 'Nick może zawierać litery, cyfry, spacje oraz znaki . _ -'),
+      .min(USER_NAME_MIN_LENGTH, messageKey('VALIDATION.USER_NAME_TOO_SHORT', { min: USER_NAME_MIN_LENGTH }))
+      .max(USER_NAME_MAX_LENGTH, messageKey('VALIDATION.USER_NAME_TOO_LONG', { max: USER_NAME_MAX_LENGTH }))
+      .regex(USER_NAME_PATTERN, 'VALIDATION.USER_NAME_INVALID'),
   );
 
 export const fitUserName = (rawName: string, fallback: string): string => {

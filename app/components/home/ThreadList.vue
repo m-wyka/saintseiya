@@ -5,6 +5,8 @@ import { routes } from '#shared/utils/routes';
 type ThreadSummary = InternalApi['/api/home']['get']['latestThreads'][number];
 
 defineProps<{ title: string; threads: ThreadSummary[]; showsPostCount?: boolean }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -14,7 +16,7 @@ defineProps<{ title: string; threads: ThreadSummary[]; showsPostCount?: boolean 
     </h2>
     <ul class="divide-y divide-aqua-500/10">
       <li v-for="thread in threads" :key="thread.id">
-        <NuxtLink
+        <NuxtLinkLocale
           :to="routes.thread(thread.id)"
           class="group flex items-center gap-3 px-4 py-2 text-sm transition duration-200 hover:bg-white/5"
         >
@@ -28,14 +30,14 @@ defineProps<{ title: string; threads: ThreadSummary[]; showsPostCount?: boolean 
           <span
             v-if="showsPostCount"
             class="shrink-0 rounded-full cosmo-bar px-2 py-0.5 text-[0.7rem] font-bold text-abyss-950"
-            :title="`${thread.postCount} postów`"
+            :title="t('POSTS.POST_COUNT', { count: formatNumber(thread.postCount) }, thread.postCount)"
           >
             {{ formatNumber(thread.postCount) }}
           </span>
           <time v-else :datetime="thread.lastPostAt" class="shrink-0 text-[0.7rem] text-aqua-500">
             {{ formatLongDate(thread.lastPostAt) }}
           </time>
-        </NuxtLink>
+        </NuxtLinkLocale>
       </li>
     </ul>
   </section>

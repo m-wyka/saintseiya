@@ -1,3 +1,4 @@
+import { UNTITLED_PHOTO_KEY } from '#shared/utils/content';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { routes } from '#shared/utils/routes';
 import type { CommentTarget } from '#shared/utils/content';
@@ -61,7 +62,7 @@ const describeTargets = (kind: CommentTarget, ids: number[]): Map<number, Commen
       .from(schema.photos)
       .where(inArray(schema.photos.id, ids))
       .all();
-    return new Map(rows.map((row) => [row.id, { title: row.title || 'Zdjęcie', url: routes.photo(row.id) }]));
+    return new Map(rows.map((row) => [row.id, { title: row.title || UNTITLED_PHOTO_KEY, url: routes.photo(row.id) }]));
   }
   const rows = db
     .select({ id: schema.videos.id, title: schema.videos.title })

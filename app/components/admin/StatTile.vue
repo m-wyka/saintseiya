@@ -9,6 +9,8 @@ defineProps<{
   note?: string;
   icon: IconName;
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -20,7 +22,7 @@ defineProps<{
     <p class="text-3xl font-semibold text-mist">{{ formatNumber(value) }}</p>
     <p v-if="recent !== undefined" class="text-xs text-aqua-500">
       <span :class="recent > 0 ? 'font-semibold text-aqua-200' : ''">+{{ formatNumber(recent) }}</span>
-      w ostatnich {{ recentPeriodDays }} dniach
+      {{ t('ADMIN_UI.RECENT_PERIOD', { days: recentPeriodDays }) }}
     </p>
     <p v-if="note" class="text-xs text-aqua-500">{{ note }}</p>
   </article>

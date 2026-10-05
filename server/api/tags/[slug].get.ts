@@ -8,7 +8,7 @@ export default defineEventHandler((event) => {
       .from(schema.tags)
       .where(eq(schema.tags.slug, getRouterParam(event, 'slug') ?? ''))
       .get(),
-    'Nie znaleziono tagu',
+    'ERRORS.TAG_NOT_FOUND',
   );
   const pages = db
     .select({ title: schema.pages.title, path: schema.pages.path })

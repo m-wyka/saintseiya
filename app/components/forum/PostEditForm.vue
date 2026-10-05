@@ -4,6 +4,7 @@ const emit = defineEmits<{ saved: []; cancel: [] }>();
 
 const editedHtml = ref(props.bodyHtml);
 const { isBusy, errorMessage, run } = useApiAction();
+const { t } = useI18n();
 
 const save = async () => {
   const wasSaved = await run(() =>
@@ -18,7 +19,7 @@ const save = async () => {
 <template>
   <form class="flex flex-1 flex-col gap-3 px-5 py-4" @submit.prevent="save">
     <ClientOnly>
-      <RichTextEditor v-model="editedHtml" label="Treść posta" />
+      <RichTextEditor v-model="editedHtml" :label="t('POSTS.BODY_LABEL')" />
       <template #fallback>
         <div class="h-48 animate-pulse rounded-xl border border-aqua-500/20 bg-black/30" />
       </template>
@@ -28,10 +29,10 @@ const save = async () => {
       {{ errorMessage }}
     </p>
     <div class="flex flex-wrap justify-end gap-2">
-      <BaseButton variant="ghost" size="sm" @click="emit('cancel')">Anuluj</BaseButton>
+      <BaseButton variant="ghost" size="sm" @click="emit('cancel')">{{ t('GENERAL.CANCEL') }}</BaseButton>
       <BaseButton type="submit" size="sm" :busy="isBusy" :disabled="!editedHtml">
         <AppIcon name="check" />
-        Zapisz zmiany
+        {{ t('POSTS.SAVE_CHANGES') }}
       </BaseButton>
     </div>
   </form>

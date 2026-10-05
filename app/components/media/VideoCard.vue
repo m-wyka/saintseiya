@@ -3,6 +3,7 @@ const props = defineProps<{
   video: { title: string; description: string; youtubeId: string; categoryName?: string };
 }>();
 
+const { t } = useI18n();
 const isPlaying = ref(false);
 const posterUrl = computed(() => `https://i.ytimg.com/vi/${props.video.youtubeId}/hqdefault.jpg`);
 const playerUrl = computed(() => `https://www.youtube-nocookie.com/embed/${props.video.youtubeId}?autoplay=1`);
@@ -25,7 +26,7 @@ const playerUrl = computed(() => `https://www.youtube-nocookie.com/embed/${props
         v-else
         type="button"
         class="absolute inset-0 size-full cursor-pointer"
-        :aria-label="`Odtwórz: ${video.title}`"
+        :aria-label="t('VIDEO_LIST.PLAY', { title: video.title })"
         @click="isPlaying = true"
       >
         <img

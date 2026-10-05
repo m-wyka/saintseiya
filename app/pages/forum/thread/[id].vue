@@ -4,19 +4,29 @@ import { routes } from '#shared/utils/routes';
 
 const POSTS_PER_PAGE = 20;
 
-const route = useRoute('forum-thread-id');
+const { t } = useI18n();
+const route = useRoute();
+const routeId = useRouteParam('id');
 const page = computed(() => Number(route.query.page) || 1);
-const { data, error, refresh } = await useFetch(() => `/api/forum/threads/${route.params.id}`, { query: { page } });
+const { data, error, refresh } = await useFetch(() => `/api/forum/threads/${routeId.value}`, { query: { page } });
 
 if (error.value || !data.value) {
   throw createError({
     statusCode: error.value?.statusCode ?? 404,
-    statusMessage: 'Nie znaleziono tematu',
+    statusMessage: t('FORUM.THREAD_NOT_FOUND'),
     fatal: true,
   });
 }
 
 const firstPositionOnPage = computed(() => (page.value - 1) * POSTS_PER_PAGE + 1);
+const threadSummary = computed(() => {
+  const postCount = data.value?.thread.postCount ?? 0;
+  const viewCount = data.value?.thread.viewCount ?? 0;
+  return [
+    t('FORUM.POST_COUNT', { count: formatNumber(postCount) }, postCount),
+    t('FORUM.VIEW_COUNT', { count: formatNumber(viewCount) }, viewCount),
+  ].join(' · ');
+});
 
 const { loggedIn, user } = useUserSession();
 const canModerate = computed(() => hasPermission(user.value, 'forum'));
@@ -32,7 +42,7 @@ const reloadPosts = async () => {
 };
 
 const sendReply = async (post: { bodyHtml: string; captchaToken: string }) => {
-  const created = await apiRequest<{ postId: number; page: number }>(`/api/forum/threads/${route.params.id}/posts`, {
+  const created = await apiRequest<{ postId: number; page: number }>(`/api/forum/threads/${routeId.value}/posts`, {
     method: 'POST',
     body: post,
   });
@@ -46,27 +56,24 @@ const sendReply = async (post: { bodyHtml: string; captchaToken: string }) => {
   });
 };
 
-useSeoMeta({ title: () => `${data.value?.thread.title ?? ''} – Forum` });
+useSeoMeta({ title: () => `${data.value?.thread.title ?? ''} – ${t('GENERAL.FORUM')}` });
 </script>
 
 <template>
   <div v-if="data">
     <BreadcrumbTrail
       :items="[
-        { title: 'Forum', to: routes.forumIndex() },
+        { title: t('GENERAL.FORUM'), to: routes.forumIndex() },
         { title: data.thread.forum.name, to: routes.forum(data.thread.forum.slug) },
       ]"
     />
-    <PageHeading
-      :title="data.thread.title"
-      :subtitle="`${pluralize(data.thread.postCount, 'post', 'posty', 'postów')} · ${pluralize(data.thread.viewCount, 'odsłona', 'odsłony', 'odsłon')}`"
-    />
+    <PageHeading :title="data.thread.title" :subtitle="threadSummary" />
     <p
       v-if="data.thread.isLocked"
       class="mb-4 flex items-center gap-2 rounded-lg border border-aqua-500/30 bg-black/30 px-4 py-2 text-sm text-aqua-300"
     >
       <AppIcon name="lock" class="text-cosmo-500" />
-      Temat jest zamknięty — nie można w nim odpowiadać.
+      {{ t('FORUM.THREAD_LOCKED_NOTICE') }}
     </p>
     <ThreadModeration v-if="canModerate" :thread="data.thread" @changed="refresh()" />
     <div class="flex flex-col gap-4">
@@ -83,11 +90,11 @@ useSeoMeta({ title: () => `${data.value?.thread.title ?? ''} – Forum` });
     <PaginationNav :page="data.posts.page" :page-count="data.posts.pageCount" />
     <section v-if="canReply" class="mt-8">
       <div v-if="loggedIn" class="panel p-5">
-        <h2 class="mb-3 heading-display text-lg text-gold-300">Odpowiedz</h2>
-        <PostComposer label="Treść odpowiedzi" submit-label="Wyślij odpowiedź" :send="sendReply" />
+        <h2 class="mb-3 heading-display text-lg text-gold-300">{{ t('FORUM.REPLY') }}</h2>
+        <PostComposer :label="t('FORUM.REPLY_LABEL')" :submit-label="t('FORUM.SEND_REPLY')" :send="sendReply" />
       </div>
       <p v-else class="flex flex-wrap items-center justify-between gap-3 panel px-5 py-4 text-sm text-aqua-300">
-        Zaloguj się, aby odpowiedzieć w tym temacie.
+        {{ t('FORUM.SIGN_IN_TO_REPLY') }}
         <LoginLink />
       </p>
     </section>

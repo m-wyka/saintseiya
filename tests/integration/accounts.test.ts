@@ -45,7 +45,7 @@ describe('accounts', () => {
     const banned = signInWithGoogle(event, { sub: 'g-7', name: 'Zbanowany' });
     useDb().update(schema.users).set({ bannedAt: new Date() }).where(eq(schema.users.id, banned.id)).run();
 
-    expect(() => signInWithGoogle(event, { sub: 'g-7', name: 'Zbanowany' })).toThrowError(/zablokowane/);
+    expect(() => signInWithGoogle(event, { sub: 'g-7', name: 'Zbanowany' })).toThrowError('ERRORS.ACCOUNT_BANNED');
   });
 
   it('renames an account unless the nick is taken by someone else', () => {
@@ -54,7 +54,7 @@ describe('accounts', () => {
 
     expect(renameAccount(account.id, 'Smok Shiryu')).toMatchObject({ name: 'Smok Shiryu', nameKey: 'smok shiryu' });
     expect(renameAccount(account.id, 'SMOK shiryu').name).toBe('SMOK shiryu');
-    expect(() => renameAccount(account.id, 'hyoga')).toThrowError(/zajęty/);
+    expect(() => renameAccount(account.id, 'hyoga')).toThrowError('ERRORS.USER_NAME_TAKEN');
   });
 
   it('turns a deleted account into an archived author without personal data', () => {

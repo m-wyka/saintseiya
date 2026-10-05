@@ -1,12 +1,13 @@
 <script setup lang="ts">
+const { t } = useI18n();
 const { data: categories } = await useFetch('/api/links');
 
-useSeoMeta({ title: 'Linki' });
+useSeoMeta({ title: () => t('LINKS.TITLE') });
 </script>
 
 <template>
   <div>
-    <PageHeading title="Linki" subtitle="Zaprzyjaźnione strony i miejsca warte odwiedzenia." />
+    <PageHeading :title="t('LINKS.TITLE')" :subtitle="t('LINKS.SUBTITLE')" />
     <div class="flex flex-col gap-8">
       <section v-for="category in categories" :key="category.id">
         <SectionHeading :title="category.name" />

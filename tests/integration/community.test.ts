@@ -27,9 +27,9 @@ describe('comments', () => {
     const draft = createNews(author.id, { status: 'draft' });
     const closed = createNews(author.id, { commentsEnabled: false });
 
-    expect(() => createComment('news', draft.id, author, '<p>A</p>')).toThrowError(/nie można komentować/);
-    expect(() => createComment('news', closed.id, author, '<p>A</p>')).toThrowError(/nie można komentować/);
-    expect(() => createComment('photo', 12_345, author, '<p>A</p>')).toThrowError(/nie można komentować/);
+    expect(() => createComment('news', draft.id, author, '<p>A</p>')).toThrowError('ERRORS.COMMENTS_UNAVAILABLE');
+    expect(() => createComment('news', closed.id, author, '<p>A</p>')).toThrowError('ERRORS.COMMENTS_UNAVAILABLE');
+    expect(() => createComment('photo', 12_345, author, '<p>A</p>')).toThrowError('ERRORS.COMMENTS_UNAVAILABLE');
   });
 });
 
@@ -53,7 +53,7 @@ describe('polls', () => {
     const { poll, options } = createPoll();
     castPollVote(poll.id, options[0]!.id, voter);
 
-    expect(() => castPollVote(poll.id, options[1]!.id, voter)).toThrowError(/już oddany/);
+    expect(() => castPollVote(poll.id, options[1]!.id, voter)).toThrowError('ERRORS.POLL_ALREADY_VOTED');
   });
 
   it('refuses votes in a closed poll and for an option of another poll', () => {
@@ -61,8 +61,8 @@ describe('polls', () => {
     const closed = createPoll({ isClosed: true });
     const open = createPoll();
 
-    expect(() => castPollVote(closed.poll.id, closed.options[0]!.id, voter)).toThrowError(/zakończona/);
-    expect(() => castPollVote(open.poll.id, closed.options[0]!.id, voter)).toThrowError(/zakończona/);
+    expect(() => castPollVote(closed.poll.id, closed.options[0]!.id, voter)).toThrowError('ERRORS.POLL_UNAVAILABLE');
+    expect(() => castPollVote(open.poll.id, closed.options[0]!.id, voter)).toThrowError('ERRORS.POLL_UNAVAILABLE');
   });
 });
 

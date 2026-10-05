@@ -5,7 +5,7 @@ const PHOTO_ROUTE_SEGMENT = 'zdjecie';
 const SLUG_FALLBACK = 'album';
 
 const inputSchema = z.object({
-  title: z.string().trim().min(2, 'Tytuł jest za krótki').max(120),
+  title: z.string().trim().min(2, 'VALIDATION.TITLE_TOO_SHORT').max(120),
   slug: slugInputSchema,
   description: z.string().trim().max(1000).default(''),
   sortOrder: z.number().int().min(0).max(9999).default(0),
@@ -68,7 +68,7 @@ export const albumsResource = defineAdminResource({
   },
   remove: (id) => {
     if (hasPhotos(id)) {
-      throw conflict('Ten album ma zdjęcia. Najpierw usuń wszystkie zdjęcia z albumu.');
+      throw conflict('ERRORS.ALBUM_HAS_PHOTOS');
     }
     useDb().delete(schema.albums).where(eq(schema.albums.id, id)).run();
   },

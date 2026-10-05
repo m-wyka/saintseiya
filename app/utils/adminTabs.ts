@@ -1,19 +1,19 @@
 export interface AdminTab {
-  label: string;
+  labelKey: string;
   to: string;
 }
 
 export const VIDEO_ADMIN_TABS: AdminTab[] = [
-  { label: 'Filmy', to: '/admin/video' },
-  { label: 'Kategorie', to: '/admin/video/kategorie' },
+  { labelKey: 'ADMIN_NAV.VIDEOS', to: '/admin/video' },
+  { labelKey: 'ADMIN_NAV.CATEGORIES', to: '/admin/video/kategorie' },
 ];
 
 export const LINK_ADMIN_TABS: AdminTab[] = [
-  { label: 'Linki', to: '/admin/linki' },
-  { label: 'Kategorie', to: '/admin/linki/kategorie' },
+  { labelKey: 'ADMIN_NAV.LINKS', to: '/admin/linki' },
+  { labelKey: 'ADMIN_NAV.CATEGORIES', to: '/admin/linki/kategorie' },
 ];
 
 export const FORUM_ADMIN_TABS: AdminTab[] = [
-  { label: 'Działy', to: '/admin/forum' },
-  { label: 'Kategorie', to: '/admin/forum/kategorie' },
+  { labelKey: 'ADMIN_NAV.FORUM_SECTIONS', to: '/admin/forum' },
+  { labelKey: 'ADMIN_NAV.CATEGORIES', to: '/admin/forum/kategorie' },
 ];

@@ -12,6 +12,8 @@ const selectedIndex = defineModel<number | null>('selectedIndex', { required: tr
 
 defineProps<{ imageUrl: string; imageWidth: number; imageHeight: number }>();
 
+const { t } = useI18n();
+
 const PERCENT = 100;
 const MINIMUM_SIZE_PERCENT = 1;
 
@@ -117,7 +119,7 @@ const highlightedIndex = computed(() => {
     <div
       ref="canvas"
       role="group"
-      aria-label="Obszary mapy"
+      :aria-label="t('ADMIN_FORMS.MAP_AREAS')"
       class="relative mx-auto min-w-2xl touch-none select-none"
       :style="{ maxWidth: `${imageWidth}px` }"
       @pointerdown.self="startDrawing"
@@ -144,7 +146,7 @@ const highlightedIndex = computed(() => {
             : 'border-cosmo-500/70 bg-cosmo-500/15 hover:bg-cosmo-500/30'
         "
         :style="frameOf(area)"
-        :aria-label="`Obszar: ${area.label}`"
+        :aria-label="t('ADMIN_FORMS.MAP_AREA', { name: area.label })"
         :aria-pressed="index === selectedIndex"
         @pointerdown.stop="startMoving($event, index)"
         @focus="selectOnFocus(index)"

@@ -29,7 +29,7 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
   md: 'gap-2 px-4 py-2 text-sm',
 };
 
-const NuxtLink = resolveComponent('NuxtLink');
+const NuxtLink = resolveComponent('NuxtLinkLocale');
 const isUnavailable = computed(() => props.disabled || props.busy);
 const attributes = computed(() =>
   props.to

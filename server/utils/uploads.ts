@@ -3,6 +3,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, extname, join } from 'node:path';
 import type { H3Event, MultiPartData } from 'h3';
 import sharp from 'sharp';
+import { messageKey } from '#shared/utils/messages';
 import { THUMBNAILS_MEDIA_FOLDER } from '#shared/utils/routes';
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -40,7 +41,7 @@ export const uploadedFilesOf = async (event: H3Event): Promise<MultiPartData[]> 
   const parts = (await readMultipartFormData(event)) ?? [];
   const files = parts.filter((part) => part.filename && part.data.length > 0);
   if (!files.length) {
-    throw invalidUpload('Nie wybrano pliku');
+    throw invalidUpload('ERRORS.UPLOAD_MISSING');
   }
   return files;
 };
@@ -51,14 +52,14 @@ export const storeUploadedImage = async (
   folder: string,
 ): Promise<StoredImage> => {
   if (upload.data.length > MAX_IMAGE_BYTES) {
-    throw invalidUpload('Obrazek jest za duży (limit 10 MB)');
+    throw invalidUpload('ERRORS.IMAGE_TOO_LARGE');
   }
   const metadata = await sharp(upload.data, { animated: true })
     .metadata()
     .catch(() => null);
   const extension = metadata?.format ? IMAGE_EXTENSION_BY_FORMAT[metadata.format] : undefined;
   if (!metadata?.width || !metadata.height || !extension) {
-    throw invalidUpload('Dozwolone formaty obrazków: JPG, PNG, GIF, WebP');
+    throw invalidUpload('ERRORS.IMAGE_FORMAT_NOT_ALLOWED');
   }
   const image = `${datedFolder(folder)}/${randomUUID()}.${extension}`;
   const thumbnail = thumbnailPathFor(image, THUMBNAILS_MEDIA_FOLDER);
@@ -70,10 +71,12 @@ export const storeUploadedImage = async (
 export const storeUploadedFile = async (event: H3Event, upload: MultiPartData, folder: string): Promise<StoredFile> => {
   const extension = extname(upload.filename ?? '').toLowerCase();
   if (!DOWNLOAD_EXTENSIONS.has(extension)) {
-    throw invalidUpload(`Dozwolone typy plików: ${[...DOWNLOAD_EXTENSIONS].join(', ')}`);
+    throw invalidUpload(
+      messageKey('ERRORS.FILE_TYPE_NOT_ALLOWED', { extensions: [...DOWNLOAD_EXTENSIONS].join(', ') }),
+    );
   }
   if (upload.data.length > MAX_FILE_BYTES) {
-    throw invalidUpload('Plik jest za duży (limit 50 MB)');
+    throw invalidUpload('ERRORS.FILE_TOO_LARGE');
   }
   const file = `${datedFolder(folder)}/${randomUUID()}${extension}`;
   await writeStoredFile(event, file, upload.data);

@@ -14,23 +14,20 @@ const sectionExists = (sectionId: number): boolean =>
   );
 
 const inputSchema = z.object({
-  sectionId: existingIdSchema(sectionExists, 'Wybierz sekcję'),
+  sectionId: existingIdSchema(sectionExists, 'VALIDATION.SECTION_REQUIRED'),
   groupTitle: z
     .string()
     .trim()
-    .max(60, 'Nazwa grupy jest za długa')
+    .max(60, 'VALIDATION.GROUP_TITLE_TOO_LONG')
     .nullable()
     .default(null)
     .transform((title) => title || null),
-  label: z.string().trim().min(1, 'Podaj nazwę odnośnika').max(80, 'Nazwa odnośnika jest za długa'),
+  label: z.string().trim().min(1, 'VALIDATION.LINK_LABEL_REQUIRED').max(80, 'VALIDATION.LINK_LABEL_TOO_LONG'),
   url: z
     .string()
     .trim()
-    .max(300, 'Adres jest za długi')
-    .refine(
-      (url) => isInternalUrl(url) || isWebUrl(url),
-      'Adres zaczyna się od / (strona portalu) albo od http:// lub https://',
-    ),
+    .max(300, 'VALIDATION.URL_TOO_LONG')
+    .refine((url) => isInternalUrl(url) || isWebUrl(url), 'VALIDATION.INTERNAL_OR_WEB_URL_REQUIRED'),
 });
 
 export const findNavigationLink = (id: number) =>

@@ -1,6 +1,7 @@
 import { and, asc, count, eq, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import { CONTENT_STATUSES, MAP_AREA_TARGETS } from '#shared/utils/content';
+import { messageKey } from '#shared/utils/messages';
 
 const PERCENT_MAX = 100;
 const MAX_AREAS = 300;
@@ -10,7 +11,7 @@ const percent = z.number().min(0).max(PERCENT_MAX);
 
 const areaSchema = z
   .object({
-    label: z.string().trim().min(1, 'Każdy obszar potrzebuje etykiety').max(120),
+    label: z.string().trim().min(1, 'VALIDATION.MAP_AREA_LABEL_REQUIRED').max(120),
     leftPercent: percent,
     topPercent: percent,
     widthPercent: percent.min(0.1),
@@ -22,24 +23,30 @@ const areaSchema = z
   })
   .superRefine((area, context) => {
     if (area.targetKind === 'page' && area.pageId === null) {
-      context.addIssue({ code: 'custom', message: `Obszar „${area.label}”: wybierz podstronę` });
+      context.addIssue({
+        code: 'custom',
+        message: messageKey('VALIDATION.MAP_AREA_PAGE_REQUIRED', { label: area.label }),
+      });
     }
     if (area.targetKind === 'url' && !WEB_OR_INTERNAL_URL_PATTERN.test(area.url ?? '')) {
       context.addIssue({
         code: 'custom',
-        message: `Obszar „${area.label}”: podaj adres zaczynający się od / lub https://`,
+        message: messageKey('VALIDATION.MAP_AREA_URL_REQUIRED', { label: area.label }),
       });
     }
     if (area.targetKind === 'content' && !area.contentHtml?.trim()) {
-      context.addIssue({ code: 'custom', message: `Obszar „${area.label}”: wpisz treść okienka` });
+      context.addIssue({
+        code: 'custom',
+        message: messageKey('VALIDATION.MAP_AREA_CONTENT_REQUIRED', { label: area.label }),
+      });
     }
   });
 
 const inputSchema = z.object({
-  title: z.string().trim().min(2, 'Tytuł jest za krótki').max(120),
+  title: z.string().trim().min(2, 'VALIDATION.TITLE_TOO_SHORT').max(120),
   slug: slugInputSchema,
   description: z.string().trim().max(600).default(''),
-  image: z.string().trim().min(1, 'Wgraj obraz mapy').max(300),
+  image: z.string().trim().min(1, 'VALIDATION.MAP_IMAGE_REQUIRED').max(300),
   imageWidth: z.number().int().positive(),
   imageHeight: z.number().int().positive(),
   teaserImage: z.string().trim().max(300).nullable().default(null),

@@ -14,17 +14,19 @@ interface StoredPoll {
   options: { id: number; label: string }[];
 }
 
-const STATUS_FILTERS = [
-  { value: '', label: 'Wszystkie' },
-  { value: 'open', label: 'Trwające' },
-  { value: 'closed', label: 'Zakończone' },
-];
-const COLUMNS = [
-  { key: 'question', label: 'Pytanie' },
-  { key: 'endedAt', label: 'Status' },
-  { key: 'totalVotes', label: 'Głosów', alignsRight: true },
-  { key: 'startedAt', label: 'Rozpoczęta' },
-];
+const { t } = useI18n();
+
+const statusFilters = computed(() => [
+  { value: '', label: t('GENERAL.ALL') },
+  { value: 'open', label: t('ADMIN_POLLS.FILTER_OPEN') },
+  { value: 'closed', label: t('ADMIN_POLLS.FILTER_CLOSED') },
+]);
+const columns = computed(() => [
+  { key: 'question', label: t('ADMIN_POLLS.QUESTION') },
+  { key: 'endedAt', label: t('GENERAL.STATUS') },
+  { key: 'totalVotes', label: t('ADMIN_POLLS.VOTES_COLUMN'), alignsRight: true },
+  { key: 'startedAt', label: t('ADMIN_POLLS.STARTED') },
+]);
 
 const { rows, page, pageCount, total, search, filter, isLoading, refresh, remove } = useAdminList<PollRow>('polls');
 const toasts = useToastStore();
@@ -35,43 +37,46 @@ const setClosed = async (poll: PollRow, isClosed: boolean) => {
   try {
     const { question, options } = await $fetch<StoredPoll>(`/api/admin/polls/${poll.id}`);
     await apiRequest(`/api/admin/polls/${poll.id}`, { method: 'PUT', body: { question, options, isClosed } });
-    toasts.success(isClosed ? 'Ankieta zakończona' : 'Ankieta wznowiona');
+    toasts.success(t(isClosed ? 'ADMIN_POLLS.POLL_CLOSED' : 'ADMIN_POLLS.POLL_REOPENED'));
     await refresh();
   } catch (error) {
     toasts.error(apiErrorMessage(error));
   }
 };
 
-useSeoMeta({ title: 'Ankiety' });
+useSeoMeta({ title: () => t('ADMIN_NAV.POLLS') });
 </script>
 
 <template>
   <div>
-    <AdminHeader title="Ankiety" :subtitle="pluralize(total, 'ankieta', 'ankiety', 'ankiet')">
+    <AdminHeader
+      :title="t('ADMIN_NAV.POLLS')"
+      :subtitle="t('ADMIN_POLLS.POLL_COUNT', { count: formatNumber(total) }, total)"
+    >
       <BaseInput
         v-model="search"
         type="search"
-        label="Szukaj"
-        placeholder="Szukaj w pytaniach…"
+        :label="t('GENERAL.SEARCH')"
+        :placeholder="t('ADMIN_POLLS.SEARCH_PLACEHOLDER')"
         hide-label
         class="w-56"
       />
-      <BaseSelect v-model="filter" label="Status" :options="STATUS_FILTERS" hide-label class="w-40" />
+      <BaseSelect v-model="filter" :label="t('GENERAL.STATUS')" :options="statusFilters" hide-label class="w-40" />
       <BaseButton to="/admin/ankiety/nowy">
         <AppIcon name="plus" />
-        Dodaj ankietę
+        {{ t('ADMIN_POLLS.ADD_POLL') }}
       </BaseButton>
     </AdminHeader>
 
-    <AdminTable :columns="COLUMNS" :rows="rows" :is-loading="isLoading" empty-message="Brak ankiet do wyświetlenia.">
+    <AdminTable :columns="columns" :rows="rows" :is-loading="isLoading" :empty-message="t('ADMIN_POLLS.EMPTY')">
       <template #cell-question="{ row }">
-        <NuxtLink :to="`/admin/ankiety/${row.id}`" class="font-semibold text-gold-300 hover:text-cosmo-400">
+        <NuxtLinkLocale :to="`/admin/ankiety/${row.id}`" class="font-semibold text-gold-300 hover:text-cosmo-400">
           {{ row.question }}
-        </NuxtLink>
+        </NuxtLinkLocale>
       </template>
       <template #cell-endedAt="{ row }">
-        <StateBadge v-if="isOpen(row)" label="Trwa" icon="play" tone="positive" />
-        <StateBadge v-else label="Zakończona" icon="lock" tone="muted" />
+        <StateBadge v-if="isOpen(row)" :label="t('ADMIN_POLLS.BADGE_OPEN')" icon="play" tone="positive" />
+        <StateBadge v-else :label="t('ADMIN_POLLS.BADGE_CLOSED')" icon="lock" tone="muted" />
       </template>
       <template #cell-totalVotes="{ row }">{{ formatNumber(row.totalVotes) }}</template>
       <template #cell-startedAt="{ row }">
@@ -80,11 +85,11 @@ useSeoMeta({ title: 'Ankiety' });
       <template #actions="{ row }">
         <BaseButton variant="ghost" size="sm" @click="setClosed(row, isOpen(row))">
           <AppIcon :name="isOpen(row) ? 'lock' : 'play'" />
-          {{ isOpen(row) ? 'Zakończ' : 'Wznów' }}
+          {{ isOpen(row) ? t('ADMIN_POLLS.CLOSE') : t('ADMIN_POLLS.REOPEN') }}
         </BaseButton>
         <BaseButton :to="`/admin/ankiety/${row.id}`" variant="ghost" size="sm">
           <AppIcon name="edit" />
-          Edytuj
+          {{ t('GENERAL.EDIT') }}
         </BaseButton>
         <ConfirmButton @confirm="remove(row.id)" />
       </template>

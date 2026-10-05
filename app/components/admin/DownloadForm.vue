@@ -9,6 +9,7 @@ const fileInputId = useId();
 const fileHintId = `${fileInputId}-hint`;
 const { isBusy, errorMessage, run } = useApiAction();
 const toasts = useToastStore();
+const { t } = useI18n();
 
 const pickFile = (event: Event) => {
   pickedFile.value = (event.target as HTMLInputElement).files?.[0] ?? null;
@@ -34,7 +35,7 @@ const save = async () => {
   const { download } = props;
   const wasSaved = await run(() => (download ? saveDetails(download.id) : uploadNew()));
   if (wasSaved) {
-    toasts.success('Zapisano');
+    toasts.success(t('GENERAL.SAVED'));
     emit('saved');
   }
 };
@@ -42,12 +43,14 @@ const save = async () => {
 
 <template>
   <form class="mb-6 flex animate-rise flex-col gap-4 panel p-5" @submit.prevent="save">
-    <h2 class="heading-display text-lg text-gold-300">{{ download ? 'Edycja' : 'Dodaj plik' }}</h2>
+    <h2 class="heading-display text-lg text-gold-300">
+      {{ download ? t('GENERAL.EDITING') : t('ADMIN_FORMS.DOWNLOAD_ADD') }}
+    </h2>
     <div class="grid gap-4 md:grid-cols-2">
-      <BaseInput v-model="title" label="Tytuł" :maxlength="200" required />
+      <BaseInput v-model="title" :label="t('GENERAL.TITLE')" :maxlength="200" required />
       <div v-if="!download" class="flex flex-col gap-1.5">
         <label :for="fileInputId" class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">
-          Plik
+          {{ t('ADMIN_FORMS.DOWNLOAD_FILE') }}
           <span class="text-cosmo-500" aria-hidden="true">*</span>
         </label>
         <input
@@ -59,13 +62,13 @@ const save = async () => {
           @change="pickFile"
         />
         <p :id="fileHintId" class="text-xs text-aqua-500">
-          ZIP, RAR, 7Z, PDF, DOC, DOCX, TXT, SRT, ASS lub MP3, najwyżej 50 MB
+          {{ t('ADMIN_FORMS.DOWNLOAD_FILE_HINT') }}
         </p>
       </div>
-      <BaseTextarea v-model="description" class="md:col-span-2" label="Opis" :maxlength="1000" />
+      <BaseTextarea v-model="description" class="md:col-span-2" :label="t('GENERAL.DESCRIPTION')" :maxlength="1000" />
     </div>
     <p v-if="download" class="text-xs text-aqua-500">
-      Samego pliku nie da się podmienić. Usuń tę pozycję i dodaj ją ponownie z nowym plikiem.
+      {{ t('ADMIN_FORMS.DOWNLOAD_REPLACE_NOTE') }}
     </p>
     <InlineFormActions :is-busy="isBusy" :error-message="errorMessage" @cancel="emit('cancel')" />
   </form>

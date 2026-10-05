@@ -1,5 +1,5 @@
 export default defineEventHandler((event) => {
-  const news = foundOr404(findPublishedNews(getRouterParam(event, 'slug') ?? ''), 'Nie znaleziono newsa');
+  const news = foundOr404(findPublishedNews(getRouterParam(event, 'slug') ?? ''), 'ERRORS.NEWS_NOT_FOUND');
   countNewsView(news.id);
   return news;
 });

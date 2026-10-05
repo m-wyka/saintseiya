@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { sortOrderSchema } from './inputs';
 
 const inputSchema = z.object({
-  name: z.string().trim().min(2, 'Nazwa jest za krótka').max(100, 'Nazwa jest za długa'),
+  name: z.string().trim().min(2, 'VALIDATION.NAME_TOO_SHORT').max(100, 'VALIDATION.NAME_TOO_LONG'),
   sortOrder: sortOrderSchema,
 });
 
@@ -36,7 +36,7 @@ export const linkCategoriesResource = defineAdminResource({
   },
   remove: (id) => {
     if (hasLinks(id)) {
-      throw conflict('W tej kategorii są linki. Najpierw przenieś je lub usuń.');
+      throw conflict('ERRORS.LINK_CATEGORY_HAS_LINKS');
     }
     useDb().delete(schema.linkCategories).where(eq(schema.linkCategories.id, id)).run();
   },

@@ -11,7 +11,7 @@ const bodySchema = z.object({
 
 export default defineEventHandler(async (event) => {
   if (String(useRuntimeConfig(event).e2eLogin) !== 'true') {
-    throw createError({ statusCode: 404, statusMessage: 'Nie znaleziono' });
+    throw createError({ statusCode: 404, statusMessage: 'ERRORS.NOT_FOUND' });
   }
   const body = await readValidatedBody(event, bodySchema.parse);
   const account = signInWithGoogle(event, { sub: body.googleId, name: body.name });

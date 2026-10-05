@@ -1,6 +1,8 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ label?: string; confirmLabel?: string }>(), { label: 'Usuń', confirmLabel: 'Na pewno?' });
+defineProps<{ label?: string; confirmLabel?: string }>();
 const emit = defineEmits<{ confirm: [] }>();
+
+const { t } = useI18n();
 
 const CONFIRMATION_WINDOW_MS = 4000;
 const isArmed = ref(false);
@@ -23,6 +25,6 @@ onBeforeUnmount(() => clearTimeout(disarmTimer));
 <template>
   <BaseButton :variant="isArmed ? 'danger' : 'ghost'" size="sm" @click="press">
     <AppIcon :name="isArmed ? 'warning' : 'trash'" />
-    {{ isArmed ? confirmLabel : label }}
+    {{ isArmed ? (confirmLabel ?? t('ADMIN_UI.CONFIRM_PROMPT')) : (label ?? t('GENERAL.DELETE')) }}
   </BaseButton>
 </template>

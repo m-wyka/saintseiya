@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { GHOST_USER_CAPTION } from '#shared/utils/content';
-import { USER_ROLE_LABELS } from '#shared/utils/roles';
+import { userRoleLabelKey } from '#shared/utils/roles';
 import { routes } from '#shared/utils/routes';
 
-const route = useRoute('user-id');
-const { data: profile, error } = await useFetch(() => `/api/users/${route.params.id}`);
+const { t } = useI18n();
+const routeId = useRouteParam('id');
+const { data: profile, error } = await useFetch(() => `/api/users/${routeId.value}`);
 
 if (error.value || !profile.value) {
   throw createError({
     statusCode: error.value?.statusCode ?? 404,
-    statusMessage: 'Nie znaleziono użytkownika',
+    statusMessage: t('PROFILE.NOT_FOUND'),
     fatal: true,
   });
 }
@@ -42,29 +42,31 @@ useSeoMeta({ title: () => profile.value?.name ?? '', robots: 'noindex' });
           {{ profile.name }}
         </h1>
         <p class="text-sm text-aqua-500">
-          <template v-if="profile.isGhost"
-            >{{ GHOST_USER_CAPTION }} — archiwalny autor treści z dawnej wersji portalu.</template
-          >
+          <template v-if="profile.isGhost">{{
+            t('PROFILE.GHOST_DESCRIPTION', { caption: t('GENERAL.DELETED_ACCOUNT') })
+          }}</template>
           <template v-else>
-            {{ USER_ROLE_LABELS[profile.role] }}
-            <template v-if="profile.createdAt"> · na portalu od {{ formatLongDate(profile.createdAt) }}</template>
+            {{ t(userRoleLabelKey(profile.role)) }}
+            <template v-if="profile.createdAt">
+              · {{ t('PROFILE.MEMBER_SINCE', { date: formatLongDate(profile.createdAt) }) }}</template
+            >
           </template>
         </p>
       </div>
       <dl class="flex gap-6 text-center">
         <div>
-          <dt class="text-xs text-aqua-500">Posty</dt>
+          <dt class="text-xs text-aqua-500">{{ t('PROFILE.POSTS') }}</dt>
           <dd class="text-2xl font-semibold text-mist">{{ formatNumber(profile.postCount) }}</dd>
         </div>
         <div>
-          <dt class="text-xs text-aqua-500">Komentarze</dt>
+          <dt class="text-xs text-aqua-500">{{ t('PROFILE.COMMENTS') }}</dt>
           <dd class="text-2xl font-semibold text-mist">{{ formatNumber(profile.commentCount) }}</dd>
         </div>
       </dl>
     </header>
 
     <section v-if="profile.latestPosts.length">
-      <SectionHeading title="Ostatnie posty na forum" />
+      <SectionHeading :title="t('PROFILE.LATEST_POSTS')" />
       <ul class="flex flex-col gap-3">
         <li v-for="post in profile.latestPosts" :key="post.id">
           <a
@@ -80,6 +82,6 @@ useSeoMeta({ title: () => profile.value?.name ?? '', robots: 'noindex' });
         </li>
       </ul>
     </section>
-    <EmptyState v-else message="Ten użytkownik nie napisał jeszcze nic na forum." />
+    <EmptyState v-else :message="t('PROFILE.NO_POSTS')" />
   </div>
 </template>

@@ -8,10 +8,10 @@ import StarterKit from '@tiptap/starter-kit';
 export const TOOLBAR_HEADING_LEVELS = [2, 3] as const;
 export const TEXT_ALIGNMENTS = ['left', 'center', 'right'] as const;
 export const TEXT_COLORS = [
-  { label: 'Złoty', value: '#ffcc99' },
-  { label: 'Pomarańczowy', value: '#ff9b0d' },
-  { label: 'Błękitny', value: '#24c4ff' },
-  { label: 'Czerwony', value: '#ff6b5e' },
+  { labelKey: 'EDITOR.COLOR_GOLD', value: '#ffcc99' },
+  { labelKey: 'EDITOR.COLOR_ORANGE', value: '#ff9b0d' },
+  { labelKey: 'EDITOR.COLOR_BLUE', value: '#24c4ff' },
+  { labelKey: 'EDITOR.COLOR_RED', value: '#ff6b5e' },
 ];
 
 const KEPT_HEADING_LEVELS = [2, 3, 4, 5, 6] as const;

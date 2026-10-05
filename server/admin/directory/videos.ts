@@ -4,7 +4,7 @@ import { existingIdSchema } from './inputs';
 
 const VIDEOS_PAGE_SIZE = 20;
 const BARE_YOUTUBE_ID_PATTERN = /^[\w-]{11}$/;
-const NOT_A_YOUTUBE_VIDEO = 'Podaj adres filmu z YouTube albo jego 11-znakowy identyfikator';
+const NOT_A_YOUTUBE_VIDEO = 'VALIDATION.YOUTUBE_VIDEO_REQUIRED';
 
 const youtubeIdOf = (addressOrId: string): string | null =>
   BARE_YOUTUBE_ID_PATTERN.test(addressOrId) ? addressOrId : youtubeIdFromUrl(addressOrId);
@@ -19,9 +19,9 @@ const categoryExists = (categoryId: number): boolean =>
   );
 
 const inputSchema = z.object({
-  title: z.string().trim().min(2, 'Tytuł jest za krótki').max(200, 'Tytuł jest za długi'),
-  description: z.string().trim().max(1000, 'Opis jest za długi').default(''),
-  categoryId: existingIdSchema(categoryExists, 'Wybierz kategorię'),
+  title: z.string().trim().min(2, 'VALIDATION.TITLE_TOO_SHORT').max(200, 'VALIDATION.TITLE_TOO_LONG'),
+  description: z.string().trim().max(1000, 'VALIDATION.DESCRIPTION_TOO_LONG').default(''),
+  categoryId: existingIdSchema(categoryExists, 'VALIDATION.CATEGORY_REQUIRED'),
   youtubeId: z.string().trim().max(300, NOT_A_YOUTUBE_VIDEO).transform(youtubeIdOf).pipe(z.string(NOT_A_YOUTUBE_VIDEO)),
 });
 

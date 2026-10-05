@@ -3,6 +3,8 @@ import type { MoveDirection } from '#shared/utils/ordering';
 
 defineProps<{ itemLabel: string; isFirst: boolean; isLast: boolean }>();
 const emit = defineEmits<{ move: [direction: MoveDirection] }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -11,7 +13,7 @@ const emit = defineEmits<{ move: [direction: MoveDirection] }>();
       variant="ghost"
       size="sm"
       :disabled="isFirst"
-      :aria-label="`Przesuń wyżej: ${itemLabel}`"
+      :aria-label="t('ADMIN_UI.MOVE_UP', { name: itemLabel })"
       @click="emit('move', 'previous')"
     >
       <AppIcon name="chevronDown" class="rotate-180" />
@@ -20,7 +22,7 @@ const emit = defineEmits<{ move: [direction: MoveDirection] }>();
       variant="ghost"
       size="sm"
       :disabled="isLast"
-      :aria-label="`Przesuń niżej: ${itemLabel}`"
+      :aria-label="t('ADMIN_UI.MOVE_DOWN', { name: itemLabel })"
       @click="emit('move', 'next')"
     >
       <AppIcon name="chevronDown" />

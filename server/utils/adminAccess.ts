@@ -8,7 +8,7 @@ const FORBIDDEN = 403;
 export const requireAdminAccess = async (event: H3Event, access: AdminAccess): Promise<Account> => {
   const account = await requireAccount(event);
   if (!canAccess(account, access)) {
-    throw createError({ statusCode: FORBIDDEN, statusMessage: 'Brak uprawnień' });
+    throw createError({ statusCode: FORBIDDEN, statusMessage: 'ERRORS.FORBIDDEN' });
   }
   return account;
 };

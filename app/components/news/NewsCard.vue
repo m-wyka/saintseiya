@@ -5,6 +5,8 @@ import { routes } from '#shared/utils/routes';
 type NewsSummary = InternalApi['/api/news']['get']['items'][number];
 
 defineProps<{ news: NewsSummary }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -13,17 +15,20 @@ defineProps<{ news: NewsSummary }>();
   >
     <header class="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-aqua-500/15 bg-black/30 px-5 py-3">
       <h3 class="min-w-0 flex-1 heading-display text-xl/snug text-gold-300">
-        <NuxtLink :to="routes.news(news.slug)" class="transition after:absolute after:inset-0 hover:text-cosmo-400">
+        <NuxtLinkLocale
+          :to="routes.news(news.slug)"
+          class="transition after:absolute after:inset-0 hover:text-cosmo-400"
+        >
           {{ news.title }}
-        </NuxtLink>
+        </NuxtLinkLocale>
       </h3>
-      <NuxtLink
+      <NuxtLinkLocale
         v-if="news.category"
         :to="routes.newsCategory(news.category.slug)"
         class="relative z-10 rounded-full border border-cosmo-500/40 px-2.5 py-0.5 text-[0.7rem] font-semibold tracking-wide text-cosmo-400 uppercase transition hover:bg-cosmo-500/15"
       >
         {{ news.category.name }}
-      </NuxtLink>
+      </NuxtLinkLocale>
     </header>
 
     <div class="flex gap-5 p-5 max-sm:flex-col">
@@ -53,13 +58,13 @@ defineProps<{ news: NewsSummary }>();
         </time>
         <span class="flex items-center gap-1.5">
           <AppIcon name="comment" class="text-cosmo-500" />
-          {{ pluralize(news.commentCount, 'komentarz', 'komentarze', 'komentarzy') }}
+          {{ t('NEWS_LIST.COMMENT_COUNT', { count: formatNumber(news.commentCount) }, news.commentCount) }}
         </span>
       </p>
       <span
         class="flex items-center gap-1.5 font-semibold text-cosmo-400 transition duration-200 group-hover:gap-2.5 group-hover:text-gold-300"
       >
-        {{ news.hasBody ? 'Czytaj więcej' : 'Otwórz' }}
+        {{ news.hasBody ? t('NEWS_LIST.READ_MORE') : t('NEWS_LIST.OPEN') }}
         <span class="grid size-5 place-items-center rounded-full cosmo-bar text-abyss-950">
           <AppIcon name="plus" class="text-[0.7rem]" />
         </span>

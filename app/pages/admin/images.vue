@@ -12,6 +12,7 @@ interface MediaImage {
   createdAt: string;
 }
 
+const { t } = useI18n();
 const { rows, page, pageCount, total, isLoading, refresh, remove } = useAdminList<MediaImage>('media');
 const { isBusy, errorMessage, run } = useApiAction();
 const toasts = useToastStore();
@@ -29,7 +30,7 @@ const upload = async (event: Event) => {
   files.forEach((file) => form.append('file', file));
   const wasUploaded = await run(() => apiRequest('/api/admin/media', { method: 'POST', body: form }));
   if (wasUploaded) {
-    toasts.success(`Wgrano: ${pluralize(files.length, 'obrazek', 'obrazki', 'obrazków')}`);
+    toasts.success(t('ADMIN_IMAGES.UPLOADED', { count: formatNumber(files.length) }, files.length));
   }
   if (fileInput.value) {
     fileInput.value.value = '';
@@ -47,30 +48,33 @@ const copyAddress = async (media: MediaImage) => {
   errorMessage.value = '';
   try {
     await navigator.clipboard.writeText(addressOf(media));
-    toasts.success('Adres skopiowany do schowka');
+    toasts.success(t('ADMIN_IMAGES.ADDRESS_COPIED'));
   } catch {
-    toasts.error('Nie udało się skopiować adresu');
+    toasts.error(t('ADMIN_IMAGES.ADDRESS_COPY_FAILED'));
   }
 };
 
-useSeoMeta({ title: 'Obrazki' });
+useSeoMeta({ title: () => t('ADMIN_NAV.IMAGES') });
 </script>
 
 <template>
   <div>
-    <AdminHeader title="Obrazki" :subtitle="pluralize(total, 'obrazek', 'obrazki', 'obrazków')">
+    <AdminHeader
+      :title="t('ADMIN_NAV.IMAGES')"
+      :subtitle="t('ADMIN_IMAGES.IMAGE_COUNT', { count: formatNumber(total) }, total)"
+    >
       <input
         ref="fileInput"
         type="file"
         accept="image/jpeg,image/png,image/gif,image/webp"
         multiple
         class="sr-only"
-        aria-label="Wgraj obrazki z dysku"
+        :aria-label="t('ADMIN_IMAGES.UPLOAD_FROM_DISK')"
         @change="upload"
       />
       <BaseButton :busy="isBusy" @click="fileInput?.click()">
         <AppIcon name="plus" />
-        Wgraj obrazki
+        {{ t('ADMIN_IMAGES.UPLOAD') }}
       </BaseButton>
     </AdminHeader>
 
@@ -88,7 +92,7 @@ useSeoMeta({ title: 'Obrazki' });
         <a :href="routes.media(media.image)" target="_blank" rel="noopener" class="block bg-black/40">
           <img
             :src="routes.media(media.thumbnail)"
-            :alt="`Obrazek ${media.width}×${media.height}`"
+            :alt="t('ADMIN_IMAGES.IMAGE_ALT', { width: media.width, height: media.height })"
             class="aspect-square w-full object-contain"
             loading="lazy"
           />
@@ -101,14 +105,14 @@ useSeoMeta({ title: 'Obrazki' });
           <div class="mt-auto flex flex-wrap gap-1.5">
             <BaseButton variant="secondary" size="sm" @click="copyAddress(media)">
               <AppIcon name="link" />
-              Kopiuj adres
+              {{ t('ADMIN_IMAGES.COPY_ADDRESS') }}
             </BaseButton>
             <ConfirmButton @confirm="removeImage(media)" />
           </div>
         </div>
       </li>
     </ul>
-    <EmptyState v-else message="Nie ma jeszcze żadnych obrazków. Wgraj pierwsze z dysku." />
+    <EmptyState v-else :message="t('ADMIN_IMAGES.EMPTY')" />
     <PageStepper v-model="page" :page-count="pageCount" />
   </div>
 </template>

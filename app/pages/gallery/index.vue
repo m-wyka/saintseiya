@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { routes } from '#shared/utils/routes';
 
+const { t } = useI18n();
 const { data: albums } = await useFetch('/api/gallery');
 
-useSeoMeta({ title: 'Galeria' });
+useSeoMeta({ title: () => t('GENERAL.GALLERY') });
 </script>
 
 <template>
   <div>
-    <PageHeading title="Galeria" subtitle="Tapety, avatary, fan arty, komiksy i okładki." />
+    <PageHeading :title="t('GENERAL.GALLERY')" :subtitle="t('GALLERY.SUBTITLE')" />
     <ul class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
       <li v-for="album in albums" :key="album.slug" class="reveal">
-        <NuxtLink
+        <NuxtLinkLocale
           :to="routes.album(album.slug)"
           class="group flex h-full flex-col overflow-hidden panel transition duration-300 ease-cosmo hover:-translate-y-1 hover:border-cosmo-500/60 hover:shadow-aura"
         >
@@ -31,10 +32,10 @@ useSeoMeta({ title: 'Galeria' });
             <h2 class="heading-display text-lg text-gold-300">{{ album.title }}</h2>
             <p class="line-clamp-2 text-xs text-aqua-300">{{ album.description }}</p>
             <p class="mt-auto pt-2 text-xs font-semibold text-cosmo-400">
-              {{ pluralize(album.photoCount, 'grafika', 'grafiki', 'grafik') }}
+              {{ t('GALLERY.PHOTO_COUNT', { count: formatNumber(album.photoCount) }, album.photoCount) }}
             </p>
           </div>
-        </NuxtLink>
+        </NuxtLinkLocale>
       </li>
     </ul>
   </div>

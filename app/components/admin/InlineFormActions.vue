@@ -1,6 +1,8 @@
 <script setup lang="ts">
 defineProps<{ isBusy: boolean; errorMessage: string }>();
 const emit = defineEmits<{ cancel: [] }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -12,9 +14,9 @@ const emit = defineEmits<{ cancel: [] }>();
     <div class="flex flex-wrap gap-2">
       <BaseButton type="submit" :busy="isBusy">
         <AppIcon name="check" />
-        Zapisz
+        {{ t('GENERAL.SAVE') }}
       </BaseButton>
-      <BaseButton variant="ghost" @click="emit('cancel')">Anuluj</BaseButton>
+      <BaseButton variant="ghost" @click="emit('cancel')">{{ t('GENERAL.CANCEL') }}</BaseButton>
     </div>
   </div>
 </template>

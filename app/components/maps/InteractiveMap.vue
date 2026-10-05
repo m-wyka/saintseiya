@@ -7,6 +7,8 @@ type MapArea = InteractiveMapData['areas'][number];
 
 const props = defineProps<{ map: InteractiveMapData }>();
 
+const { t } = useI18n();
+
 const showsAllAreas = ref(false);
 const openedArea = ref<MapArea | null>(null);
 const isDialogOpen = computed({
@@ -42,10 +44,10 @@ const uniqueAreas = computed(() => {
 <template>
   <div class="flex flex-col gap-5">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <p class="text-sm text-aqua-300">Najedź na mapę lub dotknij wybranego miejsca, aby przejść dalej.</p>
+      <p class="text-sm text-aqua-300">{{ t('MAP_VIEW.HINT') }}</p>
       <BaseButton variant="secondary" size="sm" :aria-pressed="showsAllAreas" @click="showsAllAreas = !showsAllAreas">
         <AppIcon name="eye" />
-        {{ showsAllAreas ? 'Ukryj obszary' : 'Pokaż wszystkie obszary' }}
+        {{ showsAllAreas ? t('MAP_VIEW.HIDE_AREAS') : t('MAP_VIEW.SHOW_ALL_AREAS') }}
       </BaseButton>
     </div>
 
@@ -71,7 +73,7 @@ const uniqueAreas = computed(() => {
           >
             <span class="map-area-label">{{ area.label }}</span>
           </button>
-          <NuxtLink
+          <NuxtLinkLocale
             v-else-if="area.link"
             :to="area.link"
             :target="isExternal(area.link) ? '_blank' : undefined"
@@ -82,13 +84,13 @@ const uniqueAreas = computed(() => {
             :aria-label="area.label"
           >
             <span class="map-area-label">{{ area.label }}</span>
-          </NuxtLink>
+          </NuxtLinkLocale>
         </template>
       </div>
     </div>
 
     <section aria-labelledby="map-areas-heading">
-      <SectionHeading id="map-areas-heading" title="Miejsca na mapie" />
+      <SectionHeading id="map-areas-heading" :title="t('MAP_VIEW.PLACES')" />
       <ul class="flex flex-wrap gap-2">
         <li v-for="area in uniqueAreas" :key="area.id">
           <button
@@ -99,13 +101,13 @@ const uniqueAreas = computed(() => {
           >
             {{ area.label }}
           </button>
-          <NuxtLink
+          <NuxtLinkLocale
             v-else-if="area.link"
             :to="area.link"
             class="block rounded-full border border-aqua-500/30 px-3 py-1 text-xs text-aqua-200 transition duration-200 hover:border-cosmo-500 hover:text-gold-300"
           >
             {{ area.label }}
-          </NuxtLink>
+          </NuxtLinkLocale>
         </li>
       </ul>
     </section>

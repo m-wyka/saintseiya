@@ -67,8 +67,10 @@ describe('news administration', () => {
   it('rejects invalid input with the first problem as the message', () => {
     const editor = createAccount({ role: 'admin' });
 
-    expect(() => newsResource.create({ ...validInput, title: 'A' }, editor)).toThrowError(/Tytuł jest za krótki/);
-    expect(() => newsResource.create({ ...validInput, slug: 'Zły Adres' }, editor)).toThrowError(/małe litery/);
+    expect(() => newsResource.create({ ...validInput, title: 'A' }, editor)).toThrowError('VALIDATION.TITLE_TOO_SHORT');
+    expect(() => newsResource.create({ ...validInput, slug: 'Zły Adres' }, editor)).toThrowError(
+      'VALIDATION.SLUG_INVALID',
+    );
   });
 
   it('removes a news together with its comments', () => {

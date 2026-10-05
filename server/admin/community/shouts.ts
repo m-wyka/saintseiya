@@ -3,7 +3,7 @@ import type { AdminListQuery } from '../../utils/adminResource';
 import { visibilityFilter } from './visibility';
 
 const SHOUTS_PAGE_SIZE = 40;
-const SHOUT_NOT_FOUND = 'Nie znaleziono wpisu';
+const SHOUT_NOT_FOUND = 'ERRORS.SHOUT_NOT_FOUND';
 
 export const moderatedShouts = ({ page, search, filter }: AdminListQuery) => {
   const db = useDb();

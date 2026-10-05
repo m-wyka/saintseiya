@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { forumSortOrderSchema } from './forumInputs';
 
 const inputSchema = z.object({
-  name: z.string().trim().min(2, 'Nazwa jest za krótka').max(100, 'Nazwa jest za długa'),
+  name: z.string().trim().min(2, 'VALIDATION.NAME_TOO_SHORT').max(100, 'VALIDATION.NAME_TOO_LONG'),
   sortOrder: forumSortOrderSchema,
 });
 
@@ -36,7 +36,7 @@ export const forumCategoriesResource = defineAdminResource({
   },
   remove: (id) => {
     if (hasForums(id)) {
-      throw conflict('W tej kategorii są działy. Najpierw przenieś je lub usuń.');
+      throw conflict('ERRORS.FORUM_CATEGORY_HAS_FORUMS');
     }
     useDb().delete(schema.forumCategories).where(eq(schema.forumCategories.id, id)).run();
   },

@@ -70,7 +70,10 @@ Przepisanie portalu fanowskiego o anime Saint Seiya (Rycerze Zodiaku) ze starego
 - **Panel administratora**: zasób = plik w `server/admin/` zbudowany przez `defineAdminResource` (walidacja Zod, `list/find/create/update/remove`), zarejestrowany w `server/admin/index.ts` lub `server/admin/groups/*`. Obsługują go wspólne handlery `server/api/admin/[resource]/`. Strony panelu używają `useAdminList`, `useAdminForm`, `SimpleCrud`, `AdminTable`.
 - **Uprawnienia**: `canAccess` / `hasPermission` z `shared/utils/roles.ts`; serwer zawsze sprawdza je sam (`requireAdminAccess`), front tylko ukrywa elementy.
 - **Adresy**: budować przez `routes` z `shared/utils/routes.ts`. Nowy segment na poziomie głównym dopisać do `RESERVED_ROOT_SEGMENTS`.
-- **Pliki stron po angielsku, adresy po polsku**: pliki w `app/pages` mają angielskie nazwy (`news/`, `admin/users.vue`), a polski adres nadaje słownik `PAGE_FILE_SEGMENT_URLS` w `shared/utils/routes.ts` (hook `pages:extend` w `nuxt.config.ts`). Nowy plik strony = nowy wpis w słowniku; nazwy tras (`useRoute('news-slug')`) są angielskie.
+- **Pliki stron po angielsku, adresy w dwóch językach**: pliki w `app/pages` mają angielskie nazwy (`news/`, `admin/users.vue`). Angielski adres (`/en/news`) wynika z nazwy pliku, polski (`/newsy`) ze słownika `PAGE_FILE_SEGMENT_URLS` w `shared/utils/routes.ts`; `nuxt.config.ts` składa z tego `i18n.pages`. Nowy plik strony = nowy wpis w słowniku.
+- **Tłumaczenia (i18n)**: `@nuxtjs/i18n`, domyślny `pl` bez prefiksu, `en` pod `/en`. Teksty leżą w `i18n/locales/pl.json` i `en.json` jako płaskie klucze `SEKCJA.NAZWA` wielkimi literami (np. `GENERAL.HOME`), bez głębszych zagnieżdżeń; oba pliki mają ten sam zestaw kluczy (pilnuje tego `tests/unit/messages.test.ts`). W komponencie `const { t } = useI18n()`, liczba mnoga przez `t(klucz, { count: formatNumber(n) }, n)` z formami `jeden | kilka | wiele`.
+- **Odnośniki i nawigacja**: `routes.*` zwraca polskie ścieżki; na język przekłada je `<NuxtLinkLocale>` (także w `BaseButton`), a w kodzie `navigateTo(localePath(...))`. Porównania z bieżącym adresem przez `useCurrentSitePath()`, parametry trasy przez `useRouteParam()`.
+- **Komunikaty z serwera**: serwer nie tłumaczy — w `statusMessage` i komunikatach Zod zwraca klucz (`ERRORS.*`, `VALIDATION.*`), z parametrami przez `messageKey()` z `shared/utils/messages.ts`. Front tłumaczy je w `apiErrorMessage` / `translateMessage`.
 - **Podzapytania skorelowane w Drizzle**: kolumny przez `qualified()` z `server/utils/sqlHelpers.ts`, inaczej nazwa tabeli znika i warunek porównuje kolumnę samą ze sobą.
 - **Testy**: logika serwera w `tests/integration` na tymczasowej bazie (`tests/setup.ts`, `fixtures.ts`); nowy plik w `server/utils/` dopisać do listy w `tests/setup.ts`. Ścieżki użytkownika w `tests/e2e`, strony otwierać przez `visit()`.
 
@@ -79,7 +82,7 @@ Przepisanie portalu fanowskiego o anime Saint Seiya (Rycerze Zodiaku) ze starego
 - Kod samokomentujący: nazwy zmiennych i funkcji mówią, co robią. Komentarz tylko gdy bez niego nie da się zrozumieć „dlaczego”.
 - Proste, lekkie rozwiązania. Bez zbędnych abstrakcji, bez ciężkich obliczeń tam, gdzie wystarczy prosta funkcja.
 - Bez błędów: każda zmiana przechodzi lint, typecheck i testy, zanim uznam ją za skończoną.
-- Identyfikatory w kodzie po angielsku, teksty interfejsu po polsku.
+- Identyfikatory w kodzie po angielsku. Tekstów interfejsu nie wpisuję w kod — każdy trafia do `i18n/locales/pl.json` i `en.json`.
 
 ## Zasady frontu
 

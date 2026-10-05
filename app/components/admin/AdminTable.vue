@@ -8,13 +8,15 @@ const props = defineProps<{
   emptyMessage?: string;
 }>();
 
+const { t } = useI18n();
+
 const NAMING_KEYS = ['title', 'name', 'question', 'label'];
 
 const rowLabel = (row: Row): string => {
   const values = row as Record<string, unknown>;
   const candidateKeys = [...NAMING_KEYS, ...props.columns.map((column) => column.key)];
   const namingKey = candidateKeys.find((key) => typeof values[key] === 'string' && values[key]);
-  return namingKey ? String(values[namingKey]) : `pozycja ${row.id}`;
+  return namingKey ? String(values[namingKey]) : t('ADMIN_UI.ROW_FALLBACK_NAME', { id: row.id });
 };
 </script>
 
@@ -32,7 +34,7 @@ const rowLabel = (row: Row): string => {
           >
             {{ column.label }}
           </th>
-          <th scope="col" class="px-4 py-2.5 text-right font-semibold">Akcje</th>
+          <th scope="col" class="px-4 py-2.5 text-right font-semibold">{{ t('GENERAL.ACTIONS') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-aqua-500/10">
@@ -46,7 +48,11 @@ const rowLabel = (row: Row): string => {
             <slot :name="`cell-${column.key}`" :row="row">{{ cellText(row, column.key) }}</slot>
           </td>
           <td class="px-4 py-2.5 align-middle">
-            <div class="flex items-center justify-end gap-1.5" role="group" :aria-label="`Akcje: ${rowLabel(row)}`">
+            <div
+              class="flex items-center justify-end gap-1.5"
+              role="group"
+              :aria-label="t('ADMIN_UI.ROW_ACTIONS', { name: rowLabel(row) })"
+            >
               <slot name="actions" :row="row" />
             </div>
           </td>
@@ -54,7 +60,7 @@ const rowLabel = (row: Row): string => {
       </tbody>
     </table>
     <p v-if="!rows.length" class="px-4 py-10 text-center text-sm text-aqua-500">
-      {{ emptyMessage ?? 'Brak pozycji do wyświetlenia.' }}
+      {{ emptyMessage ?? t('ADMIN_UI.EMPTY_TABLE') }}
     </p>
   </div>
 </template>

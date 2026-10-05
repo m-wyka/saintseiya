@@ -6,7 +6,7 @@ import type { Account } from './accounts';
 
 const BAD_REQUEST = 400;
 const CONFLICT = 409;
-const INVALID_INPUT_MESSAGE = 'Nieprawidłowe dane';
+const INVALID_INPUT_MESSAGE = 'ERRORS.INVALID_INPUT';
 
 export const adminListQuerySchema = z.object({
   page: pageNumberSchema,
@@ -69,7 +69,7 @@ export const slugInputSchema = z
   .string()
   .trim()
   .max(120)
-  .regex(/^[a-z0-9-]*$/, 'Adres może zawierać małe litery, cyfry i myślniki')
+  .regex(/^[a-z0-9-]*$/, 'VALIDATION.SLUG_INVALID')
   .default('');
 
 export const conflict = (message: string) => createError({ statusCode: CONFLICT, statusMessage: message });
