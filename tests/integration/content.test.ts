@@ -67,6 +67,13 @@ describe('page reading', () => {
     ]);
   });
 
+  it('leaves draft ancestors out of the breadcrumbs', () => {
+    const draftHub = createPage({ path: 'redakcja', title: 'Redakcja', kind: 'hub', status: 'draft' });
+    createPage({ path: 'redakcja/zasady', title: 'Zasady', parentId: draftHub.id });
+
+    expect(findPublishedPage('redakcja/zasady')!.breadcrumbs).toEqual([]);
+  });
+
   it('does not expose drafts or unknown addresses', () => {
     createPage({ path: 'ataki', status: 'draft' });
 

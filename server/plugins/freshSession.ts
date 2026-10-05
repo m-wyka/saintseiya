@@ -9,6 +9,6 @@ export default defineNitroPlugin(() => {
       throw createError({ statusCode: 401, statusMessage: 'ERRORS.SESSION_EXPIRED' });
     }
     session.user = sessionUserOf(account);
-    await setUserSession(event, { user: session.user });
+    await storeSessionUser(event, account);
   });
 });

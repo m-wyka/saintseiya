@@ -65,7 +65,8 @@ export const storeUploadedImage = async (
   const thumbnail = thumbnailPathFor(image, THUMBNAILS_MEDIA_FOLDER);
   const storedFile = await writeStoredFile(event, image, upload.data);
   await writeThumbnail(storedFile, join(uploadsDirOf(event), thumbnail));
-  return { image, thumbnail, width: metadata.width, height: metadata.pageHeight ?? metadata.height };
+  const { width, height } = metadata.autoOrient;
+  return { image, thumbnail, width, height: metadata.pageHeight ?? height };
 };
 
 export const storeUploadedFile = async (event: H3Event, upload: MultiPartData, folder: string): Promise<StoredFile> => {

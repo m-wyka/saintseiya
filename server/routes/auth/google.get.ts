@@ -4,7 +4,7 @@ export default defineOAuthGoogleEventHandler({
   config: { scope: ['openid', 'email', 'profile'] },
   async onSuccess(event, { user }: { user: GoogleProfile }) {
     const account = signInWithGoogle(event, user);
-    await setUserSession(event, { user: sessionUserOf(account), loggedInAt: Date.now() });
+    await storeSessionUser(event, account);
     return sendRedirect(event, '/');
   },
   onError(event, error) {

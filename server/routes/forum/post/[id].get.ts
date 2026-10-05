@@ -7,5 +7,5 @@ export default defineEventHandler(async (event) => {
   const polishPath = routes.thread(location.threadId);
   const threadPath = locale === DEFAULT_LOCALE ? polishPath : withLocalePrefix(englishPagePath(polishPath), locale);
   const pageQuery = location.page > 1 ? `?page=${location.page}` : '';
-  return sendRedirect(event, `${threadPath}${pageQuery}#post-${location.postId}`, 301);
+  return sendRedirect(event, `${threadPath}${pageQuery}#post-${location.postId}`);
 });

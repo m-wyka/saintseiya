@@ -45,6 +45,8 @@ const SERVER_UTILITY_MODULES = [
   '../server/utils/adminAccess',
   '../server/utils/adminResource',
   '../server/utils/uploads',
+  '../server/utils/mediaUsage',
+  '../server/utils/mapImages',
   '../server/utils/news',
   '../server/utils/pages',
   '../server/utils/maps',
@@ -80,7 +82,7 @@ expose({
   useRuntimeConfig: () => testRuntimeConfig,
   getUserSession: vi.fn(async () => ({})),
   requireUserSession: vi.fn(),
-  setUserSession: vi.fn(),
+  replaceUserSession: vi.fn(),
   clearUserSession: vi.fn(),
 });
 

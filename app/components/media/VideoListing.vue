@@ -4,8 +4,8 @@ import { routes } from '#shared/utils/routes';
 const props = defineProps<{ categorySlug?: string }>();
 
 const { t } = useI18n();
-const route = useRoute();
-const page = computed(() => Number(route.query.page) || 1);
+const page = usePageQuery();
+const redirectPastLastPage = useLastPageRedirect();
 const { data, error } = await useFetch('/api/videos', {
   query: computed(() => ({ page: page.value, category: props.categorySlug })),
 });
@@ -17,6 +17,8 @@ if (error.value) {
     fatal: true,
   });
 }
+
+await redirectPastLastPage(data.value?.videos);
 
 const currentCategory = computed(() => data.value?.categories.find((category) => category.slug === props.categorySlug));
 

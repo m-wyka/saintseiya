@@ -1,10 +1,16 @@
 <script setup lang="ts">
-const props = defineProps<{ postId: number; bodyHtml: string }>();
+const props = defineProps<{ postId: number }>();
 const emit = defineEmits<{ saved: []; cancel: [] }>();
 
-const editedHtml = ref(props.bodyHtml);
+const editedHtml = ref<string>();
 const { isBusy, errorMessage, run } = useApiAction();
 const { t } = useI18n();
+
+onMounted(() =>
+  run(async () => {
+    editedHtml.value = (await $fetch(`/api/forum/posts/${props.postId}`)).bodyHtml;
+  }),
+);
 
 const save = async () => {
   const wasSaved = await run(() =>
@@ -18,12 +24,8 @@ const save = async () => {
 
 <template>
   <form class="flex flex-1 flex-col gap-3 px-5 py-4" @submit.prevent="save">
-    <ClientOnly>
-      <RichTextEditor v-model="editedHtml" :label="t('POSTS.BODY_LABEL')" />
-      <template #fallback>
-        <div class="h-48 animate-pulse rounded-xl border border-aqua-500/20 bg-black/30" />
-      </template>
-    </ClientOnly>
+    <RichTextEditor v-if="editedHtml !== undefined" v-model="editedHtml" :label="t('POSTS.BODY_LABEL')" />
+    <div v-else class="h-48 animate-pulse rounded-xl border border-aqua-500/20 bg-black/30" />
     <p v-if="errorMessage" class="flex items-center gap-2 text-sm text-danger" role="alert">
       <AppIcon name="warning" />
       {{ errorMessage }}

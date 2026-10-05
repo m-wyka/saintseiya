@@ -35,6 +35,8 @@ export const useAdminList = <Row extends { id: number }>(resource: string) => {
 
   const rows = computed<Row[]>(() => (Array.isArray(data.value) ? data.value : (data.value?.items ?? [])));
   const pageCount = computed(() => (Array.isArray(data.value) ? 1 : (data.value?.pageCount ?? 1)));
+  watch(pageCount, (lastPage) => (page.value = Math.min(page.value, lastPage)));
+
   const total = computed(() => (Array.isArray(data.value) ? data.value.length : (data.value?.total ?? 0)));
 
   const remove = async (id: number) => {

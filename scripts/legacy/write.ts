@@ -280,7 +280,6 @@ const writeForum = (tx: Tx, { data, plan, rewriter, report }: WriteContext) => {
     schema.forums,
     plan.forums.map((forum) => {
       const threads = threadsByForum.get(forum.id) ?? [];
-      const lastPostAt = Math.max(0, ...threads.map((thread) => thread.lastPostAt));
       return {
         id: plan.ids.forums.get(forum.id)!,
         categoryId: plan.ids.forumCategories.get(forum.categoryId)!,
@@ -291,7 +290,6 @@ const writeForum = (tx: Tx, { data, plan, rewriter, report }: WriteContext) => {
         sortOrder: forum.sortOrder,
         threadCount: threads.length,
         postCount: threads.reduce((total, thread) => total + threadPostCount(thread.id), 0),
-        lastPostAt: optionalDate(lastPostAt),
         legacyId: forum.id,
       };
     }),

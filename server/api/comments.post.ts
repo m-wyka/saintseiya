@@ -11,9 +11,10 @@ const bodySchema = z.object({
 export default defineEventHandler(async (event) => {
   const account = await requireAccount(event);
   const body = await readValidatedBody(event, bodySchema.parse);
+  const bodyHtml = cleanUserHtml(body.bodyHtml);
   assertWithinRateLimit(`write:${account.id}`);
   await verifyCaptcha(event, body.captchaToken);
-  const comment = createComment(body.targetKind, body.targetId, account, cleanUserHtml(body.bodyHtml));
+  const comment = createComment(body.targetKind, body.targetId, account, bodyHtml);
   setResponseStatus(event, 201);
   return { id: comment.id };
 });

@@ -97,8 +97,6 @@ export const routes = {
   map: (slug: string) => `/mapy/${slug}`,
   links: () => '/linki',
   downloads: () => '/pliki',
-  polls: () => '/ankiety',
-  shoutbox: () => '/shoutbox',
   user: (id: number) => `/uzytkownik/${id}`,
   media: (storedPath: string) => `${MEDIA_BASE_URL}/${storedPath.split('/').map(encodeURIComponent).join('/')}`,
 };

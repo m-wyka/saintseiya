@@ -18,8 +18,14 @@ watch(isOpen, (shouldOpen) => {
   }
 });
 
+let pressStartedOnBackdrop = false;
+
+const rememberPressTarget = (event: MouseEvent) => {
+  pressStartedOnBackdrop = event.target === dialog.value;
+};
+
 const closeOnBackdrop = (event: MouseEvent) => {
-  if (event.target === dialog.value) {
+  if (pressStartedOnBackdrop && event.target === dialog.value) {
     isOpen.value = false;
   }
 };
@@ -32,6 +38,7 @@ const closeOnBackdrop = (event: MouseEvent) => {
     :class="compact ? 'w-[min(26rem,94vw)]' : 'w-[min(52rem,94vw)]'"
     :aria-label="title"
     @close="isOpen = false"
+    @mousedown="rememberPressTarget"
     @click="closeOnBackdrop"
   >
     <div class="flex max-h-[85dvh] flex-col">

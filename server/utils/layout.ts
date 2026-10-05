@@ -1,4 +1,5 @@
-import { asc, count, eq, getTableColumns } from 'drizzle-orm';
+import { asc, count, eq, getTableColumns, sql } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 import type { ContentLocale } from '#shared/utils/locales';
 import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { schema, useDb } from './db';
@@ -33,16 +34,25 @@ const navigationSections = (locale: ContentLocale) => {
   }));
 };
 
-const totalOf = (table: typeof schema.posts | typeof schema.threads | typeof schema.news | typeof schema.comments) =>
-  useDb().select({ total: count() }).from(table).get()?.total ?? 0;
+const totalOf = (table: typeof schema.users | typeof schema.news | typeof schema.comments, filter: SQL) =>
+  useDb().select({ total: count() }).from(table).where(filter).get()?.total ?? 0;
+
+const publicForumTotals = () =>
+  useDb()
+    .select({
+      threadCount: sql<number>`coalesce(sum(${schema.forums.threadCount}), 0)`,
+      postCount: sql<number>`coalesce(sum(${schema.forums.postCount}), 0)`,
+    })
+    .from(schema.forums)
+    .where(eq(schema.forums.isStaffOnly, false))
+    .get();
 
 const siteStatistics = () => ({
-  memberCount:
-    useDb().select({ total: count() }).from(schema.users).where(eq(schema.users.isGhost, false)).get()?.total ?? 0,
-  newsCount: totalOf(schema.news),
-  threadCount: totalOf(schema.threads),
-  postCount: totalOf(schema.posts),
-  commentCount: totalOf(schema.comments),
+  memberCount: totalOf(schema.users, eq(schema.users.isGhost, false)),
+  newsCount: totalOf(schema.news, eq(schema.news.status, 'published')),
+  threadCount: publicForumTotals()?.threadCount ?? 0,
+  postCount: publicForumTotals()?.postCount ?? 0,
+  commentCount: totalOf(schema.comments, eq(schema.comments.isHidden, false)),
 });
 
 export const siteLayout = (locale: ContentLocale = DEFAULT_LOCALE) => ({

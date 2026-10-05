@@ -21,6 +21,6 @@ export default defineEventHandler(async (event) => {
     .where(eq(schema.users.id, account.id))
     .returning()
     .get();
-  await setUserSession(event, { user: sessionUserOf(promoted), loggedInAt: Date.now() });
+  await storeSessionUser(event, promoted);
   return sessionUserOf(promoted);
 });

@@ -15,6 +15,13 @@
       "when": 1791196258086,
       "tag": "0001_blue_bucky",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791202946103,
+      "tag": "0002_brief_revanche",
+      "breakpoints": true
     }
   ]
 }

@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { existsSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { sanitizedHtmlToText } from '../utils/html';
 import * as schema from './schema';
 
 const DEFAULT_DB_PATH = '.data/saintseiya.db';
@@ -15,6 +16,9 @@ const openDatabase = (path: string) => {
   sqlite.pragma('busy_timeout = 5000');
   sqlite.function('lower_unicode', { deterministic: true }, (value) =>
     typeof value === 'string' ? value.toLocaleLowerCase('pl') : value,
+  );
+  sqlite.function('searchable_text', { deterministic: true }, (value) =>
+    typeof value === 'string' ? sanitizedHtmlToText(value).toLocaleLowerCase('pl') : value,
   );
   return drizzle(sqlite, { schema });
 };

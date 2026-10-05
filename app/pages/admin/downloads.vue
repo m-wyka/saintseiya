@@ -25,6 +25,7 @@ const columns = computed(() => [
 ]);
 
 const { rows, total, isLoading, refresh, remove } = useAdminList<DownloadRow>('downloads');
+const fetchStored = useAdminRecord();
 const editedDownload = ref<DownloadRow | null>(null);
 const isFormOpen = ref(false);
 
@@ -33,9 +34,12 @@ const openNew = () => {
   isFormOpen.value = true;
 };
 
-const openExisting = (download: DownloadRow) => {
-  editedDownload.value = download;
-  isFormOpen.value = true;
+const openExisting = async (id: number) => {
+  const stored = await fetchStored<DownloadRow>('downloads', id);
+  if (stored) {
+    editedDownload.value = stored;
+    isFormOpen.value = true;
+  }
 };
 
 const closeForm = () => {
@@ -83,7 +87,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.DOWNLOADS') });
         <time :datetime="row.createdAt" class="whitespace-nowrap">{{ formatLongDate(row.createdAt) }}</time>
       </template>
       <template #actions="{ row }">
-        <BaseButton variant="ghost" size="sm" @click="openExisting(row)">
+        <BaseButton variant="ghost" size="sm" @click="openExisting(row.id)">
           <AppIcon name="edit" />
           {{ t('GENERAL.EDIT') }}
         </BaseButton>

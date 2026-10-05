@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { messageKey } from './messages';
 
 const USER_NAME_MIN_LENGTH = 3;
-const USER_NAME_MAX_LENGTH = 30;
+export const USER_NAME_MAX_LENGTH = 30;
 const USER_NAME_PATTERN = /^[\p{L}\p{N}][\p{L}\p{N} ._-]*$/u;
 
 export const userNameKey = (name: string): string => name.trim().replace(/\s+/g, ' ').toLocaleLowerCase('pl');

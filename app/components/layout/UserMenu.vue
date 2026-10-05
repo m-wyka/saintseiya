@@ -29,7 +29,7 @@ const signOut = async () => {
       </NuxtLinkLocale>
       <BaseButton v-if="user.role !== 'user'" to="/admin" variant="secondary" size="sm">
         <AppIcon name="settings" />
-        {{ t('LAYOUT.PANEL') }}
+        <span class="max-sm:sr-only">{{ t('LAYOUT.PANEL') }}</span>
       </BaseButton>
       <BaseButton variant="ghost" size="sm" @click="signOut">
         <AppIcon name="logout" />

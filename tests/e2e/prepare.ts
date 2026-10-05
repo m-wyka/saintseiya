@@ -132,7 +132,6 @@ const seed = async () => {
       description: 'Dyskusje o bohaterach.',
       threadCount: 1,
       postCount: 2,
-      lastPostAt: new Date('2019-07-19T10:00:00Z'),
       legacyId: 20,
     })
     .returning()

@@ -31,7 +31,10 @@ const {
 } = useAdminList<SectionRow>('navigation-sections');
 const { rows: links, refresh: refreshLinks, remove: removeLink } = useAdminList<LinkRow>('navigation-links');
 const toasts = useToastStore();
+const fetchStored = useAdminRecord();
 const openForm = ref<string | null>(null);
+const editedSection = ref<SectionRow | null>(null);
+const editedLink = ref<LinkRow | null>(null);
 
 const sectionsWithLinks = computed(() =>
   sections.value.map((section) => ({
@@ -45,6 +48,16 @@ const refreshNavigation = () => Promise.all([refreshSections(), refreshLinks()])
 
 const closeForm = () => {
   openForm.value = null;
+};
+
+const editSection = async (id: number) => {
+  editedSection.value = await fetchStored<SectionRow>('navigation-sections', id);
+  openForm.value = editedSection.value && sectionFormOf(id);
+};
+
+const editLink = async (id: number) => {
+  editedLink.value = await fetchStored<LinkRow>('navigation-links', id);
+  openForm.value = editedLink.value && linkFormOf(id);
 };
 
 const showSaved = async () => {
@@ -92,7 +105,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.NAVIGATION') });
       <header class="border-b border-aqua-500/15 bg-black/30 px-4 py-3">
         <NavigationSectionForm
           v-if="openForm === sectionFormOf(section.id)"
-          :section="section"
+          :section="editedSection"
           @saved="showSaved"
           @cancel="closeForm"
         />
@@ -109,7 +122,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.NAVIGATION') });
               <AppIcon name="plus" />
               {{ t('ADMIN_NAVIGATION.ADD_LINK') }}
             </BaseButton>
-            <BaseButton variant="ghost" size="sm" @click="openForm = sectionFormOf(section.id)">
+            <BaseButton variant="ghost" size="sm" @click="editSection(section.id)">
               <AppIcon name="edit" />
               {{ t('GENERAL.EDIT') }}
             </BaseButton>
@@ -121,9 +134,9 @@ useSeoMeta({ title: () => t('ADMIN_NAV.NAVIGATION') });
       <ul class="divide-y divide-aqua-500/10">
         <li v-for="(link, linkIndex) in section.links" :key="link.id">
           <NavigationLinkForm
-            v-if="openForm === linkFormOf(link.id)"
+            v-if="openForm === linkFormOf(link.id) && editedLink"
             class="p-4"
-            :link="link"
+            :link="editedLink"
             :section-options="sectionOptions"
             @saved="showSaved"
             @cancel="closeForm"
@@ -151,7 +164,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.NAVIGATION') });
                 :is-last="linkIndex === section.links.length - 1"
                 @move="move('links', link.id, $event)"
               />
-              <BaseButton variant="ghost" size="sm" @click="openForm = linkFormOf(link.id)">
+              <BaseButton variant="ghost" size="sm" @click="editLink(link.id)">
                 <AppIcon name="edit" />
                 {{ t('GENERAL.EDIT') }}
               </BaseButton>

@@ -18,7 +18,7 @@ const breadcrumbsOf = (path: string, locale: ContentLocale) => {
   return useDb()
     .select({ title: localized(schema.pages.title, locale), path: schema.pages.path })
     .from(schema.pages)
-    .where(inArray(schema.pages.path, paths))
+    .where(and(inArray(schema.pages.path, paths), eq(schema.pages.status, 'published')))
     .orderBy(sql`LENGTH(${schema.pages.path})`)
     .all();
 };

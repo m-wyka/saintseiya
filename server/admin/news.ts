@@ -1,4 +1,4 @@
-import { and, count, desc, eq, like, ne } from 'drizzle-orm';
+import { and, count, desc, eq, like, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { CONTENT_STATUSES } from '#shared/utils/content';
 
@@ -78,7 +78,7 @@ export const newsResource = defineAdminResource({
       .innerJoin(schema.users, eq(schema.users.id, schema.news.authorId))
       .leftJoin(schema.newsCategories, eq(schema.newsCategories.id, schema.news.categoryId))
       .where(where)
-      .orderBy(desc(schema.news.publishedAt), desc(schema.news.id))
+      .orderBy(desc(sql`coalesce(${schema.news.publishedAt}, ${schema.news.createdAt})`), desc(schema.news.id))
       .limit(NEWS_PAGE_SIZE)
       .offset(pageOffset(page, NEWS_PAGE_SIZE))
       .all();

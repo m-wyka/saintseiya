@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { withLocalePrefix } from '#shared/utils/locales';
+import { MINIMUM_SEARCH_LENGTH } from '#shared/utils/search';
 import { MAIN_NAVIGATION } from '~/utils/mainNavigation';
 
-const MINIMUM_PHRASE_LENGTH = 3;
 const TYPING_PAUSE_MS = 250;
 const NuxtLinkLocale = resolveComponent('NuxtLinkLocale');
 
@@ -13,7 +13,7 @@ const route = useRoute();
 const typedPhrase = ref('');
 const searchedPhrase = ref('');
 const phrase = computed(() => typedPhrase.value.trim());
-const isPhraseTooShort = computed(() => phrase.value.length < MINIMUM_PHRASE_LENGTH);
+const isPhraseTooShort = computed(() => phrase.value.length < MINIMUM_SEARCH_LENGTH);
 
 const {
   data: results,
@@ -98,7 +98,7 @@ onBeforeUnmount(() => {
         </ul>
       </nav>
       <p v-else-if="isPhraseTooShort" class="py-6 text-center text-sm text-aqua-300">
-        {{ t('SEARCH.PHRASE_TOO_SHORT', { count: MINIMUM_PHRASE_LENGTH }) }}
+        {{ t('SEARCH.PHRASE_TOO_SHORT', { count: MINIMUM_SEARCH_LENGTH }) }}
       </p>
       <p v-else-if="isSearching && !sections.length" class="py-6 text-center text-sm text-aqua-300">
         {{ t('GENERAL.LOADING') }}

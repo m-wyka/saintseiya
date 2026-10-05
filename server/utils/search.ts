@@ -4,14 +4,14 @@ import type { SQLiteColumn } from 'drizzle-orm/sqlite-core';
 import type { ContentLocale } from '#shared/utils/locales';
 import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { routes } from '#shared/utils/routes';
+import { MINIMUM_SEARCH_LENGTH } from '#shared/utils/search';
 import { schema, useDb } from './db';
 import { localized } from './translations';
 
 const RESULTS_PER_KIND = 6;
 const EXCERPT_RADIUS = 90;
-export const MINIMUM_SEARCH_LENGTH = 3;
 
-export interface SearchResult {
+interface SearchResult {
   title: string;
   url: string;
   excerpt: string;
@@ -22,6 +22,9 @@ const likePattern = (phrase: string): string => `%${phrase.toLocaleLowerCase('pl
 
 const contains = (column: SQLiteColumn | SQL, pattern: string) =>
   sql`lower_unicode(${column}) LIKE ${pattern} ESCAPE '\\'`;
+
+const htmlContains = (column: SQLiteColumn | SQL, pattern: string) =>
+  sql`searchable_text(${column}) LIKE ${pattern} ESCAPE '\\'`;
 
 const excerptAround = (html: string, phrase: string): string => {
   const text = htmlToPlainText(html);
@@ -41,7 +44,7 @@ const searchNews = (phrase: string, pattern: string, locale: ContentLocale): Sea
     .where(
       and(
         eq(schema.news.status, 'published'),
-        sql`(${contains(title, pattern)} OR ${contains(excerptHtml, pattern)} OR ${contains(bodyHtml, pattern)})`,
+        sql`(${contains(title, pattern)} OR ${htmlContains(excerptHtml, pattern)} OR ${htmlContains(bodyHtml, pattern)})`,
       ),
     )
     .orderBy(desc(schema.news.publishedAt))
@@ -62,7 +65,10 @@ const searchPages = (phrase: string, pattern: string, locale: ContentLocale): Se
     .select({ title, path: schema.pages.path, bodyHtml })
     .from(schema.pages)
     .where(
-      and(eq(schema.pages.status, 'published'), sql`(${contains(title, pattern)} OR ${contains(bodyHtml, pattern)})`),
+      and(
+        eq(schema.pages.status, 'published'),
+        sql`(${contains(title, pattern)} OR ${htmlContains(bodyHtml, pattern)})`,
+      ),
     )
     .orderBy(sql`${contains(title, pattern)} DESC`, schema.pages.path)
     .limit(RESULTS_PER_KIND)
@@ -89,7 +95,7 @@ const searchForum = (phrase: string, pattern: string, locale: ContentLocale): Se
     .where(
       and(
         eq(schema.forums.isStaffOnly, false),
-        sql`(${contains(schema.threads.title, pattern)} OR ${contains(schema.posts.bodyHtml, pattern)})`,
+        sql`(${contains(schema.threads.title, pattern)} OR ${htmlContains(schema.posts.bodyHtml, pattern)})`,
       ),
     )
     .orderBy(desc(schema.posts.createdAt))

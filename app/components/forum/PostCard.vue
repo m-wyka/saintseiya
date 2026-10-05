@@ -86,13 +86,7 @@ const removePost = async () => {
           </a>
         </div>
       </header>
-      <PostEditForm
-        v-if="isEditing"
-        :post-id="post.id"
-        :body-html="post.bodyHtml"
-        @saved="onEdited"
-        @cancel="isEditing = false"
-      />
+      <PostEditForm v-if="isEditing" :post-id="post.id" @saved="onEdited" @cancel="isEditing = false" />
       <template v-else>
         <RichContent :html="post.bodyHtml" class="flex-1 px-5 py-4" />
         <p v-if="post.editedAt" class="px-5 pb-3 text-[0.7rem] text-aqua-500 italic">

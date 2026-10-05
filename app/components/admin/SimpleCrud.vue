@@ -18,6 +18,7 @@ const props = defineProps<{
 const { rows, page, pageCount, search, isLoading, refresh, remove } = useAdminList<Row>(props.resource);
 const { isBusy, errorMessage, run } = useApiAction();
 const toasts = useToastStore();
+const fetchStored = useAdminRecord();
 const { t } = useI18n();
 
 const editedId = ref<number | null>(null);
@@ -25,13 +26,18 @@ const isFormOpen = ref(false);
 const input = ref<Record<string, unknown>>({ ...props.emptyInput });
 
 const openNew = () => {
+  errorMessage.value = '';
   editedId.value = null;
   input.value = { ...props.emptyInput };
   isFormOpen.value = true;
 };
 
 const openExisting = async (id: number) => {
-  const stored = await $fetch<Record<string, unknown>>(`/api/admin/${props.resource}/${id}`);
+  const stored = await fetchStored<Record<string, unknown>>(props.resource, id);
+  if (!stored) {
+    return;
+  }
+  errorMessage.value = '';
   input.value = Object.fromEntries(
     Object.keys(props.emptyInput).map((key) => [key, stored[key] ?? props.emptyInput[key]]),
   );

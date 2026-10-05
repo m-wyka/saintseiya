@@ -7,6 +7,6 @@ export default defineEventHandler(async (event) => {
   const account = await requireAccount(event);
   const { name } = await readValidatedBody(event, bodySchema.parse);
   const renamed = renameAccount(account.id, name);
-  await setUserSession(event, { user: sessionUserOf(renamed) });
+  await storeSessionUser(event, renamed);
   return sessionUserOf(renamed);
 });

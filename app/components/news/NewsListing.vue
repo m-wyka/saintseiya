@@ -2,8 +2,8 @@
 const props = defineProps<{ categorySlug?: string; tagSlug?: string }>();
 
 const { t } = useI18n();
-const route = useRoute();
-const page = computed(() => Number(route.query.page) || 1);
+const page = usePageQuery();
+const redirectPastLastPage = useLastPageRedirect();
 
 const { data: listing, error } = await useFetch('/api/news', {
   query: computed(() => ({ page: page.value, category: props.categorySlug, tag: props.tagSlug })),
@@ -16,6 +16,8 @@ if (error.value) {
     fatal: true,
   });
 }
+
+await redirectPastLastPage(listing.value);
 </script>
 
 <template>

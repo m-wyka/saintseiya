@@ -98,9 +98,9 @@ export const parseLegacyUrl = (url: string): LegacyTarget | null => {
   const [location = ''] = trimmed.replace(LEGACY_HOST_PATTERN, '').split('#');
   const [rawPath = '', rawQuery = ''] = location.split('?');
   const path = normalizeLegacyPath(rawPath);
-  const resolveScript = SCRIPT_TARGETS[path.toLowerCase()];
-  if (resolveScript) {
-    return resolveScript(new URLSearchParams(rawQuery));
+  const script = path.toLowerCase();
+  if (Object.hasOwn(SCRIPT_TARGETS, script)) {
+    return SCRIPT_TARGETS[script]!(new URLSearchParams(rawQuery));
   }
   if (LEGACY_ASSET_PATTERN.test(path)) {
     return { kind: 'asset', path: safeDecode(path) };

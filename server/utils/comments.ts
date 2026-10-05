@@ -13,7 +13,30 @@ const visibleCommentsOf = (targetKind: CommentTarget, targetId: number) =>
     eq(schema.comments.isHidden, false),
   );
 
+const publishedTarget = (table: typeof schema.news | typeof schema.pages, targetId: number) =>
+  useDb()
+    .select({ commentsEnabled: table.commentsEnabled })
+    .from(table)
+    .where(and(eq(table.id, targetId), eq(table.status, 'published')))
+    .get();
+
+const existingTarget = (table: typeof schema.photos | typeof schema.videos, targetId: number) =>
+  useDb().select({ id: table.id }).from(table).where(eq(table.id, targetId)).get() && { commentsEnabled: true };
+
+const PUBLIC_TARGET_LOOKUPS: Record<CommentTarget, (targetId: number) => { commentsEnabled: boolean } | undefined> = {
+  news: (targetId) => publishedTarget(schema.news, targetId),
+  page: (targetId) => publishedTarget(schema.pages, targetId),
+  photo: (targetId) => existingTarget(schema.photos, targetId),
+  video: (targetId) => existingTarget(schema.videos, targetId),
+};
+
+export const acceptsComments = (targetKind: CommentTarget, targetId: number): boolean =>
+  PUBLIC_TARGET_LOOKUPS[targetKind](targetId)?.commentsEnabled ?? false;
+
 export const listComments = (targetKind: CommentTarget, targetId: number, page: number) => {
+  if (!PUBLIC_TARGET_LOOKUPS[targetKind](targetId)) {
+    return paginated([], 0, page, COMMENTS_PAGE_SIZE);
+  }
   const db = useDb();
   const filter = visibleCommentsOf(targetKind, targetId);
   const comments = db
@@ -34,37 +57,3 @@ export const listComments = (targetKind: CommentTarget, targetId: number, page: 
   const readableComments = comments.map((comment) => ({ ...comment, bodyHtml: markMissingImages(comment.bodyHtml) }));
   return paginated(readableComments, total, page, COMMENTS_PAGE_SIZE);
 };
-
-const COMMENTS_ENABLED_BY_TARGET: Record<CommentTarget, (targetId: number) => boolean> = {
-  news: (targetId) =>
-    Boolean(
-      useDb()
-        .select({ id: schema.news.id })
-        .from(schema.news)
-        .where(
-          and(eq(schema.news.id, targetId), eq(schema.news.status, 'published'), eq(schema.news.commentsEnabled, true)),
-        )
-        .get(),
-    ),
-  page: (targetId) =>
-    Boolean(
-      useDb()
-        .select({ id: schema.pages.id })
-        .from(schema.pages)
-        .where(
-          and(
-            eq(schema.pages.id, targetId),
-            eq(schema.pages.status, 'published'),
-            eq(schema.pages.commentsEnabled, true),
-          ),
-        )
-        .get(),
-    ),
-  photo: (targetId) =>
-    Boolean(useDb().select({ id: schema.photos.id }).from(schema.photos).where(eq(schema.photos.id, targetId)).get()),
-  video: (targetId) =>
-    Boolean(useDb().select({ id: schema.videos.id }).from(schema.videos).where(eq(schema.videos.id, targetId)).get()),
-};
-
-export const acceptsComments = (targetKind: CommentTarget, targetId: number): boolean =>
-  COMMENTS_ENABLED_BY_TARGET[targetKind](targetId);

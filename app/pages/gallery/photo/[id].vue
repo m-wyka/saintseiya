@@ -68,7 +68,7 @@ useSeoMeta({ title: () => `${title.value} – ${t('GENERAL.GALLERY')}` });
             {{ t('GALLERY.VIEW_COUNT', { count: formatNumber(photo.viewCount) }, photo.viewCount) }}
           </span>
         </p>
-        <BaseButton :to="routes.media(photo.image)" variant="secondary" size="sm" target="_blank">
+        <BaseButton :href="routes.media(photo.image)" variant="secondary" size="sm" target="_blank">
           <AppIcon name="external" />
           {{ t('GALLERY.FULL_SIZE', { width: photo.width, height: photo.height }) }}
         </BaseButton>

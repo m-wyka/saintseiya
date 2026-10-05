@@ -7,7 +7,8 @@ const POSTS_PER_PAGE = 20;
 const { t } = useI18n();
 const route = useRoute();
 const routeId = useRouteParam('id');
-const page = computed(() => Number(route.query.page) || 1);
+const page = usePageQuery();
+const redirectPastLastPage = useLastPageRedirect();
 const { data, error, refresh } = await useFetch(() => `/api/forum/threads/${routeId.value}`, { query: { page } });
 
 if (error.value || !data.value) {
@@ -17,6 +18,8 @@ if (error.value || !data.value) {
     fatal: true,
   });
 }
+
+await redirectPastLastPage(data.value.posts);
 
 const firstPositionOnPage = computed(() => (page.value - 1) * POSTS_PER_PAGE + 1);
 const threadSummary = computed(() => {
@@ -31,14 +34,11 @@ const threadSummary = computed(() => {
 const { loggedIn, user } = useUserSession();
 const canModerate = computed(() => hasPermission(user.value, 'forum'));
 const canReply = computed(() => !data.value?.thread.isLocked || canModerate.value);
-const canEditPostOf = (authorId: number) => canModerate.value || authorId === user.value?.id;
+const canEditPostOf = (authorId: number) => canModerate.value || (canReply.value && authorId === user.value?.id);
 
 const reloadPosts = async () => {
   await refresh();
-  const lastPage = data.value?.posts.pageCount ?? 1;
-  if (page.value > lastPage) {
-    await navigateTo({ path: route.path, query: { page: lastPage > 1 ? lastPage : undefined } });
-  }
+  await redirectPastLastPage(data.value?.posts);
 };
 
 const sendReply = async (post: { bodyHtml: string; captchaToken: string }) => {

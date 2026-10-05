@@ -2,9 +2,9 @@
 import { routes } from '#shared/utils/routes';
 
 const { t } = useI18n();
-const route = useRoute();
 const routeSlug = useRouteParam('slug');
-const page = computed(() => Number(route.query.page) || 1);
+const page = usePageQuery();
+const redirectPastLastPage = useLastPageRedirect();
 const { data, error } = await useFetch(() => `/api/gallery/albums/${routeSlug.value}`, { query: { page } });
 
 if (error.value || !data.value) {
@@ -14,6 +14,8 @@ if (error.value || !data.value) {
     fatal: true,
   });
 }
+
+await redirectPastLastPage(data.value.photos);
 
 useSeoMeta({ title: () => `${data.value?.album.title ?? ''} – ${t('GENERAL.GALLERY')}` });
 </script>

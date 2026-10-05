@@ -67,13 +67,10 @@ const uploadMapImage = async (event: Event) => {
   const form = new FormData();
   form.append('file', file);
   await imageUpload.run(async () => {
-    const stored = await apiRequest<{ image: string; width: number; height: number }>(
-      '/api/admin/uploads-image?folder=maps',
-      {
-        method: 'POST',
-        body: form,
-      },
-    );
+    const stored = await apiRequest<{ image: string; width: number; height: number }>('/api/admin/map-image', {
+      method: 'POST',
+      body: form,
+    });
     input.value.image = stored.image;
     input.value.imageWidth = stored.width;
     input.value.imageHeight = stored.height;

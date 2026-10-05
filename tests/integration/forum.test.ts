@@ -7,6 +7,7 @@ import {
   deletePost,
   deleteThread,
   editPost,
+  findEditablePost,
   moveThread,
   replyToThread,
   setThreadLocked,
@@ -82,6 +83,20 @@ describe('forum writing', () => {
     const post = useDb().select().from(schema.posts).where(eq(schema.posts.id, postId)).get()!;
     expect(post).toMatchObject({ bodyHtml: '<p>Moderator</p>', editedById: moderator.id });
     expect(post.editedAt).toBeInstanceOf(Date);
+  });
+
+  it('closes editing to the author once the thread is locked or moved to a staff-only forum', () => {
+    const author = createAccount();
+    const moderator = createAccount({ role: 'moderator', permissions: ['forum'] });
+    const { threadId, postId } = createThread(createForum(), author, 'Temat', '<p>A</p>');
+
+    setThreadLocked(threadId, true);
+    expect(() => editPost(postId, author, '<p>X</p>')).toThrowError('ERRORS.THREAD_LOCKED');
+    expect(findEditablePost(postId, moderator).bodyHtml).toBe('<p>A</p>');
+
+    setThreadLocked(threadId, false);
+    moveThread(threadId, createForum({ isStaffOnly: true }).id);
+    expect(() => findEditablePost(postId, author)).toThrowError('ERRORS.FORUM_STAFF_ONLY');
   });
 });
 
@@ -174,7 +189,7 @@ describe('forum moderation', () => {
       lastPostAuthorId: author.id,
       lastPostAt: firstPostDate,
     });
-    expect(forumRow(forum.id)).toMatchObject({ threadCount: 1, postCount: 1, lastPostAt: firstPostDate });
+    expect(forumRow(forum.id)).toMatchObject({ threadCount: 1, postCount: 1 });
     expect(postCountIn(threadId)).toBe(1);
   });
 
@@ -217,36 +232,30 @@ describe('forum moderation', () => {
     const removed = createThread(forum, author, 'Do usunięcia', '<p>A</p>');
     replyToThread(removed.threadId, author, '<p>B</p>');
     replyToThread(removed.threadId, author, '<p>C</p>');
-    const stayingLastPostAt = new Date(2021, 0, 1);
-    useDb()
-      .update(schema.threads)
-      .set({ lastPostAt: stayingLastPostAt })
-      .where(eq(schema.threads.id, staying.threadId))
-      .run();
 
     deleteThread(removed.threadId);
 
     expect(threadRow(removed.threadId)).toBeUndefined();
     expect(postCountIn(removed.threadId)).toBe(0);
     expect(postCountIn(staying.threadId)).toBe(1);
-    expect(forumRow(forum.id)).toMatchObject({ threadCount: 1, postCount: 1, lastPostAt: stayingLastPostAt });
+    expect(forumRow(forum.id)).toMatchObject({ threadCount: 1, postCount: 1 });
     expect(() => deleteThread(removed.threadId)).toThrowError('ERRORS.THREAD_NOT_FOUND');
   });
 
-  it('leaves an emptied forum with zeroed counters and no last-post date', () => {
+  it('leaves an emptied forum with zeroed counters', () => {
     const forum = createForum();
     const { threadId } = createThread(forum, createAccount(), 'Jedyny', '<p>A</p>');
 
     deleteThread(threadId);
 
-    expect(forumRow(forum.id)).toMatchObject({ threadCount: 0, postCount: 0, lastPostAt: null });
+    expect(forumRow(forum.id)).toMatchObject({ threadCount: 0, postCount: 0 });
   });
 
   it('moves a thread to another forum and recounts both forums', () => {
     const author = createAccount();
     const source = createForum();
     const target = createForum();
-    const staying = createThread(source, author, 'Zostaje', '<p>A</p>');
+    createThread(source, author, 'Zostaje', '<p>A</p>');
     const moved = createThread(source, author, 'Przenoszony', '<p>A</p>');
     replyToThread(moved.threadId, author, '<p>B</p>');
     createThread(target, author, 'Miejscowy', '<p>A</p>');
@@ -254,11 +263,7 @@ describe('forum moderation', () => {
     expect(moveThread(moved.threadId, target.id)).toEqual({ threadId: moved.threadId, forumSlug: target.slug });
 
     expect(threadRow(moved.threadId)).toMatchObject({ forumId: target.id, postCount: 2 });
-    expect(forumRow(source.id)).toMatchObject({
-      threadCount: 1,
-      postCount: 1,
-      lastPostAt: threadRow(staying.threadId).lastPostAt,
-    });
+    expect(forumRow(source.id)).toMatchObject({ threadCount: 1, postCount: 1 });
     expect(forumRow(target.id)).toMatchObject({ threadCount: 2, postCount: 3 });
     expect(forumThreads(target.slug, 1, null)?.threads.total).toBe(2);
   });

@@ -1,18 +1,28 @@
 <script setup lang="ts">
 const { t } = useI18n();
 const route = useRoute();
-const page = computed(() => Number(route.query.page) || 1);
+const page = usePageQuery();
+const redirectPastLastPage = useLastPageRedirect();
 const { data: shouts, refresh } = await useFetch('/api/shouts', { query: { page } });
+
+await redirectPastLastPage(shouts.value);
 
 const { loggedIn } = useUserSession();
 const { isBusy, errorMessage, run } = useApiAction();
 const message = ref('');
+const captchaToken = ref('');
+const captcha = ref<{ reset: () => void } | null>(null);
+
+const showNewestShouts = () => (page.value > 1 ? navigateTo({ path: route.path }) : refresh());
 
 const sendShout = async () => {
-  const sent = await run(() => apiRequest('/api/shouts', { method: 'POST', body: { message: message.value } }));
+  const sent = await run(() =>
+    apiRequest('/api/shouts', { method: 'POST', body: { message: message.value, captchaToken: captchaToken.value } }),
+  );
+  captcha.value?.reset();
   if (sent) {
     message.value = '';
-    await refresh();
+    await showNewestShouts();
   }
 };
 
@@ -22,7 +32,7 @@ useSeoMeta({ title: () => t('SHOUTBOX.TITLE') });
 <template>
   <div>
     <PageHeading :title="t('SHOUTBOX.TITLE')" :subtitle="t('SHOUTBOX.SUBTITLE')" />
-    <form v-if="loggedIn" class="mb-5 flex items-end gap-3 panel p-4" @submit.prevent="sendShout">
+    <form v-if="loggedIn" class="mb-5 flex flex-wrap items-end gap-3 panel p-4" @submit.prevent="sendShout">
       <BaseInput
         v-model="message"
         class="flex-1"
@@ -35,6 +45,7 @@ useSeoMeta({ title: () => t('SHOUTBOX.TITLE') });
         <AppIcon name="send" />
         {{ t('GENERAL.SEND') }}
       </BaseButton>
+      <CaptchaField ref="captcha" v-model="captchaToken" class="w-full" />
     </form>
     <p v-else class="mb-5 flex flex-wrap items-center justify-between gap-3 panel px-5 py-4 text-sm text-aqua-300">
       {{ t('SHOUTBOX.SIGN_IN_PROMPT') }}

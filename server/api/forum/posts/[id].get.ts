@@ -1,3 +1,4 @@
-export default defineEventHandler(async (event) =>
-  foundOr404(postLocation(requiredIdParam(event), await viewerOf(event)), 'ERRORS.POST_NOT_FOUND'),
-);
+export default defineEventHandler(async (event) => {
+  const { bodyHtml } = findEditablePost(requiredIdParam(event), await requireAccount(event));
+  return { bodyHtml };
+});

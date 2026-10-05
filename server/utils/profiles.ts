@@ -8,8 +8,11 @@ const postCountOf = (userId: number): number =>
   useDb().select({ total: count() }).from(schema.posts).where(eq(schema.posts.authorId, userId)).get()?.total ?? 0;
 
 const commentCountOf = (userId: number): number =>
-  useDb().select({ total: count() }).from(schema.comments).where(eq(schema.comments.authorId, userId)).get()?.total ??
-  0;
+  useDb()
+    .select({ total: count() })
+    .from(schema.comments)
+    .where(and(eq(schema.comments.authorId, userId), eq(schema.comments.isHidden, false)))
+    .get()?.total ?? 0;
 
 const latestPublicPosts = (userId: number) =>
   useDb()

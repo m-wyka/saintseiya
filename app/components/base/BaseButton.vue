@@ -9,11 +9,12 @@ const props = withDefaults(
     variant?: ButtonVariant;
     size?: ButtonSize;
     to?: RouteLocationRaw;
+    href?: string;
     type?: 'button' | 'submit';
     disabled?: boolean;
     busy?: boolean;
   }>(),
-  { variant: 'primary', size: 'md', to: undefined, type: 'button' },
+  { variant: 'primary', size: 'md', to: undefined, href: undefined, type: 'button' },
 );
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
@@ -31,16 +32,25 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
 
 const NuxtLink = resolveComponent('NuxtLinkLocale');
 const isUnavailable = computed(() => props.disabled || props.busy);
-const attributes = computed(() =>
-  props.to
-    ? { to: props.to }
-    : { type: props.type, disabled: isUnavailable.value, 'aria-busy': props.busy || undefined },
-);
+const tag = computed(() => {
+  if (props.to) {
+    return NuxtLink;
+  }
+  return props.href ? 'a' : 'button';
+});
+const attributes = computed(() => {
+  if (props.to) {
+    return { to: props.to };
+  }
+  return props.href
+    ? { href: props.href }
+    : { type: props.type, disabled: isUnavailable.value, 'aria-busy': props.busy || undefined };
+});
 </script>
 
 <template>
   <component
-    :is="to ? NuxtLink : 'button'"
+    :is="tag"
     v-bind="attributes"
     class="inline-flex cursor-pointer items-center justify-center rounded-md font-semibold tracking-wide transition duration-200 ease-cosmo select-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
     :class="[VARIANT_CLASSES[variant], SIZE_CLASSES[size]]"

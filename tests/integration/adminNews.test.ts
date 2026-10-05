@@ -94,10 +94,14 @@ describe('news administration', () => {
       total: number;
     };
     const drafts = newsResource.list({ page: 1, search: '', filter: 'draft' }) as { total: number };
-    const everything = newsResource.list({ page: 1, search: '', filter: '' }) as { total: number };
+    const everything = newsResource.list({ page: 1, search: '', filter: '' }) as {
+      items: { title: string }[];
+      total: number;
+    };
 
     expect(search.items.map((news) => news.title)).toEqual(['Omega rusza']);
     expect(drafts.total).toBe(1);
     expect(everything.total).toBe(2);
+    expect(everything.items[0]!.title).toBe('Omega rusza');
   });
 });

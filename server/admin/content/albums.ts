@@ -29,7 +29,7 @@ export const albumsResource = defineAdminResource({
   inputSchema,
   translatable: {
     table: schema.albums,
-    fields: { title: 'text', description: 'text', coverImage: 'text' },
+    fields: { title: 'text', description: 'text' },
   },
   list: () =>
     useDb()

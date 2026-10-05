@@ -1,4 +1,4 @@
-import { and, asc, eq, max } from 'drizzle-orm';
+import { and, asc, eq, getTableName, max } from 'drizzle-orm';
 import type { H3Event, MultiPartData } from 'h3';
 import { z } from 'zod';
 import type { Tx } from '../../db';
@@ -18,6 +18,7 @@ const photoInputSchema = z.object({
 });
 
 const PHOTO_TEXTS: TranslationSource = { table: schema.photos, fields: { title: 'text', description: 'text' } };
+const ALBUM_COVER: TranslationSource = { table: schema.albums, fields: { coverImage: 'text' } };
 
 const albumPhotoIdsInOrder = (tx: Tx, albumId: number): number[] =>
   tx
@@ -86,7 +87,13 @@ export const listAlbumPhotos = (albumId: number, locale: ContentLocale = DEFAULT
     .where(eq(schema.photos.albumId, albumId))
     .orderBy(asc(schema.photos.sortOrder), asc(schema.photos.id))
     .all();
-  return { album, photos: locale === DEFAULT_LOCALE ? photos : withTranslations(photos, PHOTO_TEXTS, locale) };
+  if (locale === DEFAULT_LOCALE) {
+    return { album, photos };
+  }
+  return {
+    album: withTranslations([album], ALBUM_COVER, locale)[0]!,
+    photos: withTranslations(photos, PHOTO_TEXTS, locale),
+  };
 };
 
 export const uploadPhotos = async (event: H3Event, albumId: number, uploads: MultiPartData[], uploader: Account) => {
@@ -128,15 +135,29 @@ export const removePhoto = async (event: H3Event, photoId: number) => {
       .set({ coverImage: null })
       .where(and(eq(schema.albums.id, photo.albumId), eq(schema.albums.coverImage, photo.thumbnail)))
       .run();
+    tx.delete(schema.translations)
+      .where(
+        and(
+          eq(schema.translations.entity, getTableName(schema.albums)),
+          eq(schema.translations.entityId, photo.albumId),
+          eq(schema.translations.value, photo.thumbnail),
+        ),
+      )
+      .run();
     tx.delete(schema.photos).where(eq(schema.photos.id, photoId)).run();
   });
   pruneTranslations(schema.photos);
   await removeStoredFiles(event, [photo.image, photo.thumbnail]);
 };
 
-export const setAlbumCover = (photoId: number) => {
+export const setAlbumCover = (photoId: number, locale: ContentLocale = DEFAULT_LOCALE) => {
   const photo = storedPhoto(photoId);
-  useDb().update(schema.albums).set({ coverImage: photo.thumbnail }).where(eq(schema.albums.id, photo.albumId)).run();
+  const coverImage = photo.thumbnail;
+  if (locale === DEFAULT_LOCALE) {
+    useDb().update(schema.albums).set({ coverImage }).where(eq(schema.albums.id, photo.albumId)).run();
+  } else {
+    storeTranslations(ALBUM_COVER, photo.albumId, { coverImage }, storedAlbum(photo.albumId), locale);
+  }
 };
 
 export const movePhoto = (photoId: number, direction: MoveDirection) => {

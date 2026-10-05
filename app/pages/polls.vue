@@ -1,8 +1,10 @@
 <script setup lang="ts">
 const { t } = useI18n();
-const route = useRoute();
-const page = computed(() => Number(route.query.page) || 1);
+const page = usePageQuery();
+const redirectPastLastPage = useLastPageRedirect();
 const { data: polls, refresh } = await useFetch('/api/polls', { query: { page } });
+
+await redirectPastLastPage(polls.value);
 
 useSeoMeta({ title: () => t('POLLS.TITLE') });
 </script>

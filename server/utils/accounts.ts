@@ -3,7 +3,7 @@ import type { H3Event } from 'h3';
 import type { User as SessionUser } from '#auth-utils';
 import { hasPermission } from '#shared/utils/roles';
 import type { ModeratorPermission } from '#shared/utils/roles';
-import { fitUserName, userNameKey } from '#shared/utils/users';
+import { USER_NAME_MAX_LENGTH, fitUserName, userNameKey } from '#shared/utils/users';
 import { schema, useDb } from './db';
 
 const NEW_USER_NAME_FALLBACK = 'Rycerz';
@@ -33,11 +33,13 @@ const firstFreeName = (wantedName: string): string => {
   if (!isNameTaken(wantedName)) {
     return wantedName;
   }
+  const numbered = (suffix: number) =>
+    `${wantedName.slice(0, USER_NAME_MAX_LENGTH - ` ${suffix}`.length).trim()} ${suffix}`;
   let suffix = 2;
-  while (isNameTaken(`${wantedName} ${suffix}`)) {
+  while (isNameTaken(numbered(suffix))) {
     suffix += 1;
   }
-  return `${wantedName} ${suffix}`;
+  return numbered(suffix);
 };
 
 const adminEmailsOf = (event: H3Event): string[] =>
@@ -53,6 +55,9 @@ export const sessionUserOf = (account: Account): SessionUser => ({
   role: account.role,
   permissions: account.permissions,
 });
+
+export const storeSessionUser = (event: H3Event, account: Account) =>
+  replaceUserSession(event, { user: sessionUserOf(account) });
 
 const assertNotBanned = (account: Account) => {
   if (account.bannedAt) {

@@ -31,6 +31,15 @@ describe('comments', () => {
     expect(() => createComment('news', closed.id, author, '<p>A</p>')).toThrowError('ERRORS.COMMENTS_UNAVAILABLE');
     expect(() => createComment('photo', 12_345, author, '<p>A</p>')).toThrowError('ERRORS.COMMENTS_UNAVAILABLE');
   });
+
+  it('stops listing comments once the content is unpublished', () => {
+    const author = createAccount();
+    const news = createNews(author.id);
+    createComment('news', news.id, author, '<p>Komentarz</p>');
+    useDb().update(schema.news).set({ status: 'draft' }).where(eq(schema.news.id, news.id)).run();
+
+    expect(listComments('news', news.id, 1)).toMatchObject({ items: [], total: 0 });
+  });
 });
 
 describe('polls', () => {

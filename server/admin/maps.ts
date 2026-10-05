@@ -182,4 +182,5 @@ export const mapsResource = defineAdminResource({
   remove: (id) => {
     useDb().delete(schema.maps).where(eq(schema.maps.id, id)).run();
   },
+  aroundChange: cleaningUpMapImages,
 });

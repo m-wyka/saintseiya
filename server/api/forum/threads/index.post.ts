@@ -12,10 +12,11 @@ const bodySchema = z.object({
 export default defineEventHandler(async (event) => {
   const account = await requireAccount(event);
   const body = await readValidatedBody(event, bodySchema.parse);
+  const bodyHtml = cleanUserHtml(body.bodyHtml);
   assertWithinRateLimit(`write:${account.id}`);
   await verifyCaptcha(event, body.captchaToken);
   const forum = foundOr404(findForumForWriting(body.forumSlug), 'ERRORS.FORUM_NOT_FOUND');
-  const created = createThread(forum, account, body.title, cleanUserHtml(body.bodyHtml));
+  const created = createThread(forum, account, body.title, bodyHtml);
   setResponseStatus(event, 201);
   return created;
 });

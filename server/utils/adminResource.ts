@@ -35,6 +35,7 @@ interface AdminResourceDefinition<Input> {
   create: (input: Input, actor: Account) => { id: number };
   update: (id: number, input: Input, actor: Account) => void;
   remove: (id: number, actor: Account) => void;
+  aroundChange?: <Result>(change: () => Result) => Result;
 }
 
 export interface AdminResource {
@@ -123,6 +124,8 @@ const pruneRecordTranslations = (content: TranslatableContent | undefined) => {
 
 export const defineAdminResource = <Input>(definition: AdminResourceDefinition<Input>): AdminResource => {
   const content = definition.translatable;
+  const changed = <Result>(change: () => Result): Result =>
+    definition.aroundChange ? definition.aroundChange(change) : change();
   return {
     access: definition.access,
     list: definition.list,
@@ -130,21 +133,25 @@ export const defineAdminResource = <Input>(definition: AdminResourceDefinition<I
       const record = definition.find(id);
       return record && content && locale !== DEFAULT_LOCALE ? translatedRecord(record as Row, content, locale) : record;
     },
-    create: (rawInput, actor) => definition.create(parseInput(definition.inputSchema, rawInput), actor),
+    create: (rawInput, actor) => changed(() => definition.create(parseInput(definition.inputSchema, rawInput), actor)),
     update: (id, rawInput, actor, locale = DEFAULT_LOCALE) => {
       const input = parseInput(definition.inputSchema, rawInput);
-      if (!content || locale === DEFAULT_LOCALE) {
-        definition.update(id, input, actor);
-      } else {
-        const base = definition.find(id) as Row;
-        definition.update(id, inputWithBaseTexts(input as Row, base, content) as Input, actor);
-        storeRecordTranslations(id, input as Row, base, content, locale);
-      }
-      pruneRecordTranslations(content);
+      changed(() => {
+        if (!content || locale === DEFAULT_LOCALE) {
+          definition.update(id, input, actor);
+        } else {
+          const base = definition.find(id) as Row;
+          definition.update(id, inputWithBaseTexts(input as Row, base, content) as Input, actor);
+          storeRecordTranslations(id, input as Row, base, content, locale);
+        }
+        pruneRecordTranslations(content);
+      });
     },
     remove: (id, actor) => {
-      definition.remove(id, actor);
-      pruneRecordTranslations(content);
+      changed(() => {
+        definition.remove(id, actor);
+        pruneRecordTranslations(content);
+      });
     },
   };
 };

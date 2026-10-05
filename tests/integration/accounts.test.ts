@@ -32,6 +32,16 @@ describe('accounts', () => {
     expect(signInWithGoogle(event, { sub: 'g-3', name: 'HEKATE' }).name).toBe('HEKATE 3');
   });
 
+  it('keeps a numbered nick within the length limit', () => {
+    const longName = 'Rycerz'.repeat(5);
+    signInWithGoogle(event, { sub: 'g-10', name: longName });
+
+    const numbered = signInWithGoogle(event, { sub: 'g-11', name: longName }).name;
+
+    expect(numbered).toBe(`${longName.slice(0, 28)} 2`);
+    expect(numbered).toHaveLength(30);
+  });
+
   it('falls back to a neutral nick when the Google name is unusable', () => {
     expect(signInWithGoogle(event, { sub: 'g-4', name: '<>' }).name).toBe('Rycerz');
     expect(signInWithGoogle(event, { sub: 'g-5' }).name).toBe('Rycerz 2');

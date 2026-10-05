@@ -13,10 +13,16 @@ const closeOnEscape = (event: KeyboardEvent) => {
   }
 };
 
+const closeOnLinkClick = (event: MouseEvent) => {
+  if (event.target instanceof Element && event.target.closest('a')) {
+    ui.closeMenu();
+  }
+};
+
 onMounted(() => window.addEventListener('keydown', closeOnEscape));
 onBeforeUnmount(() => window.removeEventListener('keydown', closeOnEscape));
 
-useHead({ bodyAttrs: { class: computed(() => (ui.isMenuOpen ? 'overflow-hidden' : '')) } });
+useHead({ bodyAttrs: { class: computed(() => (ui.isMenuOpen ? 'max-lg:overflow-hidden' : '')) } });
 </script>
 
 <template>
@@ -41,6 +47,7 @@ useHead({ bodyAttrs: { class: computed(() => (ui.isMenuOpen ? 'overflow-hidden' 
       />
       <div
         class="absolute inset-y-0 left-0 flex w-[min(22rem,88vw)] animate-rise flex-col gap-4 overflow-y-auto bg-abyss-950 p-4 shadow-panel"
+        @click="closeOnLinkClick"
       >
         <div class="flex items-center justify-between">
           <p class="heading-display text-xl text-gold-300">{{ t('LAYOUT.MENU') }}</p>

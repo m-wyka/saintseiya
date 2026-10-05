@@ -8,8 +8,8 @@ Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportow
 
 | Kontrola | Wynik | Kiedy |
 |---|---|---|
-| `pnpm check` (lint, format, typy, Vitest) | zielone, 278 testów w 25 plikach | po ostatniej zmianie kodu, na Windows |
-| `pnpm test:e2e` (Playwright) | zielone, 35 testów | po ostatniej zmianie kodu, na Windows |
+| `pnpm check` (lint, format, typy, Vitest) | zielone, 287 testów w 25 plikach | po ostatniej zmianie kodu, na Windows |
+| `pnpm test:e2e` (Playwright) | zielone, 36 testów | po ostatniej zmianie kodu, na Windows |
 | `pnpm build` | nie ponawiany w tej sesji | ostatnio przechodził w poprzedniej sesji (macOS) |
 
 - **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**). Cały kod jest na gałęzi `staging`. `main` ma tylko początkowy commit z pustym README i na razie go nie ruszamy; `staging` wyrasta z niego, więc da się je później scalić. `legacy/`, `.data/`, `.env` są ignorowane.
@@ -115,6 +115,20 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 - Po logowaniu Google użytkownik wraca na polską stronę główną; tytuł `Film YouTube` w osadzonych filmach i domyślne komunikaty Zod nie są tłumaczone.
 - Ponowny `pnpm legacy:import --force` kasuje tłumaczenia razem z bazą.
 
+**Przegląd błędów w całym kodzie** (piąta sesja 2026-10-05; niezacommitowane) — trzy równoległe przeglądy (serwer publiczny, panel, front publiczny), każde zgłoszenie sprawdzone w kodzie przed poprawką:
+
+- Wyszukiwarka dopasowywała znaczniki HTML (`lazy`, `strong`, `href`) i nie znajdowała tekstu z `&`; teraz szuka w widocznym tekście (funkcja SQLite `searchable_text`).
+- Edycja posta zapisywała zaślepkę martwego obrazka zamiast oryginalnego `<img>` — formularz pobiera surową treść z `GET /api/forum/posts/:id`.
+- Autor mógł edytować post w zamkniętym temacie i w dziale redakcji po utracie roli; przycisk „Edytuj” znika w zamkniętym temacie.
+- Shoutbox nie wysyłał tokenu captcha (po włączeniu Turnstile każdy wpis by padał); wpis z dalszej strony wraca na pierwszą.
+- Sesja: `setUserSession` sklejał tablicę uprawnień przy każdym odświeżeniu (rosnące ciasteczko moderatora) — zapis przez `storeSessionUser` / `replaceUserSession`.
+- Komentarze szkiców i okruszki ze szkicami przodków były publicznie czytelne; statystyki w pasku liczyły szkice, ukryte komentarze i dział redakcji.
+- Panel w trybie EN: formularze nawigacji i plików pokazywały polski tekst i kasowały tłumaczenie przy zapisie; szkice newsów lądowały na końcu listy; lista zostawała na nieistniejącej stronie po usunięciu ostatniego wiersza; `SimpleCrud` pokazywał stary błąd.
+- Front: „Pełny rozmiar” zdjęcia dawał 404 pod `/en`; menu mobilne blokowało przewijanie po poszerzeniu okna i nie zamykało się po kliknięciu odnośnika do bieżącej strony; odnośniki w treści pod `/en` otwierane w nowej karcie prowadziły do wersji polskiej; okno dialogowe zamykało się przy zaznaczaniu tekstu; `reveal` i płynne przewijanie ignorowały `prefers-reduced-motion`.
+- Drobne: captcha i limit zużywane przed walidacją treści, permalink posta jako 302, nick z numerem ponad 30 znaków, wymiary zdjęć z orientacją EXIF, adresy `constructor` w panelu i starych odnośnikach, `usePageQuery` zamiast siedmiu kopii, usunięty martwy kod i nieużywane klucze tłumaczeń.
+
+- Po decyzjach Mateusza: Panel → Obrazki ostrzega przed usunięciem używanego obrazka (`isMediaImageUsed`); obrazy map mają własny adres wgrywania (`/api/admin/map-image`) i są usuwane z dysku przy podmianie i usunięciu mapy, a wgrane i nigdy niezapisane po 24 h (`cleaningUpMapImages`); okładkę albumu da się ustawić osobno dla EN; numer strony poza zakresem przekierowuje na ostatnią stronę; usunięte martwe kolumny `forums.last_post_at` i `media_images.alt` (migracja `0002_brief_revanche.sql`, zastosuje się przy starcie).
+
 ## Co jest zrobione
 
 **Dane**
@@ -151,6 +165,7 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 3. **Listy poza `AdminTable`** (zdjęcia w albumie, nawigacja, zakładki ustawień) — przyciski „Edytuj” i „Usuń” nadal bez nazwy z kontekstem pozycji.
 4. **Emotikony** — w nowych wpisach `:)` zostaje tekstem; zamiana na emoji działała tylko przy imporcie.
 5. **Pliki do pobrania** — trzy pozycje z konkursu z 2013 r. i regulamin „konta VIP”, w opisach adres e-mail konkursu. Do decyzji, czy zostają publicznie.
+6. **`i18n.baseUrl`** czyta `NUXT_PUBLIC_SITE_URL` przy budowaniu — zmienna musi być ustawiona już podczas `pnpm build`, inaczej `hreflang` wskaże `localhost`. Do ustawienia przy wdrożeniu dev/prod.
 
 ## Decyzje dla Mateusza
 
@@ -178,7 +193,7 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 
 ## Następne kroki
 
-1. Commit zmian z tej sesji na `staging` (po zgodzie Mateusza), potem `pnpm build` na Windows.
+1. Commit poprawek z przeglądu błędów na `staging` (po zgodzie Mateusza), potem `pnpm build` na Windows.
 2. Reszta z „Czego nie sprawdziłem”: Podstrony i struktura forum w e2e, telefon na pozostałych stronach (temat forum, mapa, panel), zakładki News Center w Firefoksie.
 3. Scalenie `staging` do `main`, gdy Mateusz zdecyduje. Do tego czasu commity tylko na `staging`.
 4. Przegląd wyglądu z Mateuszem i poprawki, w tym telefon.

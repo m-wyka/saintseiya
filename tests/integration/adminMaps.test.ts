@@ -1,8 +1,12 @@
+import { existsSync, mkdirSync, utimesSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { mapsResource } from '../../server/admin/maps';
+import { isMediaImageUsed } from '../../server/utils/mediaUsage';
 import { findPublishedMap, listPublishedMaps } from '../../server/utils/maps';
 import { readSetting, writeSetting } from '../../server/utils/settings';
-import { createAccount, createPage, resetDatabase } from './fixtures';
+import { testRuntimeConfig } from '../setup';
+import { createAccount, createNews, createPage, resetDatabase } from './fixtures';
 
 const frame = { leftPercent: 10, topPercent: 20, widthPercent: 30, heightPercent: 15 };
 
@@ -18,6 +22,75 @@ const mapInput = (overrides: Record<string, unknown> = {}) => ({
   sortOrder: 0,
   areas: [],
   ...overrides,
+});
+
+const uploadedFile = (storedPath: string) => join(testRuntimeConfig.uploadsDir, storedPath);
+
+const LONG_AGO = new Date(2020, 0, 1);
+
+const storeUpload = (storedPath: string, uploadedAt = new Date()) => {
+  mkdirSync(dirname(uploadedFile(storedPath)), { recursive: true });
+  writeFileSync(uploadedFile(storedPath), 'image');
+  utimesSync(uploadedFile(storedPath), uploadedAt, uploadedAt);
+};
+
+describe('map images on disk', () => {
+  beforeEach(resetDatabase);
+
+  it('removes a replaced image and the images of a deleted map, keeping what other maps use', () => {
+    const editor = createAccount({ role: 'admin' });
+    ['maps/2020/old.webp', 'maps/2020/teaser.png', 'maps/2020/other.webp', 'thumbnails/maps/2020/old.webp'].forEach(
+      (image) => storeUpload(image),
+    );
+    storeUpload('maps/2020/new.webp');
+    storeUpload('maps/2020/abandoned.webp', LONG_AGO);
+    mapsResource.create(mapInput({ title: 'Mapa nieba', image: 'maps/2020/other.webp' }), editor);
+    const { id } = mapsResource.create(
+      mapInput({ image: 'maps/2020/old.webp', teaserImage: 'maps/2020/teaser.png' }),
+      editor,
+    );
+
+    mapsResource.update(id, mapInput({ image: 'maps/2020/new.webp', teaserImage: 'maps/2020/teaser.png' }), editor);
+
+    expect(existsSync(uploadedFile('maps/2020/old.webp'))).toBe(false);
+    expect(existsSync(uploadedFile('thumbnails/maps/2020/old.webp'))).toBe(false);
+    expect(existsSync(uploadedFile('maps/2020/new.webp'))).toBe(true);
+    expect(existsSync(uploadedFile('maps/2020/abandoned.webp'))).toBe(false);
+
+    mapsResource.remove(id, editor);
+
+    expect(existsSync(uploadedFile('maps/2020/new.webp'))).toBe(false);
+    expect(existsSync(uploadedFile('maps/2020/teaser.png'))).toBe(false);
+    expect(existsSync(uploadedFile('maps/2020/other.webp'))).toBe(true);
+  });
+
+  it('keeps an English map image and a fresh upload that no map has saved yet', () => {
+    const editor = createAccount({ role: 'admin' });
+    storeUpload('maps/2020/pl.webp', LONG_AGO);
+    storeUpload('maps/2020/unsaved.webp');
+    const { id } = mapsResource.create(mapInput({ image: 'maps/2020/pl.webp' }), editor);
+    storeUpload('maps/2020/en.webp');
+
+    mapsResource.update(id, mapInput({ image: 'maps/2020/en.webp' }), editor, 'en');
+
+    expect(existsSync(uploadedFile('maps/2020/pl.webp'))).toBe(true);
+    expect(existsSync(uploadedFile('maps/2020/en.webp'))).toBe(true);
+    expect(existsSync(uploadedFile('maps/2020/unsaved.webp'))).toBe(true);
+  });
+});
+
+describe('image library usage', () => {
+  beforeEach(resetDatabase);
+
+  it('recognises an image used as a map teaser or inside content', () => {
+    const editor = createAccount({ role: 'admin' });
+    mapsResource.create(mapInput({ teaserImage: 'images/2026/teaser.png' }), editor);
+    createNews(editor.id, { bodyHtml: '<p><img src="/media/images/2026/in-news.jpg" alt="" /></p>' });
+
+    expect(isMediaImageUsed('images/2026/teaser.png')).toBe(true);
+    expect(isMediaImageUsed('images/2026/in-news.jpg')).toBe(true);
+    expect(isMediaImageUsed('images/2026/unused.jpg')).toBe(false);
+  });
 });
 
 describe('map administration', () => {

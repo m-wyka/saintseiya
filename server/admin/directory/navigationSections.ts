@@ -60,5 +60,6 @@ export const navigationSectionsResource = defineAdminResource({
   },
   remove: (id) => {
     useDb().delete(schema.navigationSections).where(eq(schema.navigationSections.id, id)).run();
+    pruneTranslations(schema.navigationLinks);
   },
 });

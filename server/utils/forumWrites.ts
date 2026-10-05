@@ -1,4 +1,4 @@
-import { asc, count, desc, eq, max, sql } from 'drizzle-orm';
+import { asc, count, desc, eq, sql } from 'drizzle-orm';
 import { hasPermission, isStaff } from '#shared/utils/roles';
 import type { Account } from './accounts';
 import { schema, useDb } from './db';
@@ -28,7 +28,7 @@ const insertPost = (tx: Tx, threadId: number, forumId: number, author: Account, 
     .where(eq(schema.threads.id, threadId))
     .run();
   tx.update(schema.forums)
-    .set({ postCount: sql`${schema.forums.postCount} + 1`, lastPostAt: now })
+    .set({ postCount: sql`${schema.forums.postCount} + 1` })
     .where(eq(schema.forums.id, forumId))
     .run();
   return post;
@@ -78,26 +78,37 @@ const findThreadForWriting = (threadId: number) =>
     .where(eq(schema.threads.id, threadId))
     .get();
 
-export const replyToThread = (threadId: number, author: Account, bodyHtml: string) => {
+const findOpenThread = (threadId: number, author: Account) => {
   const thread = foundOr404(findThreadForWriting(threadId), 'ERRORS.THREAD_NOT_FOUND');
   assertCanWriteIn(thread.forum, author);
   if (thread.isLocked && !hasPermission(author, 'forum')) {
     throw createError({ statusCode: FORBIDDEN, statusMessage: 'ERRORS.THREAD_LOCKED' });
   }
+  return thread;
+};
+
+export const replyToThread = (threadId: number, author: Account, bodyHtml: string) => {
+  const thread = findOpenThread(threadId, author);
   const post = useDb().transaction((tx) => insertPost(tx, thread.id, thread.forum.id, author, bodyHtml, new Date()));
   return { threadId: thread.id, postId: post.id };
 };
 
-export const editPost = (postId: number, editor: Account, bodyHtml: string) => {
-  const db = useDb();
+export const findEditablePost = (postId: number, editor: Account) => {
   const post = foundOr404(
-    db.select().from(schema.posts).where(eq(schema.posts.id, postId)).get(),
+    useDb().select().from(schema.posts).where(eq(schema.posts.id, postId)).get(),
     'ERRORS.POST_NOT_FOUND',
   );
   if (post.authorId !== editor.id && !hasPermission(editor, 'forum')) {
     throw createError({ statusCode: FORBIDDEN, statusMessage: 'ERRORS.POST_NOT_OWNED' });
   }
-  db.update(schema.posts)
+  findOpenThread(post.threadId, editor);
+  return post;
+};
+
+export const editPost = (postId: number, editor: Account, bodyHtml: string) => {
+  const post = findEditablePost(postId, editor);
+  useDb()
+    .update(schema.posts)
     .set({ bodyHtml, editedAt: new Date(), editedById: editor.id })
     .where(eq(schema.posts.id, postId))
     .run();
@@ -131,17 +142,12 @@ const refreshForumCounters = (tx: Tx, forumId: number) => {
     .select({
       threadCount: count(),
       postCount: sql<number>`coalesce(sum(${schema.threads.postCount}), 0)`,
-      lastPostAt: max(schema.threads.lastPostAt),
     })
     .from(schema.threads)
     .where(eq(schema.threads.forumId, forumId))
     .get();
   tx.update(schema.forums)
-    .set({
-      threadCount: totals?.threadCount ?? 0,
-      postCount: totals?.postCount ?? 0,
-      lastPostAt: totals?.lastPostAt ?? null,
-    })
+    .set({ threadCount: totals?.threadCount ?? 0, postCount: totals?.postCount ?? 0 })
     .where(eq(schema.forums.id, forumId))
     .run();
 };

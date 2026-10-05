@@ -16,6 +16,7 @@ const { t } = useI18n();
 const { rows, page, pageCount, total, isLoading, refresh, remove } = useAdminList<MediaImage>('media');
 const { isBusy, errorMessage, run } = useApiAction();
 const toasts = useToastStore();
+const confirmation = useConfirmationStore();
 const siteOrigin = useRequestURL().origin;
 const fileInput = ref<HTMLInputElement | null>(null);
 
@@ -41,7 +42,14 @@ const upload = async (event: Event) => {
 
 const removeImage = async (media: MediaImage) => {
   errorMessage.value = '';
-  await remove(media.id);
+  try {
+    const { isUsed } = await $fetch<{ isUsed: boolean }>(`/api/admin/media/${media.id}/usage`);
+    if (await confirmation.ask(t(isUsed ? 'CONFIRM.DELETE_USED_IMAGE' : 'CONFIRM.DELETE_IMAGE'))) {
+      await remove(media.id);
+    }
+  } catch (error) {
+    toasts.error(apiErrorMessage(error));
+  }
 };
 
 const copyAddress = async (media: MediaImage) => {
@@ -107,7 +115,10 @@ useSeoMeta({ title: () => t('ADMIN_NAV.IMAGES') });
               <AppIcon name="link" />
               {{ t('ADMIN_IMAGES.COPY_ADDRESS') }}
             </BaseButton>
-            <ConfirmButton :question="t('CONFIRM.DELETE_IMAGE')" @confirm="removeImage(media)" />
+            <BaseButton variant="ghost" size="sm" aria-haspopup="dialog" @click="removeImage(media)">
+              <AppIcon name="trash" />
+              {{ t('GENERAL.DELETE') }}
+            </BaseButton>
           </div>
         </div>
       </li>

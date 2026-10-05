@@ -79,6 +79,19 @@ describe('site search', () => {
     expect(results.forum.map((post) => post.title)).toEqual(['Ulubiony rycerz']);
   });
 
+  it('searches the visible text, not the markup', () => {
+    createPage({
+      path: 'ilustracja',
+      title: 'Ilustracja',
+      bodyHtml: '<p>Seiya &amp; Shiryu <strong>ra</strong>zem</p><img src="/media/a.jpg" alt="" loading="lazy" />',
+    });
+
+    expect(searchSite('lazy').pages).toEqual([]);
+    expect(searchSite('strong').pages).toEqual([]);
+    expect(searchSite('Seiya & Shiryu').pages).toHaveLength(1);
+    expect(searchSite('razem').pages).toHaveLength(1);
+  });
+
   it('ignores too short phrases and treats wildcard characters literally', () => {
     createPage({ path: 'procent', title: 'Sto procent', bodyHtml: '<p>100% cosmo</p>' });
 

@@ -18,9 +18,8 @@ const ADMIN_RESOURCES: Record<string, AdminResource> = {
 };
 
 export const adminResourceNamed = (name: string | undefined): AdminResource => {
-  const resource = ADMIN_RESOURCES[name ?? ''];
-  if (!resource) {
+  if (!name || !Object.hasOwn(ADMIN_RESOURCES, name)) {
     throw createError({ statusCode: 404, statusMessage: 'ERRORS.RESOURCE_NOT_FOUND' });
   }
-  return resource;
+  return ADMIN_RESOURCES[name]!;
 };

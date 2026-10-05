@@ -611,6 +611,31 @@ describe('photo administration', () => {
     expect(() => setAlbumCover(cover.id)).toThrowError('ERRORS.PHOTO_NOT_FOUND');
   });
 
+  it('keeps a separate English cover that survives an album edit and goes away with its photo', async () => {
+    const album = createAlbum({ title: 'Zbroje' });
+    const polishCover = createPhoto(album.id);
+    const englishCover = createPhoto(album.id);
+    const coverOf = (locale: 'pl' | 'en') =>
+      listAlbums(locale).find((listed) => listed.slug === album.slug)?.coverImage;
+
+    setAlbumCover(polishCover.id);
+    setAlbumCover(englishCover.id, 'en');
+    albumsResource.update(
+      album.id,
+      { title: 'Cloths', slug: album.slug, description: '', sortOrder: 0 },
+      createAccount({ role: 'admin' }),
+      'en',
+    );
+
+    expect(coverOf('pl')).toBe(polishCover.thumbnail);
+    expect(coverOf('en')).toBe(englishCover.thumbnail);
+    expect(listAlbumPhotos(album.id, 'en').album.coverImage).toBe(englishCover.thumbnail);
+
+    await removePhoto(event, englishCover.id);
+
+    expect(coverOf('en')).toBe(polishCover.thumbnail);
+  });
+
   it('moves a photo left and right within its album and keeps the order gap-free', () => {
     const album = createAlbum();
     const other = createAlbum();

@@ -176,8 +176,17 @@ const TEXT_ENTITY_PATTERN = /&(?:amp|lt|gt|quot|#39|nbsp);/g;
 const LINE_BREAKING_TAG_PATTERN =
   /<\/?(?:br|p|div|li|tr|td|th|h[1-6]|blockquote|pre|hr|summary|details|figcaption)\b[^>]*>/gi;
 
+const decodeTextEntities = (text: string): string =>
+  text.replace(TEXT_ENTITY_PATTERN, (entity) => TEXT_ENTITIES[entity]!);
+
+export const sanitizedHtmlToText = (html: string): string =>
+  decodeTextEntities(html.replace(LINE_BREAKING_TAG_PATTERN, ' ').replace(/<[^>]*>/g, ''))
+    .replace(/\s+/g, ' ')
+    .trim();
+
 export const htmlToPlainText = (html: string): string =>
-  sanitizeHtml(html.replace(LINE_BREAKING_TAG_PATTERN, ' $&'), { allowedTags: [], allowedAttributes: {} })
-    .replace(TEXT_ENTITY_PATTERN, (entity) => TEXT_ENTITIES[entity]!)
+  decodeTextEntities(
+    sanitizeHtml(html.replace(LINE_BREAKING_TAG_PATTERN, ' $&'), { allowedTags: [], allowedAttributes: {} }),
+  )
     .replace(/\s+/g, ' ')
     .trim();

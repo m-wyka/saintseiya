@@ -186,7 +186,6 @@ export const forums = sqliteTable(
     sortOrder: counter('sort_order'),
     threadCount: counter('thread_count'),
     postCount: counter('post_count'),
-    lastPostAt: timestamp('last_post_at'),
     legacyId: legacyId(),
   },
   (table) => [index('forums_category_idx').on(table.categoryId, table.sortOrder)],
@@ -410,7 +409,6 @@ export const downloads = sqliteTable('downloads', {
 export const mediaImages = sqliteTable('media_images', {
   id: id(),
   image: text('image').notNull().unique(),
-  alt: text('alt').notNull().default(''),
   width: integer('width').notNull(),
   height: integer('height').notNull(),
   uploadedById: integer('uploaded_by_id').references(() => users.id, { onDelete: 'set null' }),
