@@ -3,9 +3,14 @@ import type { Locator, Page } from '@playwright/test';
 import sharp from 'sharp';
 import { signIn, visit } from './helpers';
 
-const confirmRemoval = async (scope: Locator | Page, label = 'Usuń', confirmLabel = 'Na pewno?') => {
+const confirmRemoval = async (scope: Locator | Page, subject: string, label = 'Usuń') => {
+  const question = `Czy na pewno chcesz usunąć ${subject}?`;
+  const page = 'page' in scope ? scope.page() : scope;
+  const dialog = page.getByRole('dialog', { name: 'Potwierdzenie' });
   await scope.getByRole('button', { name: label, exact: true }).click();
-  await scope.getByRole('button', { name: confirmLabel }).click();
+  await expect(dialog.getByText(question)).toBeVisible();
+  await dialog.getByRole('button', { name: 'Tak' }).click();
+  await expect(dialog).toBeHidden();
 };
 
 const solidPng = async (name: string, color: string) => ({
@@ -54,7 +59,7 @@ test.describe('moderation and the remaining panel sections', () => {
     await expect(page.getByRole('listitem').filter({ hasText: 'Temat do moderacji' })).toContainText('Przyklejony');
 
     await visit(page, threadUrl);
-    await confirmRemoval(reply);
+    await confirmRemoval(reply, 'tego posta');
     await expect(page.getByText('Post usunięty')).toBeVisible();
     await expect(reply).toHaveCount(0);
     await expect(page.getByText('Pierwszy post zostaje.')).toBeVisible();
@@ -69,7 +74,7 @@ test.describe('moderation and the remaining panel sections', () => {
     expect((await memberPage.request.get(threadUrl)).status()).toBe(404);
     await memberContext.close();
 
-    await confirmRemoval(moderation, 'Usuń temat', 'Usunąć cały temat?');
+    await confirmRemoval(moderation, 'cały temat', 'Usuń temat');
     await expect(page).toHaveURL('/forum/dzial/redakcja');
     await expect(page.getByText('W tym dziale nie ma jeszcze żadnego tematu.')).toBeVisible();
   });
@@ -124,7 +129,7 @@ test.describe('moderation and the remaining panel sections', () => {
     await expect(publicPoll.getByRole('button', { name: 'Głosuję' })).toHaveCount(0);
 
     await visit(page, '/admin/ankiety');
-    await confirmRemoval(pollRow);
+    await confirmRemoval(pollRow, 'tę ankietę');
     await expect(page.getByText('Usunięto')).toBeVisible();
     await expect(pollRow).toHaveCount(0);
   });
@@ -156,7 +161,7 @@ test.describe('moderation and the remaining panel sections', () => {
     const renamedLink = section.getByRole('listitem').filter({ hasText: 'Kącik giermka' });
     await expect(renamedLink).toBeVisible();
 
-    await confirmRemoval(renamedLink);
+    await confirmRemoval(renamedLink, 'ten odnośnik');
     await expect(page.getByText('Usunięto')).toBeVisible();
     await expect(section.getByRole('listitem')).toHaveCount(2);
   });
@@ -182,7 +187,7 @@ test.describe('moderation and the remaining panel sections', () => {
     await page.getByRole('button', { name: 'Zapisz' }).click();
     await expect(page.getByRole('row', { name: /Soldier Dream II/ })).toBeVisible();
 
-    await confirmRemoval(videoRow);
+    await confirmRemoval(videoRow, 'ten film');
     await expect(page.getByText('Usunięto')).toBeVisible();
     await expect(videoRow).toHaveCount(0);
   });
@@ -226,9 +231,9 @@ test.describe('moderation and the remaining panel sections', () => {
     const seededCard = photoCards.filter({ hasText: 'Złota zbroja' });
     await seededCard.getByRole('button', { name: 'Ustaw jako okładkę' }).click();
     await expect(seededCard.getByText('Okładka')).toBeVisible();
-    await confirmRemoval(uploadedCards.first());
+    await confirmRemoval(uploadedCards.first(), 'to zdjęcie');
     await expect(photoCards).toHaveCount(2);
-    await confirmRemoval(uploadedCards.first());
+    await confirmRemoval(uploadedCards.first(), 'to zdjęcie');
     await expect(photoCards).toHaveCount(1);
     await expect(photoCards.first()).toContainText('Złota zbroja');
   });

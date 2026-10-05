@@ -54,6 +54,7 @@ const posterUrlOf = (row: object) => `https://i.ytimg.com/vi/${videoOf(row).yout
       :title="t('ADMIN_NAV.VIDEOS')"
       :subtitle="t('ADMIN_VIDEO.SUBTITLE')"
       :add-label="t('ADMIN_VIDEO.ADD_VIDEO')"
+      :remove-question="t('CONFIRM.DELETE_VIDEO')"
       :columns="columns"
       :fields="fields"
       :empty-input="EMPTY_INPUT"

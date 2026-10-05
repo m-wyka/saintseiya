@@ -21,6 +21,7 @@ const fields = computed<CrudField[]>(() => [
     resource="tags"
     :title="t('ADMIN_NAV.TAGS')"
     :add-label="t('ADMIN_TAGS.ADD')"
+    :remove-question="t('CONFIRM.DELETE_TAG')"
     :columns="columns"
     :fields="fields"
     :empty-input="{ name: '', slug: '' }"

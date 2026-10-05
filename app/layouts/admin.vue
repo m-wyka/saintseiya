@@ -95,6 +95,7 @@ useSeoMeta({ robots: 'noindex, nofollow' });
         </div>
       </div>
     </main>
+    <ConfirmDialog />
     <AppToaster />
   </div>
 </template>

@@ -30,6 +30,7 @@ const coverOf = (row: object): string | null => (row as { coverImage?: string | 
     :title="t('ADMIN_NAV.GALLERY')"
     :subtitle="t('ADMIN_GALLERY.SUBTITLE')"
     :add-label="t('ADMIN_GALLERY.ADD_ALBUM')"
+    :remove-question="t('CONFIRM.DELETE_ALBUM')"
     :columns="columns"
     :fields="fields"
     :empty-input="{ title: '', slug: '', description: '', sortOrder: 0 }"

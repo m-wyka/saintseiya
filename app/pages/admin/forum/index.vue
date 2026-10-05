@@ -63,6 +63,7 @@ const forumOf = (row: object) => row as ForumRow;
       :title="t('ADMIN_FORUM.SECTIONS_TITLE')"
       :subtitle="t('ADMIN_FORUM.SECTIONS_SUBTITLE')"
       :add-label="t('ADMIN_FORUM.ADD_SECTION')"
+      :remove-question="t('CONFIRM.DELETE_FORUM_SECTION')"
       :columns="columns"
       :fields="fields"
       :empty-input="EMPTY_INPUT"

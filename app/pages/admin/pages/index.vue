@@ -176,7 +176,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.PAGES') });
             <AppIcon name="chevronDown" />
           </BaseButton>
         </template>
-        <ConfirmButton @confirm="removePage(row)" />
+        <ConfirmButton :question="t('CONFIRM.DELETE_PAGE')" @confirm="removePage(row)" />
       </template>
     </AdminTable>
     <PageStepper v-if="isSearchMode" v-model="page" :page-count="pageCount" />

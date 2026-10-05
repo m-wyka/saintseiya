@@ -34,6 +34,7 @@ onMounted(() => {
     <SiteFooter />
     <MobileMenu />
     <SearchDialog />
+    <ConfirmDialog />
     <AppToaster />
   </div>
 </template>

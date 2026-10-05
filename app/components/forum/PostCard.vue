@@ -76,7 +76,7 @@ const removePost = async () => {
             <AppIcon name="edit" />
             {{ t('GENERAL.EDIT') }}
           </BaseButton>
-          <ConfirmButton v-if="canDelete" @confirm="removePost" />
+          <ConfirmButton v-if="canDelete" :question="t('CONFIRM.DELETE_POST')" @confirm="removePost" />
           <a
             :href="withLocalePrefix(routes.post(post.id), locale)"
             class="ml-1.5 font-semibold text-cosmo-400 hover:text-gold-300"

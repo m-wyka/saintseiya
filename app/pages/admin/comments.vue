@@ -100,7 +100,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.COMMENTS') });
           <AppIcon name="eye" />
           {{ row.isHidden ? t('ADMIN_COMMENTS.SHOW') : t('ADMIN_COMMENTS.HIDE') }}
         </BaseButton>
-        <ConfirmButton @confirm="remove(row.id)" />
+        <ConfirmButton :question="t('CONFIRM.DELETE_COMMENT')" @confirm="remove(row.id)" />
       </template>
     </AdminTable>
     <PageStepper v-model="page" :page-count="pageCount" />

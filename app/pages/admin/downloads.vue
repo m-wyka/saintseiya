@@ -87,7 +87,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.DOWNLOADS') });
           <AppIcon name="edit" />
           {{ t('GENERAL.EDIT') }}
         </BaseButton>
-        <ConfirmButton @confirm="remove(row.id)" />
+        <ConfirmButton :question="t('CONFIRM.DELETE_DOWNLOAD')" @confirm="remove(row.id)" />
       </template>
     </AdminTable>
   </div>

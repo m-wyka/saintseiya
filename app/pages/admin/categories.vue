@@ -31,6 +31,7 @@ const imageOf = (row: object): string | null => (row as { image?: string | null 
     resource="news-categories"
     :title="t('ADMIN_NAV.NEWS_CATEGORIES')"
     :add-label="t('ADMIN_NEWS_CATEGORIES.ADD')"
+    :remove-question="t('CONFIRM.DELETE_CATEGORY')"
     :columns="columns"
     :fields="fields"
     :empty-input="{ name: '', slug: '', image: null }"

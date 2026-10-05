@@ -45,6 +45,7 @@ const urlOf = (row: object) => (row as { url: string }).url;
       :title="t('ADMIN_NAV.LINKS')"
       :subtitle="t('ADMIN_LINKS.SUBTITLE')"
       :add-label="t('ADMIN_LINKS.ADD_LINK')"
+      :remove-question="t('CONFIRM.DELETE_LINK')"
       :columns="columns"
       :fields="fields"
       :empty-input="EMPTY_INPUT"

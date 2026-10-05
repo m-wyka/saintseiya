@@ -92,11 +92,7 @@ const moveThread = async () => {
         <AppIcon name="folder" />
         {{ t('POSTS.MOVE') }}
       </BaseButton>
-      <ConfirmButton
-        :label="t('POSTS.DELETE_THREAD')"
-        :confirm-label="t('POSTS.CONFIRM_DELETE_THREAD')"
-        @confirm="removeThread"
-      />
+      <ConfirmButton :label="t('POSTS.DELETE_THREAD')" :question="t('CONFIRM.DELETE_THREAD')" @confirm="removeThread" />
     </div>
     <form v-if="isChoosingForum" class="flex flex-wrap items-end gap-2" @submit.prevent="moveThread">
       <BaseSelect

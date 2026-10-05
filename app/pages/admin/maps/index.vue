@@ -52,7 +52,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.MAPS') });
           <AppIcon name="edit" />
           {{ t('GENERAL.EDIT') }}
         </BaseButton>
-        <ConfirmButton @confirm="remove(row.id)" />
+        <ConfirmButton :question="t('CONFIRM.DELETE_MAP')" @confirm="remove(row.id)" />
       </template>
     </AdminTable>
   </div>

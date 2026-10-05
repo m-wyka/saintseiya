@@ -76,7 +76,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.NEWS') });
           <AppIcon name="edit" />
           {{ t('GENERAL.EDIT') }}
         </BaseButton>
-        <ConfirmButton @confirm="remove(row.id)" />
+        <ConfirmButton :question="t('CONFIRM.DELETE_NEWS')" @confirm="remove(row.id)" />
       </template>
     </AdminTable>
     <PageStepper v-model="page" :page-count="pageCount" />

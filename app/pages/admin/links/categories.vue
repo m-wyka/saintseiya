@@ -24,6 +24,7 @@ const fields = computed<CrudField[]>(() => [
       :title="t('ADMIN_LINKS.CATEGORIES_TITLE')"
       :subtitle="t('ADMIN_LINKS.CATEGORIES_SUBTITLE')"
       :add-label="t('ADMIN_LINKS.ADD_CATEGORY')"
+      :remove-question="t('CONFIRM.DELETE_CATEGORY')"
       :columns="columns"
       :fields="fields"
       :empty-input="{ name: '', sortOrder: 0 }"

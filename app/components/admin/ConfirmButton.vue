@@ -1,30 +1,20 @@
 <script setup lang="ts">
-defineProps<{ label?: string; confirmLabel?: string }>();
+const props = defineProps<{ question: string; label?: string }>();
 const emit = defineEmits<{ confirm: [] }>();
 
 const { t } = useI18n();
+const confirmation = useConfirmationStore();
 
-const CONFIRMATION_WINDOW_MS = 4000;
-const isArmed = ref(false);
-let disarmTimer: ReturnType<typeof setTimeout> | undefined;
-
-const press = () => {
-  clearTimeout(disarmTimer);
-  if (isArmed.value) {
-    isArmed.value = false;
+const press = async () => {
+  if (await confirmation.ask(props.question)) {
     emit('confirm');
-    return;
   }
-  isArmed.value = true;
-  disarmTimer = setTimeout(() => (isArmed.value = false), CONFIRMATION_WINDOW_MS);
 };
-
-onBeforeUnmount(() => clearTimeout(disarmTimer));
 </script>
 
 <template>
-  <BaseButton :variant="isArmed ? 'danger' : 'ghost'" size="sm" @click="press">
-    <AppIcon :name="isArmed ? 'warning' : 'trash'" />
-    {{ isArmed ? (confirmLabel ?? t('ADMIN_UI.CONFIRM_PROMPT')) : (label ?? t('GENERAL.DELETE')) }}
+  <BaseButton variant="ghost" size="sm" aria-haspopup="dialog" @click="press">
+    <AppIcon name="trash" />
+    {{ label ?? t('GENERAL.DELETE') }}
   </BaseButton>
 </template>

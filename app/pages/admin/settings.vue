@@ -81,7 +81,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.SETTINGS') });
             <AppIcon name="edit" />
             {{ openedIndex === index ? t('ADMIN_SETTINGS.COLLAPSE') : t('GENERAL.EDIT') }}
           </BaseButton>
-          <ConfirmButton @confirm="removeTab(index)" />
+          <ConfirmButton :question="t('CONFIRM.DELETE_TAB')" @confirm="removeTab(index)" />
         </div>
         <div v-if="openedIndex === index" class="flex flex-col gap-4 border-t border-aqua-500/15 p-4">
           <BaseInput v-model="tab.title" :label="t('ADMIN_SETTINGS.TAB_TITLE')" :maxlength="40" required />

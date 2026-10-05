@@ -78,7 +78,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.SHOUTBOX') });
           <AppIcon name="eye" />
           {{ row.isHidden ? t('ADMIN_SHOUTBOX.SHOW') : t('ADMIN_SHOUTBOX.HIDE') }}
         </BaseButton>
-        <ConfirmButton @confirm="remove(row.id)" />
+        <ConfirmButton :question="t('CONFIRM.DELETE_SHOUT')" @confirm="remove(row.id)" />
       </template>
     </AdminTable>
     <PageStepper v-model="page" :page-count="pageCount" />

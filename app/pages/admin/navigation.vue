@@ -113,10 +113,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.NAVIGATION') });
               <AppIcon name="edit" />
               {{ t('GENERAL.EDIT') }}
             </BaseButton>
-            <ConfirmButton
-              :confirm-label="t('ADMIN_NAVIGATION.CONFIRM_REMOVE_SECTION')"
-              @confirm="removeSection(section.id)"
-            />
+            <ConfirmButton :question="t('CONFIRM.DELETE_NAVIGATION_SECTION')" @confirm="removeSection(section.id)" />
           </div>
         </div>
       </header>
@@ -158,7 +155,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.NAVIGATION') });
                 <AppIcon name="edit" />
                 {{ t('GENERAL.EDIT') }}
               </BaseButton>
-              <ConfirmButton @confirm="removeLink(link.id)" />
+              <ConfirmButton :question="t('CONFIRM.DELETE_NAVIGATION_LINK')" @confirm="removeLink(link.id)" />
             </div>
           </div>
         </li>

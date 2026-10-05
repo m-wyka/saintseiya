@@ -203,7 +203,7 @@ useSeoMeta({ title: () => t('ADMIN_GALLERY.SEO_TITLE', { title: data.value?.albu
               <AppIcon name="edit" />
               {{ t('GENERAL.EDIT') }}
             </BaseButton>
-            <ConfirmButton @confirm="remove(photo)" />
+            <ConfirmButton :question="t('CONFIRM.DELETE_PHOTO')" @confirm="remove(photo)" />
           </div>
         </div>
       </li>

@@ -107,7 +107,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.IMAGES') });
               <AppIcon name="link" />
               {{ t('ADMIN_IMAGES.COPY_ADDRESS') }}
             </BaseButton>
-            <ConfirmButton @confirm="removeImage(media)" />
+            <ConfirmButton :question="t('CONFIRM.DELETE_IMAGE')" @confirm="removeImage(media)" />
           </div>
         </div>
       </li>

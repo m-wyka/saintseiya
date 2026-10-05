@@ -91,7 +91,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.POLLS') });
           <AppIcon name="edit" />
           {{ t('GENERAL.EDIT') }}
         </BaseButton>
-        <ConfirmButton @confirm="remove(row.id)" />
+        <ConfirmButton :question="t('CONFIRM.DELETE_POLL')" @confirm="remove(row.id)" />
       </template>
     </AdminTable>
     <PageStepper v-model="page" :page-count="pageCount" />

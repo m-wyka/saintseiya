@@ -7,6 +7,7 @@ const props = defineProps<{
   title: string;
   subtitle?: string;
   addLabel: string;
+  removeQuestion: string;
   icon?: IconName;
   columns: CrudColumn[];
   fields: CrudField[];
@@ -148,7 +149,7 @@ useSeoMeta({ title: props.title });
           <AppIcon name="edit" />
           {{ t('GENERAL.EDIT') }}
         </BaseButton>
-        <ConfirmButton @confirm="remove(row.id)" />
+        <ConfirmButton :question="removeQuestion" @confirm="remove(row.id)" />
       </template>
     </AdminTable>
     <PageStepper v-model="page" :page-count="pageCount" />

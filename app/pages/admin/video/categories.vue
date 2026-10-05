@@ -30,6 +30,7 @@ const slugOf = (row: object) => (row as { slug: string }).slug;
       :title="t('ADMIN_VIDEO.CATEGORIES_TITLE')"
       :subtitle="t('ADMIN_VIDEO.CATEGORIES_SUBTITLE')"
       :add-label="t('ADMIN_VIDEO.ADD_CATEGORY')"
+      :remove-question="t('CONFIRM.DELETE_CATEGORY')"
       :columns="columns"
       :fields="fields"
       :empty-input="{ name: '', slug: '', sortOrder: 0, description: '' }"
