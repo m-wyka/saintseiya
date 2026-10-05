@@ -1,0 +1,3 @@
+<template>
+  <VideoListing />
+</template>

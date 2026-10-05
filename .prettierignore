@@ -1,0 +1,8 @@
+node_modules
+.nuxt
+.output
+.data
+/legacy
+pnpm-lock.yaml
+server/db/migrations
+public

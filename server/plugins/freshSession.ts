@@ -1,0 +1,14 @@
+export default defineNitroPlugin(() => {
+  sessionHooks.hook('fetch', async (session, event) => {
+    if (!session.user) {
+      return;
+    }
+    const account = findActiveAccount(session.user.id);
+    if (!account) {
+      await clearUserSession(event);
+      throw createError({ statusCode: 401, statusMessage: 'Sesja wygasła' });
+    }
+    session.user = sessionUserOf(account);
+    await setUserSession(event, { user: session.user });
+  });
+});

@@ -1,0 +1,55 @@
+<script setup lang="ts">
+import { routes } from '#shared/utils/routes';
+
+const { data: categories } = await useFetch('/api/forum');
+
+useSeoMeta({ title: 'Forum' });
+</script>
+
+<template>
+  <div>
+    <PageHeading title="Forum" subtitle="Rozmowy rycerzy o Saint Seiya, mandze, anime i wszystkim wokół." />
+    <div class="flex flex-col gap-6">
+      <section v-for="category in categories" :key="category.id" class="reveal overflow-hidden panel">
+        <h2 class="px-4 py-2 heading-display text-lg text-abyss-950 cosmo-bar">{{ category.name }}</h2>
+        <ul class="divide-y divide-aqua-500/10">
+          <li
+            v-for="forum in category.forums"
+            :key="forum.id"
+            class="group relative grid items-center gap-x-4 gap-y-1 px-4 py-3 transition duration-200 hover:bg-white/5 md:grid-cols-[minmax(0,1fr)_7rem_minmax(0,16rem)]"
+          >
+            <div class="flex min-w-0 items-start gap-3">
+              <span
+                class="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-black/40 text-cosmo-500 transition group-hover:text-abyss-950 group-hover:cosmo-bar"
+              >
+                <AppIcon :name="forum.isStaffOnly ? 'lock' : 'forum'" />
+              </span>
+              <div class="min-w-0">
+                <h3 class="font-semibold text-gold-300">
+                  <NuxtLink :to="routes.forum(forum.slug)" class="after:absolute after:inset-0">{{
+                    forum.name
+                  }}</NuxtLink>
+                </h3>
+                <p class="text-xs text-aqua-300">{{ forum.description }}</p>
+              </div>
+            </div>
+            <p class="text-xs text-aqua-500 max-md:pl-12">
+              {{ pluralize(forum.threadCount, 'temat', 'tematy', 'tematów') }}<br class="max-md:hidden" />
+              <span class="md:hidden"> · </span>{{ pluralize(forum.postCount, 'post', 'posty', 'postów') }}
+            </p>
+            <p v-if="forum.latestThread" class="min-w-0 text-xs text-aqua-500 max-md:pl-12">
+              <NuxtLink
+                :to="routes.thread(forum.latestThread.id)"
+                class="relative z-10 block truncate text-aqua-200 hover:text-gold-300"
+              >
+                {{ forum.latestThread.title }}
+              </NuxtLink>
+              <span v-if="forum.latestThread.lastPostAt">{{ formatLongDate(forum.latestThread.lastPostAt) }}</span>
+              <span v-if="forum.latestThread.authorName"> · {{ forum.latestThread.authorName }}</span>
+            </p>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</template>

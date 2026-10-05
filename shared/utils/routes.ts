@@ -1,0 +1,52 @@
+export const MEDIA_BASE_URL = '/media';
+export const LEGACY_MEDIA_FOLDER = 'legacy';
+export const THUMBNAILS_MEDIA_FOLDER = 'thumbnails';
+
+export const RESERVED_ROOT_SEGMENTS = [
+  'admin',
+  'ankiety',
+  'api',
+  'auth',
+  'forum',
+  'galeria',
+  'konto',
+  'linki',
+  'logowanie-testowe',
+  'mapy',
+  'media',
+  'newsy',
+  'pliki',
+  'shoutbox',
+  'szukaj',
+  'tagi',
+  'theme',
+  'uzytkownik',
+  'video',
+] as const;
+
+export const routes = {
+  home: () => '/',
+  newsList: () => '/newsy',
+  news: (slug: string) => `/newsy/${slug}`,
+  newsCategory: (slug: string) => `/newsy/kategoria/${slug}`,
+  tag: (slug: string) => `/tagi/${slug}`,
+  page: (path: string) => `/${path}`,
+  forumIndex: () => '/forum',
+  forum: (slug: string) => `/forum/dzial/${slug}`,
+  thread: (id: number) => `/forum/temat/${id}`,
+  post: (id: number) => `/forum/post/${id}`,
+  gallery: () => '/galeria',
+  album: (slug: string) => `/galeria/${slug}`,
+  photo: (id: number) => `/galeria/zdjecie/${id}`,
+  videos: () => '/video',
+  videoCategory: (slug: string) => `/video/${slug}`,
+  maps: () => '/mapy',
+  map: (slug: string) => `/mapy/${slug}`,
+  links: () => '/linki',
+  downloads: () => '/pliki',
+  polls: () => '/ankiety',
+  shoutbox: () => '/shoutbox',
+  search: () => '/szukaj',
+  user: (id: number) => `/uzytkownik/${id}`,
+  media: (storedPath: string) => `${MEDIA_BASE_URL}/${storedPath.split('/').map(encodeURIComponent).join('/')}`,
+};
