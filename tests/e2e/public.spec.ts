@@ -12,7 +12,7 @@ test.describe('public site', () => {
     await expect(page.getByRole('heading', { name: 'Saint Seiya Revolution powraca!' })).toBeVisible();
     await expect(page.getByText('Nowy rozdział mangi już dostępny.')).toBeVisible();
     await expect(page.getByText('Szkic redakcyjny')).toHaveCount(0);
-    await expect(page.getByText('Konto usunięte').first()).toBeVisible();
+    await expect(page.getByText('Konto nieaktywne').first()).toBeVisible();
   });
 
   test('a news opens with its body, a placeholder for a dead image and comments', async ({ page }) => {

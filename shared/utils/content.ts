@@ -13,7 +13,7 @@ export type MapAreaTarget = (typeof MAP_AREA_TARGETS)[number];
 export const EXTERNAL_IMAGE_STATUSES = ['unchecked', 'alive', 'dead'] as const;
 export type ExternalImageStatus = (typeof EXTERNAL_IMAGE_STATUSES)[number];
 
-export const GHOST_USER_CAPTION_KEY = 'GENERAL.DELETED_ACCOUNT';
+export const GHOST_USER_CAPTION_KEY = 'GENERAL.INACTIVE_ACCOUNT';
 
 export const MISSING_IMAGE_TITLE_KEY = 'CONTENT.IMAGE_NOT_FOUND';
 export const UNTITLED_PHOTO_KEY = 'CONTENT.UNTITLED_PHOTO';

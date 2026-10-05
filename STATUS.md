@@ -124,7 +124,7 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 
 **Strona publiczna**
 - Strona główna, newsy (kategorie, tagi), podstrony z okruszkami i hubami, forum, galeria, video, mapy z okienkami treści, linki, pliki, ankiety, shoutbox, wyszukiwarka, profile.
-- Logowanie Google, konto (zmiana nicku, usunięcie konta → „Konto usunięte”), pisanie na forum, komentarze, shoutbox, głosowanie; captcha Turnstile i limit częstotliwości.
+- Logowanie Google, konto (zmiana nicku, usunięcie konta → „Konto nieaktywne”), pisanie na forum, komentarze, shoutbox, głosowanie; captcha Turnstile i limit częstotliwości.
 - Przekierowania 301 ze starych adresów (`viewpage.php`, `news.php`, `forum/viewthread.php`, `kr/index.html` itd.).
 - Zaślepka „Nie znaleziono zdjęcia” dla martwych obrazków.
 

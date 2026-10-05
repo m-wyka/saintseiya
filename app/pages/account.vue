@@ -57,7 +57,7 @@ useSeoMeta({ title: () => t('ACCOUNT.TITLE') });
     <section class="flex flex-col gap-3 panel border-danger/30 p-6">
       <h2 class="heading-display text-lg text-danger">{{ t('ACCOUNT.REMOVAL_HEADING') }}</h2>
       <p class="text-sm text-aqua-300">
-        {{ t('ACCOUNT.REMOVAL_DESCRIPTION', { caption: t('GENERAL.DELETED_ACCOUNT') }) }}
+        {{ t('ACCOUNT.REMOVAL_DESCRIPTION', { caption: t('GENERAL.INACTIVE_ACCOUNT') }) }}
       </p>
       <p v-if="removal.errorMessage.value" class="text-sm text-danger" role="alert">{{ removal.errorMessage.value }}</p>
       <div class="flex flex-wrap gap-2">

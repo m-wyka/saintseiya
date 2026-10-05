@@ -25,7 +25,7 @@ const profileAddress = computed(() => (props.linked && props.author?.id ? routes
       {{ author.name }}
     </component>
     <span v-if="author.isGhost" class="text-[0.7em] tracking-wide text-aqua-500 uppercase">{{
-      t('GENERAL.DELETED_ACCOUNT')
+      t('GENERAL.INACTIVE_ACCOUNT')
     }}</span>
   </span>
 </template>

@@ -44,7 +44,7 @@ useSeoMeta({ title: () => profile.value?.name ?? '', robots: 'noindex' });
         </h1>
         <p class="text-sm text-aqua-500">
           <template v-if="profile.isGhost">{{
-            t('PROFILE.GHOST_DESCRIPTION', { caption: t('GENERAL.DELETED_ACCOUNT') })
+            t('PROFILE.GHOST_DESCRIPTION', { caption: t('GENERAL.INACTIVE_ACCOUNT') })
           }}</template>
           <template v-else>
             {{ t(userRoleLabelKey(profile.role)) }}

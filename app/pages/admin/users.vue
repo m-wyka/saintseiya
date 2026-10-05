@@ -115,7 +115,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.USERS') });
         <template v-else>—</template>
       </template>
       <template #cell-status="{ row }">
-        <StateBadge v-if="row.isGhost" :label="t('GENERAL.DELETED_ACCOUNT')" icon="user" tone="muted" />
+        <StateBadge v-if="row.isGhost" :label="t('GENERAL.INACTIVE_ACCOUNT')" icon="user" tone="muted" />
         <StateBadge v-else-if="row.bannedAt" :label="t('ADMIN_USERS.ACCOUNT_BANNED')" icon="lock" tone="danger" />
         <StateBadge v-else :label="t('ADMIN_USERS.ACCOUNT_ACTIVE')" icon="check" tone="positive" />
       </template>

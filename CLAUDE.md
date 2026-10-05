@@ -21,7 +21,7 @@ Przepisanie portalu fanowskiego o anime Saint Seiya (Rycerze Zodiaku) ze starego
 - **Moduły dodatkowe przenoszone z legacy**: galeria video (YouTube), shoutbox, ankiety, katalog linków, pliki do pobrania.
 - **Widoczność**: wszystkie migrowane podstrony są publiczne, także dawne „tylko dla zalogowanych” (Multimedia). Wyjątek: strony redakcyjne (z treścią są 2) trafiają do bazy jako ukryte szkice.
 - **Logowanie**: wyłącznie Google. Bez rejestracji e-mail/hasło.
-- **Starzy użytkownicy**: nie migrujemy kont. Autorzy starych treści zostają jako „ghost” — sam nick i podpis „Konto usunięte”.
+- **Starzy użytkownicy**: nie migrujemy kont. Autorzy starych treści zostają jako „ghost” — sam nick i podpis „Konto nieaktywne”.
 - **Role**: `user`, `moderator` (z osobno nadawanymi uprawnieniami), `administrator`.
 - **Panel administratora**:
   - dodawanie, edycja i usuwanie treści (newsy, podstrony, mapy, galerie),

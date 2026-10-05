@@ -59,7 +59,7 @@ const removePost = async () => {
           {{ post.author.name }}
         </p>
         <p v-if="post.author.isGhost" class="text-[0.65rem] tracking-wide text-aqua-500 uppercase">
-          {{ t('GENERAL.DELETED_ACCOUNT') }}
+          {{ t('GENERAL.INACTIVE_ACCOUNT') }}
         </p>
         <p class="text-xs text-aqua-500">
           {{ t('POSTS.POST_COUNT', { count: formatNumber(post.author.postCount) }, post.author.postCount) }}

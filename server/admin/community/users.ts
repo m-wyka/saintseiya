@@ -66,7 +66,7 @@ const findEditableAccount = (userId: number): Account => {
     'ERRORS.USER_NOT_FOUND',
   );
   if (account.isGhost) {
-    throw conflict('ERRORS.DELETED_ACCOUNT_IMMUTABLE');
+    throw conflict('ERRORS.INACTIVE_ACCOUNT_IMMUTABLE');
   }
   return account;
 };

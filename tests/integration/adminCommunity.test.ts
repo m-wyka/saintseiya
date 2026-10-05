@@ -176,7 +176,7 @@ describe('user administration', () => {
     const ghost = createAccount({ isGhost: true });
 
     expect(() => setAccountBan(admin, admin.id, true)).toThrowError('ERRORS.CANNOT_BAN_SELF');
-    expect(() => setAccountBan(admin, ghost.id, true)).toThrowError('ERRORS.DELETED_ACCOUNT_IMMUTABLE');
+    expect(() => setAccountBan(admin, ghost.id, true)).toThrowError('ERRORS.INACTIVE_ACCOUNT_IMMUTABLE');
     expect(() => setAccountBan(moderator, admin.id, true)).toThrowError('ERRORS.ADMIN_BAN_REQUIRES_ADMIN');
     expect(() => setAccountBan(admin, 999_999, true)).toThrowError('ERRORS.USER_NOT_FOUND');
     expect(storedAccount(admin.id).bannedAt).toBeNull();
@@ -212,7 +212,7 @@ describe('user administration', () => {
       'ERRORS.LAST_ADMIN_REQUIRED',
     );
     expect(() => changeAccountRole(admin, ghost.id, { role: 'moderator', permissions: [] })).toThrowError(
-      'ERRORS.DELETED_ACCOUNT_IMMUTABLE',
+      'ERRORS.INACTIVE_ACCOUNT_IMMUTABLE',
     );
     expect(storedAccount(admin.id).role).toBe('admin');
     expect(storedAccount(ghost.id).role).toBe('user');
