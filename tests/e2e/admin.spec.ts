@@ -110,6 +110,80 @@ test.describe('administration panel', () => {
     await expect(page).toHaveURL('/forum');
   });
 
+  test('an administrator builds the FAQ in two languages', async ({ page }) => {
+    await signIn(page, { name: 'Admin FAQ', role: 'admin' });
+    await visit(page, '/admin/faq/kategorie');
+    await page.getByRole('button', { name: 'Dodaj kategorię' }).click();
+    await page.getByLabel('Nazwa').fill('Rejestracja');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page.getByRole('cell', { name: 'Rejestracja', exact: true })).toBeVisible();
+
+    await page.getByRole('link', { name: 'Pytania' }).click();
+    await expect(page).toHaveURL('/admin/faq');
+    await page.getByRole('button', { name: 'Dodaj pytanie' }).click();
+    await page.getByLabel('Tytuł').fill('Czy konto jest płatne?');
+    await page.getByRole('textbox', { name: 'Opis' }).click();
+    await page.keyboard.type('Nie, konto jest darmowe.');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page.getByRole('cell', { name: 'Czy konto jest płatne?', exact: true })).toBeVisible();
+
+    await page.getByRole('group', { name: 'Język treści' }).getByRole('button', { name: 'en' }).click();
+    await page.getByRole('button', { name: 'Edytuj' }).click();
+    await expect(page.getByLabel('Tytuł')).toHaveValue('Czy konto jest płatne?');
+    await page.getByLabel('Tytuł').fill('Is the account paid?');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page.getByLabel('Tytuł')).toBeHidden();
+
+    await visit(page, '/faq');
+    await expect(page.getByRole('heading', { level: 2, name: 'Rejestracja' })).toBeVisible();
+    await expect(page.getByText('Nie, konto jest darmowe.')).toBeHidden();
+    await page.getByText('Czy konto jest płatne?').click();
+    await expect(page.getByText('Nie, konto jest darmowe.')).toBeVisible();
+
+    await visit(page, '/en/faq');
+    await expect(page.getByText('Is the account paid?')).toBeVisible();
+
+    await visit(page, '/');
+    await page.getByRole('button', { name: 'Szukaj', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'Szukaj' });
+    await dialog.getByLabel('Szukana fraza').fill('darmowe');
+    await expect(dialog.getByRole('heading', { name: 'FAQ (1)' })).toBeVisible();
+    await dialog.getByRole('link', { name: 'Czy konto jest płatne?' }).click();
+    await expect(page).toHaveURL(/\/faq#pytanie-\d+$/);
+    await expect(page.getByRole('group').getByText('Nie, konto jest darmowe.')).toBeVisible();
+  });
+
+  test('the change log shows who changed a news and how', async ({ page }) => {
+    await signIn(page, { name: 'Admin Dziennika', role: 'admin' });
+    await visit(page, '/admin/newsy/nowy');
+    await page.getByLabel('Tytuł').fill('Saga Asgardu');
+    await page.getByLabel('Status').selectOption('published');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page).toHaveURL('/admin/newsy');
+    await page.getByRole('link', { name: 'Saga Asgardu' }).click();
+    await page.getByLabel('Tytuł').fill('Saga Asgardu wraca');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page).toHaveURL('/admin/newsy');
+
+    await visit(page, '/admin/dziennik');
+    await expect(page.getByRole('heading', { level: 1, name: 'Dziennik zmian' })).toBeVisible();
+    await page.getByPlaceholder('Nick lub nazwa pozycji…').fill('Saga Asgardu');
+    await expect(page.getByRole('listitem').filter({ hasText: 'Dodanie' })).toHaveCount(1);
+    await expect(page.getByRole('listitem').filter({ hasText: 'Dodanie' })).toContainText('Saga Asgardu');
+
+    await page.getByLabel('Akcja').selectOption('update');
+    const change = page.getByRole('listitem').filter({ hasText: 'Saga Asgardu wraca' });
+    await expect(change).toContainText('Admin Dziennika');
+    await change.locator('summary').click();
+    await expect(change.locator('del').filter({ hasText: 'Saga Asgardu' })).toBeVisible();
+    await expect(change.locator('ins').filter({ hasText: 'Saga Asgardu wraca' })).toBeVisible();
+
+    await signIn(page, { name: 'Moderator Bez Dziennika', role: 'moderator', permissions: ['news'] });
+    expect((await page.request.get('/api/admin/logs')).status()).toBe(403);
+    await visit(page, '/admin/dziennik');
+    await expect(page).toHaveURL('/admin');
+  });
+
   test('a moderator sees only the granted sections', async ({ page }) => {
     await signIn(page, { name: 'Moderator Newsów', role: 'moderator', permissions: ['news'] });
     await visit(page, '/admin');

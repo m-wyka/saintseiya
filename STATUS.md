@@ -129,6 +129,19 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 
 - Po decyzjach Mateusza: Panel → Obrazki ostrzega przed usunięciem używanego obrazka (`isMediaImageUsed`); obrazy map mają własny adres wgrywania (`/api/admin/map-image`) i są usuwane z dysku przy podmianie i usunięciu mapy, a wgrane i nigdy niezapisane po 24 h (`cleaningUpMapImages`); okładkę albumu da się ustawić osobno dla EN; numer strony poza zakresem przekierowuje na ostatnią stronę; usunięte martwe kolumny `forums.last_post_at` i `media_images.alt` (migracja `0002_brief_revanche.sql`, zastosuje się przy starcie).
 
+**Wygląd podstrony `/redakcja`** (niezacommitowane) — tabele profili z legacy (nick, kontakt, awatar z `rowspan`, stanowisko, opis) są pokazywane jako karty, nagłówki grup jako nagłówki szeryfowe, a „Byli członkowie” jako równa siatka awatarów. Sam CSS w `rich-content` (`app/assets/css/main.css`), dopasowany do struktury tabeli — treść w bazie bez zmian; wzorzec pasuje tylko do tej strony. Obejrzane na zrzutach 1280 i 390 px. Decyzje Mateusza: prywatnych wiadomości na razie nie robimy, numer GG wylatuje, adresy e-mail redakcji zostają — odnośniki „Prywatna Wiadomość” i numer GG usunięte z treści strony w lokalnej bazie (`pages.id = 1`); ponowny import z legacy je przywróci, importer nie był zmieniany. Trzy awatary nie istnieją w plikach (zaślepka).
+
+**Dziennik zmian** (szósta sesja 2026-10-05; niezacommitowane):
+
+- Tabela `audit_logs` (migracja `0003_true_skaar.sql`, zastosuje się przy starcie): kto (id, nick i rola w chwili zdarzenia), kiedy, akcja (dodanie, zmiana, usunięcie, logowanie, rejestracja), dział, id i nazwa pozycji, język treści oraz lista pól „było → jest”. Długie teksty zapisują się jako wycinek 400 znaków wokół miejsca zmiany.
+- Logowane: wszystkie zasoby panelu (wspólne handlery), pliki, zdjęcia i okładki albumów, obrazki, kolejność (podstrony, zdjęcia, menu), ukrywanie i usuwanie komentarzy i wpisów shoutboksa, blokady i role użytkowników, News Center, moderacja forum (zamknięcie, przyklejenie, przeniesienie, usunięcie tematu, edycja i usunięcie posta — także edycja własnego posta przez autora), zmiana nicku, usunięcie konta, rejestracja, logowanie i rola nadana z `NUXT_ADMIN_EMAILS`.
+- Nie logowane: nowe posty, komentarze, wpisy shoutboksa i głosy w ankietach (mają własnego autora i datę; głosy są tajne), wgranie obrazu mapy przed zapisem mapy, logowanie testowe nadające rolę.
+- Dziennik nie przechowuje e-maili, identyfikatorów Google, awatarów ani adresów IP. Nie ma też automatycznego czyszczenia starych wpisów.
+- Panel → Portal → „Dziennik zmian” (`/admin/dziennik`, tylko administrator): filtr akcji i działu, szukanie po nicku lub nazwie pozycji, rozwijane szczegóły zmian. Nazwy pól pokazują się tak jak w kodzie (`bodyHtml`, `isHidden`).
+- Testy: 12 nowych testów integracyjnych (`tests/integration/auditLog.test.ts`) i scenariusz e2e w `admin.spec.ts`. `pnpm lint`, `pnpm typecheck` i Vitest (299 testów) zielone; z e2e uruchomione `admin`, `moderation` i `community` (22 testy, zielone), `public` i `mobile` nie.
+- `app/assets/css/main.css` ma niezacommitowane zmiany spoza tej pracy (plik zmieniał się równolegle w trakcie sesji) — nie ruszałem ich. `pnpm format:check` na koniec zielone.
+- `pnpm legacy:import --force` kasuje dziennik razem z bazą.
+
 ## Co jest zrobione
 
 **Dane**
@@ -183,6 +196,7 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 ## Znane ograniczenia
 
 - Tytuły podstron są wyliczone automatycznie ze starych nazw („Faq”, „Grecka”) — wymagają przejrzenia w panelu.
+- FAQ to osobny moduł (`faq_categories`, `faq_items`, panel „FAQ”, `/api/faq`, strona `/faq`), nie podstrona. Import z legacy dzieli starą stronę „MENU - FAQ” na kategorie i pytania (`scripts/legacy/faq.ts`) — ta ścieżka importu ma tylko testy jednostkowe, pełnego importu po zmianie nie puszczałem. Stary adres `viewpage.php?page_id=761` przekierowuje na stronę główną zamiast na `/faq`.
 - Zmiana adresu lub rodzica podstrony nie poprawia odnośników do niej w treściach innych stron ani w menu.
 - Edytor przy edycji starych treści gubi `<small>`, `<details>` i opakowania `<div>`; tabele, wyrównanie, kolory, obrazki i YouTube zachowuje.
 - Komentarze do filmów (2 z legacy) nie są nigdzie wyświetlane; filmy nie mają własnych stron.

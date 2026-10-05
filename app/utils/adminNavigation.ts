@@ -28,6 +28,7 @@ export const ADMIN_NAVIGATION: AdminNavigationGroup[] = [
       { labelKey: 'ADMIN_NAV.TAGS', to: '/admin/tagi', icon: 'tag', access: 'news' },
       { labelKey: 'ADMIN_NAV.PAGES', to: '/admin/strony', icon: 'list', access: 'pages' },
       { labelKey: 'ADMIN_NAV.MAPS', to: '/admin/mapy', icon: 'map', access: 'maps' },
+      { labelKey: 'ADMIN_NAV.FAQ', to: '/admin/faq', icon: 'help', access: 'pages' },
       { labelKey: 'ADMIN_NAV.IMAGES', to: '/admin/obrazki', icon: 'image', access: 'staff' },
     ],
   },
@@ -55,6 +56,7 @@ export const ADMIN_NAVIGATION: AdminNavigationGroup[] = [
     items: [
       { labelKey: 'ADMIN_NAV.NAVIGATION', to: '/admin/nawigacja', icon: 'menu', access: 'admin' },
       { labelKey: 'ADMIN_NAV.SETTINGS', to: '/admin/ustawienia', icon: 'settings', access: 'admin' },
+      { labelKey: 'ADMIN_NAV.LOGS', to: '/admin/dziennik', icon: 'calendar', access: 'admin' },
     ],
   },
 ];

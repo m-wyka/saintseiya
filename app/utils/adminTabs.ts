@@ -13,6 +13,11 @@ export const LINK_ADMIN_TABS: AdminTab[] = [
   { labelKey: 'ADMIN_NAV.CATEGORIES', to: '/admin/linki/kategorie' },
 ];
 
+export const FAQ_ADMIN_TABS: AdminTab[] = [
+  { labelKey: 'ADMIN_NAV.FAQ_ITEMS', to: '/admin/faq' },
+  { labelKey: 'ADMIN_NAV.CATEGORIES', to: '/admin/faq/kategorie' },
+];
+
 export const FORUM_ADMIN_TABS: AdminTab[] = [
   { labelKey: 'ADMIN_NAV.FORUM_SECTIONS', to: '/admin/forum' },
   { labelKey: 'ADMIN_NAV.CATEGORIES', to: '/admin/forum/kategorie' },

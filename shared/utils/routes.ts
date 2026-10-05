@@ -10,6 +10,7 @@ export const RESERVED_ROOT_SEGMENTS = [
   'auth',
   'downloads',
   'en',
+  'faq',
   'forum',
   'galeria',
   'gallery',
@@ -45,6 +46,7 @@ export const PAGE_FILE_SEGMENT_URLS: Record<string, string> = {
   gallery: 'galeria',
   images: 'obrazki',
   links: 'linki',
+  logs: 'dziennik',
   maps: 'mapy',
   navigation: 'nawigacja',
   'new-thread': 'nowy-temat',
@@ -77,6 +79,8 @@ export const englishPagePath = (polishPath: string): string =>
     .map((segment) => PAGE_URL_SEGMENT_FILES[segment] ?? segment)
     .join('/');
 
+export const faqItemAnchor = (id: number): string => `pytanie-${id}`;
+
 export const routes = {
   home: () => '/',
   newsList: () => '/newsy',
@@ -96,6 +100,8 @@ export const routes = {
   maps: () => '/mapy',
   map: (slug: string) => `/mapy/${slug}`,
   links: () => '/linki',
+  faq: () => '/faq',
+  faqItem: (id: number) => `/faq#${faqItemAnchor(id)}`,
   downloads: () => '/pliki',
   user: (id: number) => `/uzytkownik/${id}`,
   media: (storedPath: string) => `${MEDIA_BASE_URL}/${storedPath.split('/').map(encodeURIComponent).join('/')}`,

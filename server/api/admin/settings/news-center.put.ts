@@ -15,9 +15,19 @@ const bodySchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
-  await requireAdminAccess(event, 'admin');
+  const actor = await requireAdminAccess(event, 'admin');
   const { tabs } = parseInput(bodySchema, await readBody(event));
   const cleanedTabs = tabs.map((tab) => ({ title: tab.title, bodyHtml: cleanEditorHtml(tab.bodyHtml) }));
-  writeSetting('newsCenterTabs', cleanedTabs, contentLocaleOf(event));
+  const locale = contentLocaleOf(event);
+  const before = { newsCenterTabs: readSetting('newsCenterTabs', locale) };
+  writeSetting('newsCenterTabs', cleanedTabs, locale);
+  recordAudit(actor, {
+    action: 'update',
+    entity: 'settings',
+    label: 'News Center',
+    before,
+    after: { newsCenterTabs: cleanedTabs },
+    locale,
+  });
   return cleanedTabs;
 });

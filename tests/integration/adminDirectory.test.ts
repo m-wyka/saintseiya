@@ -60,6 +60,8 @@ describe('directory resources', () => {
       'link-categories': 'links',
       links: 'links',
       downloads: 'downloads',
+      'faq-categories': 'pages',
+      'faq-items': 'pages',
       polls: 'polls',
       'navigation-sections': 'admin',
       'navigation-links': 'admin',

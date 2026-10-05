@@ -45,6 +45,7 @@ const sections = computed(() =>
   [
     { title: t('SEARCH.PAGES'), items: results.value?.pages ?? [] },
     { title: t('GENERAL.NEWS'), items: results.value?.news ?? [] },
+    { title: t('FAQ.TITLE'), items: results.value?.faq ?? [] },
     { title: t('GENERAL.FORUM'), items: results.value?.forum ?? [] },
   ].filter((section) => section.items.length),
 );

@@ -42,6 +42,7 @@ export const ICON_PATHS = {
   alignCenter: 'M4 6h16M7 10h10M4 14h16M7 18h10',
   alignRight: 'M4 6h16M10 10h10M4 14h16M10 18h10',
   table: 'M4 5h16v14H4zM4 10h16M4 15h16M10 5v14',
+  help: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8M12 16.5v.5',
 } as const;
 
 export type IconName = keyof typeof ICON_PATHS;

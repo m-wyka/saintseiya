@@ -1,6 +1,8 @@
 import { sql } from 'drizzle-orm';
 import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
 import { index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import type { AuditChange } from '../../shared/utils/audit';
+import { AUDIT_ACTIONS } from '../../shared/utils/audit';
 import {
   COMMENT_TARGETS,
   CONTENT_STATUSES,
@@ -395,6 +397,27 @@ export const links = sqliteTable(
   (table) => [index('links_category_idx').on(table.categoryId)],
 );
 
+export const faqCategories = sqliteTable('faq_categories', {
+  id: id(),
+  name: text('name').notNull(),
+  sortOrder: counter('sort_order'),
+});
+
+export const faqItems = sqliteTable(
+  'faq_items',
+  {
+    id: id(),
+    categoryId: integer('category_id')
+      .notNull()
+      .references(() => faqCategories.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    descriptionHtml: text('description_html').notNull().default(''),
+    sortOrder: counter('sort_order'),
+    createdAt: createdAt(),
+  },
+  (table) => [index('faq_items_category_idx').on(table.categoryId)],
+);
+
 export const downloads = sqliteTable('downloads', {
   id: id(),
   title: text('title').notNull(),
@@ -458,4 +481,25 @@ export const translations = sqliteTable(
     value: text('value').notNull(),
   },
   (table) => [primaryKey({ columns: [table.entity, table.entityId, table.field, table.locale] })],
+);
+
+export const auditLogs = sqliteTable(
+  'audit_logs',
+  {
+    id: id(),
+    actorId: integer('actor_id').references(() => users.id, { onDelete: 'set null' }),
+    actorName: text('actor_name').notNull(),
+    actorRole: text('actor_role', { enum: USER_ROLES }).notNull(),
+    action: text('action', { enum: AUDIT_ACTIONS }).notNull(),
+    entity: text('entity').notNull(),
+    entityId: integer('entity_id'),
+    label: text('label'),
+    locale: text('locale'),
+    changes: text('changes', { mode: 'json' }).$type<AuditChange[]>().notNull().default([]),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    index('audit_logs_recent_idx').on(table.createdAt),
+    index('audit_logs_entity_idx').on(table.entity, table.entityId),
+  ],
 );

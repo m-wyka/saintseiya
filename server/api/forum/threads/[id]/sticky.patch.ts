@@ -3,7 +3,8 @@ import { z } from 'zod';
 const bodySchema = z.object({ isSticky: z.boolean() });
 
 export default defineEventHandler(async (event) => {
-  await requirePermission(event, 'forum');
+  const actor = await requirePermission(event, 'forum');
   const { isSticky } = await readValidatedBody(event, bodySchema.parse);
-  return setThreadSticky(requiredIdParam(event), isSticky);
+  const id = requiredIdParam(event);
+  return audited({ actor, table: schema.threads, id }, () => setThreadSticky(id, isSticky));
 });

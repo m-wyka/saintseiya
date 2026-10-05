@@ -93,6 +93,12 @@ useSeoMeta({ title: props.title });
             :hint="field.hint"
             :required="field.required"
           />
+          <div v-else-if="field.kind === 'richText'" class="flex flex-col gap-1.5 md:col-span-2">
+            <p class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">{{ field.label }}</p>
+            <ClientOnly>
+              <RichTextEditor v-model="input[field.key] as string" :label="field.label" extended allows-upload />
+            </ClientOnly>
+          </div>
           <BaseCheckbox
             v-else-if="field.kind === 'checkbox'"
             v-model="input[field.key] as boolean"

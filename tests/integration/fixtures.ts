@@ -34,12 +34,15 @@ const TABLES_IN_DELETION_ORDER = [
   schema.videoCategories,
   schema.links,
   schema.linkCategories,
+  schema.faqItems,
+  schema.faqCategories,
   schema.downloads,
   schema.mediaImages,
   schema.externalImages,
   schema.navigationLinks,
   schema.navigationSections,
   schema.settings,
+  schema.auditLogs,
   schema.users,
 ];
 

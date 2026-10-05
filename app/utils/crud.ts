@@ -1,4 +1,4 @@
-type CrudFieldKind = 'text' | 'textarea' | 'number' | 'checkbox' | 'select' | 'image' | 'url';
+type CrudFieldKind = 'text' | 'textarea' | 'number' | 'checkbox' | 'select' | 'image' | 'url' | 'richText';
 
 export interface CrudField {
   key: string;

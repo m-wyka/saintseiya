@@ -108,16 +108,46 @@ const searchForum = (phrase: string, pattern: string, locale: ContentLocale): Se
       context: `Forum · ${post.forumName}`,
     }));
 
+const searchFaq = (phrase: string, pattern: string, locale: ContentLocale): SearchResult[] => {
+  const title = localized(schema.faqItems.title, locale);
+  const descriptionHtml = localized(schema.faqItems.descriptionHtml, locale);
+  return useDb()
+    .select({
+      id: schema.faqItems.id,
+      title,
+      descriptionHtml,
+      categoryName: localized(schema.faqCategories.name, locale),
+    })
+    .from(schema.faqItems)
+    .innerJoin(schema.faqCategories, eq(schema.faqCategories.id, schema.faqItems.categoryId))
+    .where(sql`(${contains(title, pattern)} OR ${htmlContains(descriptionHtml, pattern)})`)
+    .orderBy(
+      sql`${contains(title, pattern)} DESC`,
+      schema.faqCategories.sortOrder,
+      schema.faqItems.sortOrder,
+      schema.faqItems.id,
+    )
+    .limit(RESULTS_PER_KIND)
+    .all()
+    .map((item) => ({
+      title: item.title,
+      url: routes.faqItem(item.id),
+      excerpt: excerptAround(item.descriptionHtml, phrase),
+      context: `FAQ · ${item.categoryName}`,
+    }));
+};
+
 export const searchSite = (rawPhrase: string, locale: ContentLocale = DEFAULT_LOCALE) => {
   const phrase = rawPhrase.trim();
   if (phrase.length < MINIMUM_SEARCH_LENGTH) {
-    return { phrase, news: [], pages: [], forum: [] };
+    return { phrase, news: [], pages: [], faq: [], forum: [] };
   }
   const pattern = likePattern(phrase);
   return {
     phrase,
     news: searchNews(phrase, pattern, locale),
     pages: searchPages(phrase, pattern, locale),
+    faq: searchFaq(phrase, pattern, locale),
     forum: searchForum(phrase, pattern, locale),
   };
 };

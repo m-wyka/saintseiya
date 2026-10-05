@@ -1,5 +1,6 @@
 import { uniqueSlug } from '../../shared/utils/slug';
 import { userNameKey } from '../../shared/utils/users';
+import { FAQ_PAGE_PATH, isFaqPage } from './faq';
 import { linkedPageId, planNavigation } from './navigation';
 import type { PlannedNavigationSection } from './navigation';
 import { isMigratablePage, isPublicPage, planPageTree } from './pageTree';
@@ -135,7 +136,11 @@ export const planImport = (data: LegacyData): ImportPlan => {
 
   const ghostUsers = planGhostUsers(data, contentAuthorIds(data, threads, posts));
   const navigation = planNavigation(data.siteLinks, linkablePageTitles(data));
-  const pages = planPageTree(data.pages, navigationRootPageIds(navigation));
+  const faqPage = data.pages.find((page) => isFaqPage(page) && isMigratablePage(page));
+  const pages = planPageTree(
+    data.pages.filter((page) => page !== faqPage),
+    navigationRootPageIds(navigation),
+  );
   const pageIds = new Map(pages.map((page, index) => [page.key, index + 1]));
   const pagesByLegacyId = new Map(
     pages.filter((page) => page.legacyId !== null).map((page) => [page.legacyId!, pageIds.get(page.key)!]),
@@ -172,6 +177,9 @@ export const planImport = (data: LegacyData): ImportPlan => {
       .filter((page) => page.legacyId !== null && page.status === 'published')
       .map((page) => [page.legacyId!, page.path]),
   );
+  if (faqPage) {
+    publishedPagePaths.set(faqPage.id, FAQ_PAGE_PATH);
+  }
 
   return {
     ghostUsers,

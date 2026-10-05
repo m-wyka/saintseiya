@@ -8,6 +8,7 @@ import { htmlToPlainText } from '../../server/utils/html';
 import type { CommentTarget } from '../../shared/utils/content';
 import { THUMBNAILS_MEDIA_FOLDER } from '../../shared/utils/routes';
 import type { AssetRegistry } from './assets';
+import { isFaqPage, splitFaqPage } from './faq';
 import { convertLegacyBbcode, convertLegacyHtml, lineBreaksToHtml } from './html';
 import { pageBodiesReplacedByMaps, prepareMaps } from './maps';
 import type { PreparedMaps } from './maps';
@@ -226,6 +227,34 @@ const writePages = (tx: Tx, { data, plan, rewriter, report }: WriteContext, repl
     })),
   );
   countSkipped(report, 'pages', data.pages.length, plan.pages.filter((page) => page.legacyId !== null).length);
+};
+
+const SORT_ORDER_STEP = 10;
+
+const writeFaq = (tx: Tx, { data, rewriter, report }: WriteContext) => {
+  const faqPage = data.pages.find(isFaqPage);
+  const categories = faqPage ? splitFaqPage(convertLegacyHtml(faqPage.content, rewriter)) : [];
+  insertAll(
+    tx,
+    report,
+    'faqCategories',
+    schema.faqCategories,
+    categories.map((category, index) => ({ id: index + 1, name: category.name, sortOrder: index * SORT_ORDER_STEP })),
+  );
+  insertAll(
+    tx,
+    report,
+    'faqItems',
+    schema.faqItems,
+    categories.flatMap((category, categoryIndex) =>
+      category.items.map((item, index) => ({
+        categoryId: categoryIndex + 1,
+        title: item.title,
+        descriptionHtml: item.descriptionHtml,
+        sortOrder: index * SORT_ORDER_STEP,
+      })),
+    ),
+  );
 };
 
 const writeMaps = (tx: Tx, { report }: WriteContext, { maps, skippedMaps }: PreparedMaps) => {
@@ -629,6 +658,7 @@ export const writeImport = async (
     writeUsers(tx, context);
     writeNews(tx, context, categoryImages);
     writePages(tx, context, pageBodiesReplacedByMaps(maps.maps));
+    writeFaq(tx, context);
     writeMaps(tx, context, maps);
     writeForum(tx, context);
     writeGallery(tx, context, photos);

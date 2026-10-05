@@ -19,7 +19,10 @@ const debounced = (source: Ref<string>): Ref<string> => {
   return settled;
 };
 
-export const useAdminList = <Row extends { id: number }>(resource: string) => {
+export const useAdminList = <Row extends { id: number }>(
+  resource: string,
+  extraFilters: Record<string, Ref<string>> = {},
+) => {
   const page = ref(1);
   const search = ref('');
   const filter = ref('');
@@ -27,10 +30,10 @@ export const useAdminList = <Row extends { id: number }>(resource: string) => {
   const toasts = useToastStore();
   const { t } = useI18n();
 
-  watch([settledSearch, filter], () => (page.value = 1));
+  watch([settledSearch, filter, ...Object.values(extraFilters)], () => (page.value = 1));
 
   const { data, refresh, status } = useFetch<PaginatedRows<Row> | Row[]>(`/api/admin/${resource}`, {
-    query: { page, search: settledSearch, filter },
+    query: { page, search: settledSearch, filter, ...extraFilters },
   });
 
   const rows = computed<Row[]>(() => (Array.isArray(data.value) ? data.value : (data.value?.items ?? [])));

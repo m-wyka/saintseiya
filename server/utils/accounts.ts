@@ -4,6 +4,7 @@ import type { User as SessionUser } from '#auth-utils';
 import { hasPermission } from '#shared/utils/roles';
 import type { ModeratorPermission } from '#shared/utils/roles';
 import { USER_NAME_MAX_LENGTH, fitUserName, userNameKey } from '#shared/utils/users';
+import { recordAudit } from './auditLog';
 import { schema, useDb } from './db';
 
 const NEW_USER_NAME_FALLBACK = 'Rycerz';
@@ -74,7 +75,7 @@ export const signInWithGoogle = (event: H3Event, profile: GoogleProfile): Accoun
 
   if (existing) {
     assertNotBanned(existing);
-    return db
+    const signedIn = db
       .update(schema.users)
       .set({
         email,
@@ -85,10 +86,19 @@ export const signInWithGoogle = (event: H3Event, profile: GoogleProfile): Accoun
       .where(eq(schema.users.id, existing.id))
       .returning()
       .get();
+    recordAudit(signedIn, { action: 'sign_in', entity: 'users', entityId: signedIn.id, label: signedIn.name });
+    recordAudit(signedIn, {
+      action: 'update',
+      entity: 'users',
+      entityId: signedIn.id,
+      before: existing,
+      after: signedIn,
+    });
+    return signedIn;
   }
 
   const name = firstFreeName(fitUserName(profile.name ?? '', NEW_USER_NAME_FALLBACK));
-  return db
+  const registered = db
     .insert(schema.users)
     .values({
       googleId: profile.sub,
@@ -101,6 +111,8 @@ export const signInWithGoogle = (event: H3Event, profile: GoogleProfile): Accoun
     })
     .returning()
     .get();
+  recordAudit(registered, { action: 'register', entity: 'users', entityId: registered.id, label: registered.name });
+  return registered;
 };
 
 export const findActiveAccount = (accountId: number): Account | null => {

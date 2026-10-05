@@ -1,4 +1,5 @@
 export default defineEventHandler(async (event) => {
-  await requirePermission(event, 'forum');
-  return deletePost(requiredIdParam(event));
+  const actor = await requirePermission(event, 'forum');
+  const id = requiredIdParam(event);
+  return audited({ actor, table: schema.posts, id }, () => deletePost(id));
 });

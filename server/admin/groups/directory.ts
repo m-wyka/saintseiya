@@ -1,5 +1,7 @@
 import type { AdminResource } from '../../utils/adminResource';
 import { downloadsResource } from '../directory/downloads';
+import { faqCategoriesResource } from '../directory/faqCategories';
+import { faqItemsResource } from '../directory/faqItems';
 import { linkCategoriesResource } from '../directory/linkCategories';
 import { linksResource } from '../directory/links';
 import { navigationLinksResource } from '../directory/navigationLinks';
@@ -14,6 +16,8 @@ export const directoryResources: Record<string, AdminResource> = {
   'link-categories': linkCategoriesResource,
   links: linksResource,
   downloads: downloadsResource,
+  'faq-categories': faqCategoriesResource,
+  'faq-items': faqItemsResource,
   polls: pollsResource,
   'navigation-sections': navigationSectionsResource,
   'navigation-links': navigationLinksResource,
