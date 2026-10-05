@@ -70,6 +70,7 @@ Przepisanie portalu fanowskiego o anime Saint Seiya (Rycerze Zodiaku) ze starego
 - **Panel administratora**: zasób = plik w `server/admin/` zbudowany przez `defineAdminResource` (walidacja Zod, `list/find/create/update/remove`), zarejestrowany w `server/admin/index.ts` lub `server/admin/groups/*`. Obsługują go wspólne handlery `server/api/admin/[resource]/`. Strony panelu używają `useAdminList`, `useAdminForm`, `SimpleCrud`, `AdminTable`.
 - **Uprawnienia**: `canAccess` / `hasPermission` z `shared/utils/roles.ts`; serwer zawsze sprawdza je sam (`requireAdminAccess`), front tylko ukrywa elementy.
 - **Adresy**: budować przez `routes` z `shared/utils/routes.ts`. Nowy segment na poziomie głównym dopisać do `RESERVED_ROOT_SEGMENTS`.
+- **Pliki stron po angielsku, adresy po polsku**: pliki w `app/pages` mają angielskie nazwy (`news/`, `admin/users.vue`), a polski adres nadaje słownik `PAGE_FILE_SEGMENT_URLS` w `shared/utils/routes.ts` (hook `pages:extend` w `nuxt.config.ts`). Nowy plik strony = nowy wpis w słowniku; nazwy tras (`useRoute('news-slug')`) są angielskie.
 - **Podzapytania skorelowane w Drizzle**: kolumny przez `qualified()` z `server/utils/sqlHelpers.ts`, inaczej nazwa tabeli znika i warunek porównuje kolumnę samą ze sobą.
 - **Testy**: logika serwera w `tests/integration` na tymczasowej bazie (`tests/setup.ts`, `fixtures.ts`); nowy plik w `server/utils/` dopisać do listy w `tests/setup.ts`. Ścieżki użytkownika w `tests/e2e`, strony otwierać przez `visit()`.
 

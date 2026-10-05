@@ -27,7 +27,7 @@ const STATUS_OPTIONS: { value: ContentStatus; label: string }[] = [
 ];
 const TARGET_OPTIONS = MAP_AREA_TARGETS.map((value) => ({ value, label: MAP_AREA_TARGET_LABELS[value] }));
 
-const route = useRoute('admin-mapy-id');
+const route = useRoute('admin-maps-id');
 const { input, isNew, isBusy, errorMessage, save } = await useAdminForm<MapInput>({
   resource: 'maps',
   recordId: route.params.id,

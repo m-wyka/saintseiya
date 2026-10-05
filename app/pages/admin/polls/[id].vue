@@ -21,7 +21,7 @@ const LIST_PATH = '/admin/ankiety';
 
 const emptyOption = (): PollOptionInput => ({ id: null, label: '' });
 
-const route = useRoute('admin-ankiety-id');
+const route = useRoute('admin-polls-id');
 const { input, isNew, isBusy, errorMessage, save } = await useAdminForm<PollInput>({
   resource: 'polls',
   recordId: route.params.id,

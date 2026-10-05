@@ -87,6 +87,8 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 - Tabele panelu — akcje wiersza są grupą z etykietą „Akcje: <nazwa wiersza>” (`AdminTable`).
 - `UserRoleForm` — podpowiedź mówiła o ponownym zalogowaniu; zmiana roli działa od najbliższego wczytania strony.
 
+**Angielska struktura plików** (czwarta sesja 2026-10-05) — pliki i katalogi w `app/pages` przemianowane na angielskie (`newsy/` → `news/`, `forum/dzial` → `forum/section`, `admin/uzytkownicy.vue` → `admin/users.vue` itd.). Adresy URL zostały polskie: tłumaczy je słownik `PAGE_FILE_SEGMENT_URLS` w `shared/utils/routes.ts` przez hook `pages:extend`. `pnpm check` i `pnpm test:e2e` zielone po zmianie; niezacommitowane.
+
 ## Co jest zrobione
 
 **Dane**

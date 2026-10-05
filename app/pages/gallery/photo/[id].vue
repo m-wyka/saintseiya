@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { routes } from '#shared/utils/routes';
 
-const route = useRoute('galeria-zdjecie-id');
+const route = useRoute('gallery-photo-id');
 const { data: photo, error } = await useFetch(() => `/api/gallery/photos/${route.params.id}`);
 
 if (error.value || !photo.value) {

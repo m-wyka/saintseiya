@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { routes } from '#shared/utils/routes';
 
-const route = useRoute('newsy-slug');
+const route = useRoute('news-slug');
 const { data: news, error } = await useFetch(() => `/api/news/${route.params.slug}`);
 
 if (error.value || !news.value) {

@@ -3,7 +3,7 @@ import { routes } from '#shared/utils/routes';
 
 definePageMeta({ middleware: 'auth' });
 
-const route = useRoute('forum-dzial-slug-nowy-temat');
+const route = useRoute('forum-section-slug-new-thread');
 const { data, error } = await useFetch(() => `/api/forum/forums/${route.params.slug}`);
 
 if (error.value || !data.value) {

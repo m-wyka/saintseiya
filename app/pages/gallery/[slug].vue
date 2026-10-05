@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { routes } from '#shared/utils/routes';
 
-const route = useRoute('galeria-slug');
+const route = useRoute('gallery-slug');
 const page = computed(() => Number(route.query.page) || 1);
 const { data, error } = await useFetch(() => `/api/gallery/albums/${route.params.slug}`, { query: { page } });
 

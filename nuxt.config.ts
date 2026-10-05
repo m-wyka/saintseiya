@@ -1,9 +1,20 @@
 import { cp } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import type { NuxtPage } from 'nuxt/schema';
 import tailwindcss from '@tailwindcss/vite';
+import { localizePagePath } from './shared/utils/routes';
 
 const SESSION_MAX_AGE_SEC = 30 * 24 * 3600;
 const STATIC_IMAGE_CACHE = 'public, max-age=86400, stale-while-revalidate=604800';
+
+const localizePagePaths = (pages: NuxtPage[]) => {
+  for (const page of pages) {
+    page.path = localizePagePath(page.path);
+    if (page.children) {
+      localizePagePaths(page.children);
+    }
+  }
+};
 
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-01',
@@ -57,6 +68,9 @@ export default defineNuxtConfig({
         });
       },
     },
+  },
+  hooks: {
+    'pages:extend': localizePagePaths,
   },
   routeRules: {
     '/admin/**': { ssr: false },

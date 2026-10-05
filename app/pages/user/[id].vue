@@ -3,7 +3,7 @@ import { GHOST_USER_CAPTION } from '#shared/utils/content';
 import { USER_ROLE_LABELS } from '#shared/utils/roles';
 import { routes } from '#shared/utils/routes';
 
-const route = useRoute('uzytkownik-id');
+const route = useRoute('user-id');
 const { data: profile, error } = await useFetch(() => `/api/users/${route.params.id}`);
 
 if (error.value || !profile.value) {

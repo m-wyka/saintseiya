@@ -22,7 +22,7 @@ const STATUS_OPTIONS: { value: ContentStatus; label: string }[] = [
   { value: 'published', label: 'Opublikowany' },
 ];
 
-const route = useRoute('admin-newsy-id');
+const route = useRoute('admin-news-id');
 const { input, isNew, isBusy, errorMessage, save } = await useAdminForm<NewsInput>({
   resource: 'news',
   recordId: route.params.id,

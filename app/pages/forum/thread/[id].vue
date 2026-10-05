@@ -4,7 +4,7 @@ import { routes } from '#shared/utils/routes';
 
 const POSTS_PER_PAGE = 20;
 
-const route = useRoute('forum-temat-id');
+const route = useRoute('forum-thread-id');
 const page = computed(() => Number(route.query.page) || 1);
 const { data, error, refresh } = await useFetch(() => `/api/forum/threads/${route.params.id}`, { query: { page } });
 

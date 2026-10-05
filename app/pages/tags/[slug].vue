@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { routes } from '#shared/utils/routes';
 
-const route = useRoute('tagi-slug');
+const route = useRoute('tags-slug');
 const { data: tag, error } = await useFetch(() => `/api/tags/${route.params.slug}`);
 
 if (error.value || !tag.value) {

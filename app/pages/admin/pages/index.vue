@@ -27,7 +27,7 @@ const COLUMNS = [
   { key: 'childCount', label: 'Podstron', alignsRight: true },
 ];
 
-const route = useRoute('admin-strony');
+const route = useRoute('admin-pages');
 const toasts = useToastStore();
 const parentId = computed(() => Number(route.query.parent) || null);
 

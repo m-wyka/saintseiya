@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { routes } from '#shared/utils/routes';
 
-const route = useRoute('newsy-kategoria-slug');
+const route = useRoute('news-category-slug');
 const { data: categories } = await useFetch('/api/news-categories');
 const category = computed(() => categories.value?.find((candidate) => candidate.slug === route.params.slug));
 

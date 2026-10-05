@@ -23,7 +23,7 @@ const KIND_OPTIONS: { value: PageKind; label: string }[] = [
   { value: 'hub', label: PAGE_KIND_LABELS.hub },
 ];
 
-const route = useRoute('admin-strony-id');
+const route = useRoute('admin-pages-id');
 const { input, isNew, isBusy, errorMessage, save } = await useAdminForm<PageInput>({
   resource: 'pages',
   recordId: route.params.id,

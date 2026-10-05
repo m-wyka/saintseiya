@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { routes } from '#shared/utils/routes';
 
-const route = useRoute('forum-dzial-slug');
+const route = useRoute('forum-section-slug');
 const page = computed(() => Number(route.query.page) || 1);
 const { data, error } = await useFetch(() => `/api/forum/forums/${route.params.slug}`, { query: { page } });
 

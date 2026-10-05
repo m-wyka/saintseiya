@@ -24,6 +24,38 @@ export const RESERVED_ROOT_SEGMENTS = [
   'video',
 ] as const;
 
+export const PAGE_FILE_SEGMENT_URLS: Record<string, string> = {
+  account: 'konto',
+  categories: 'kategorie',
+  category: 'kategoria',
+  comments: 'komentarze',
+  downloads: 'pliki',
+  gallery: 'galeria',
+  images: 'obrazki',
+  links: 'linki',
+  maps: 'mapy',
+  navigation: 'nawigacja',
+  'new-thread': 'nowy-temat',
+  news: 'newsy',
+  pages: 'strony',
+  photo: 'zdjecie',
+  polls: 'ankiety',
+  search: 'szukaj',
+  section: 'dzial',
+  settings: 'ustawienia',
+  tags: 'tagi',
+  'test-login': 'logowanie-testowe',
+  thread: 'temat',
+  user: 'uzytkownik',
+  users: 'uzytkownicy',
+};
+
+export const localizePagePath = (filePath: string): string =>
+  filePath
+    .split('/')
+    .map((segment) => PAGE_FILE_SEGMENT_URLS[segment] ?? segment)
+    .join('/');
+
 export const routes = {
   home: () => '/',
   newsList: () => '/newsy',

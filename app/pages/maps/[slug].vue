@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { routes } from '#shared/utils/routes';
 
-const route = useRoute('mapy-slug');
+const route = useRoute('maps-slug');
 const { data: map, error } = await useFetch(() => `/api/maps/${route.params.slug}`);
 
 if (error.value || !map.value) {

@@ -20,7 +20,7 @@ interface AlbumWithPhotos {
 const ALBUMS_PATH = '/admin/galeria';
 const PHOTOS_API = '/api/admin/gallery/photos';
 
-const route = useRoute('admin-galeria-id');
+const route = useRoute('admin-gallery-id');
 const albumPhotosApi = `/api/admin/gallery/albums/${route.params.id}/photos`;
 const toasts = useToastStore();
 const upload = useApiAction();
