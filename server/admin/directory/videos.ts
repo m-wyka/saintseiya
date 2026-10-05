@@ -37,6 +37,10 @@ const storedValues = (input: VideoInput) => ({
 export const videosResource = defineAdminResource({
   access: 'videos',
   inputSchema,
+  translatable: {
+    table: schema.videos,
+    fields: { title: 'text', description: 'text' },
+  },
   list: ({ page, search }) => {
     const db = useDb();
     const where = search ? like(schema.videos.title, `%${search}%`) : undefined;

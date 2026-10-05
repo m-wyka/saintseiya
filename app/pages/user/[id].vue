@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { withLocalePrefix } from '#shared/utils/locales';
 import { userRoleLabelKey } from '#shared/utils/roles';
 import { routes } from '#shared/utils/routes';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const routeId = useRouteParam('id');
 const { data: profile, error } = await useFetch(() => `/api/users/${routeId.value}`);
 
@@ -70,7 +71,7 @@ useSeoMeta({ title: () => profile.value?.name ?? '', robots: 'noindex' });
       <ul class="flex flex-col gap-3">
         <li v-for="post in profile.latestPosts" :key="post.id">
           <a
-            :href="routes.post(post.id)"
+            :href="withLocalePrefix(routes.post(post.id), locale)"
             class="block panel px-5 py-3 transition duration-300 ease-cosmo hover:-translate-y-0.5 hover:border-cosmo-500/60"
           >
             <span class="flex flex-wrap items-baseline justify-between gap-2">

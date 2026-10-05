@@ -1,1 +1,1 @@
-export default defineEventHandler(() => listNewsCategories());
+export default defineEventHandler((event) => listNewsCategories(contentLocaleOf(event)));

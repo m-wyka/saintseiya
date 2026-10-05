@@ -15,6 +15,10 @@ const hasForums = (categoryId: number): boolean =>
 export const forumCategoriesResource = defineAdminResource({
   access: 'forum',
   inputSchema,
+  translatable: {
+    table: schema.forumCategories,
+    fields: { name: 'text' },
+  },
   list: () =>
     useDb()
       .select({

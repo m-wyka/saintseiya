@@ -1,1 +1,1 @@
-export default defineEventHandler(() => siteLayout());
+export default defineEventHandler((event) => siteLayout(contentLocaleOf(event)));

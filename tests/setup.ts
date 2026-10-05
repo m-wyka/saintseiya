@@ -34,6 +34,8 @@ const SERVER_UTILITY_MODULES = [
   '../server/utils/media',
   '../server/utils/authors',
   '../server/utils/settings',
+  '../server/utils/contentLocale',
+  '../server/utils/translations',
   '../server/utils/missingImages',
   '../server/utils/viewer',
   '../server/utils/rateLimit',

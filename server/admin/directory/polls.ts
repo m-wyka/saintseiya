@@ -109,6 +109,11 @@ const endedAtAfterUpdate = (tx: Tx, pollId: number, isClosed: boolean): Date | n
 export const pollsResource = defineAdminResource({
   access: 'polls',
   inputSchema,
+  translatable: {
+    table: schema.polls,
+    fields: { question: 'text' },
+    children: { key: 'options', table: schema.pollOptions, fields: { label: 'text' } },
+  },
   list: ({ page, search, filter }) => {
     const db = useDb();
     const where = and(

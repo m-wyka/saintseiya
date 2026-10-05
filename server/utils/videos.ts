@@ -1,15 +1,17 @@
 import { asc, count, desc, eq } from 'drizzle-orm';
+import type { ContentLocale } from '#shared/utils/locales';
+import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { schema, useDb } from './db';
 import { pageOffset, paginated } from './pagination';
 
 const VIDEOS_PAGE_SIZE = 12;
 
-export const listVideoCategories = () =>
+export const listVideoCategories = (locale: ContentLocale = DEFAULT_LOCALE) =>
   useDb()
     .select({
       slug: schema.videoCategories.slug,
-      name: schema.videoCategories.name,
-      description: schema.videoCategories.description,
+      name: localized(schema.videoCategories.name, locale),
+      description: localized(schema.videoCategories.description, locale),
       videoCount: count(schema.videos.id),
     })
     .from(schema.videoCategories)
@@ -18,17 +20,17 @@ export const listVideoCategories = () =>
     .orderBy(asc(schema.videoCategories.sortOrder), asc(schema.videoCategories.id))
     .all();
 
-export const listVideos = (page: number, categorySlug?: string) => {
+export const listVideos = (page: number, categorySlug?: string, locale: ContentLocale = DEFAULT_LOCALE) => {
   const db = useDb();
   const filter = categorySlug ? eq(schema.videoCategories.slug, categorySlug) : undefined;
   const videos = db
     .select({
       id: schema.videos.id,
-      title: schema.videos.title,
-      description: schema.videos.description,
+      title: localized(schema.videos.title, locale),
+      description: localized(schema.videos.description, locale),
       youtubeId: schema.videos.youtubeId,
       createdAt: schema.videos.createdAt,
-      categoryName: schema.videoCategories.name,
+      categoryName: localized(schema.videoCategories.name, locale),
     })
     .from(schema.videos)
     .innerJoin(schema.videoCategories, eq(schema.videoCategories.id, schema.videos.categoryId))

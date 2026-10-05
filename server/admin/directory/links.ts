@@ -23,6 +23,10 @@ const inputSchema = z.object({
 export const linksResource = defineAdminResource({
   access: 'links',
   inputSchema,
+  translatable: {
+    table: schema.links,
+    fields: { title: 'text', description: 'text' },
+  },
   list: ({ page, search }) => {
     const db = useDb();
     const where = search

@@ -18,6 +18,6 @@ export default defineEventHandler(async (event) => {
   await requireAdminAccess(event, 'admin');
   const { tabs } = parseInput(bodySchema, await readBody(event));
   const cleanedTabs = tabs.map((tab) => ({ title: tab.title, bodyHtml: cleanEditorHtml(tab.bodyHtml) }));
-  writeSetting('newsCenterTabs', cleanedTabs);
+  writeSetting('newsCenterTabs', cleanedTabs, contentLocaleOf(event));
   return cleanedTabs;
 });

@@ -10,6 +10,7 @@ const nextNumber = (): number => {
 };
 
 const TABLES_IN_DELETION_ORDER = [
+  schema.translations,
   schema.pollVotes,
   schema.pollOptions,
   schema.polls,

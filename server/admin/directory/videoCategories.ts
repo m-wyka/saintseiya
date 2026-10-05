@@ -28,6 +28,10 @@ const hasVideos = (categoryId: number): boolean =>
 export const videoCategoriesResource = defineAdminResource({
   access: 'videos',
   inputSchema,
+  translatable: {
+    table: schema.videoCategories,
+    fields: { name: 'text', description: 'text' },
+  },
   list: () =>
     useDb()
       .select({

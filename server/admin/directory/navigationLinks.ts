@@ -72,6 +72,10 @@ export const moveNavigationLink = (link: { id: number; sectionId: number }, dire
 export const navigationLinksResource = defineAdminResource({
   access: 'admin',
   inputSchema,
+  translatable: {
+    table: schema.navigationLinks,
+    fields: { groupTitle: 'text', label: 'text' },
+  },
   list: () =>
     useDb()
       .select()

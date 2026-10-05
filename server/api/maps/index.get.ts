@@ -1,1 +1,1 @@
-export default defineEventHandler(() => listPublishedMaps());
+export default defineEventHandler((event) => listPublishedMaps(contentLocaleOf(event)));

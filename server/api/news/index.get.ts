@@ -8,5 +8,9 @@ const querySchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const query = await getValidatedQuery(event, querySchema.parse);
-  return listPublishedNews({ page: query.page, categorySlug: query.category, tagSlug: query.tag });
+  return listPublishedNews(
+    { page: query.page, categorySlug: query.category, tagSlug: query.tag },
+    undefined,
+    contentLocaleOf(event),
+  );
 });

@@ -1,7 +1,8 @@
-import { and, asc, count, eq, ne } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import { CONTENT_STATUSES, MAP_AREA_TARGETS } from '#shared/utils/content';
 import { messageKey } from '#shared/utils/messages';
+import type { Tx } from '../db';
 
 const PERCENT_MAX = 100;
 const MAX_AREAS = 300;
@@ -11,6 +12,7 @@ const percent = z.number().min(0).max(PERCENT_MAX);
 
 const areaSchema = z
   .object({
+    id: z.number().int().positive().nullable().default(null),
     label: z.string().trim().min(1, 'VALIDATION.MAP_AREA_LABEL_REQUIRED').max(120),
     leftPercent: percent,
     topPercent: percent,
@@ -74,6 +76,7 @@ const storedMapValues = ({ areas: _areas, ...map }: MapInput, slug: string) => (
 
 const storedAreaValues = (mapId: number, areas: MapInput['areas']) =>
   areas.map((area, index) => ({
+    id: area.id,
     mapId,
     label: area.label,
     leftPercent: area.leftPercent,
@@ -87,9 +90,35 @@ const storedAreaValues = (mapId: number, areas: MapInput['areas']) =>
     sortOrder: index,
   }));
 
+const replaceAreas = (tx: Tx, mapId: number, areas: MapInput['areas']) => {
+  const storedIds = tx
+    .select({ id: schema.mapAreas.id })
+    .from(schema.mapAreas)
+    .where(eq(schema.mapAreas.mapId, mapId))
+    .all()
+    .map((area) => area.id);
+  const keptIds = areas.flatMap((area) => (area.id !== null && storedIds.includes(area.id) ? [area.id] : []));
+  const droppedIds = storedIds.filter((id) => !keptIds.includes(id));
+  if (droppedIds.length) {
+    tx.delete(schema.mapAreas).where(inArray(schema.mapAreas.id, droppedIds)).run();
+  }
+  for (const { id, ...values } of storedAreaValues(mapId, areas)) {
+    if (id !== null && keptIds.includes(id)) {
+      tx.update(schema.mapAreas).set(values).where(eq(schema.mapAreas.id, id)).run();
+    } else {
+      tx.insert(schema.mapAreas).values(values).run();
+    }
+  }
+};
+
 export const mapsResource = defineAdminResource({
   access: 'maps',
   inputSchema,
+  translatable: {
+    table: schema.maps,
+    fields: { title: 'text', description: 'text', image: 'text', teaserImage: 'text' },
+    children: { key: 'areas', table: schema.mapAreas, fields: { label: 'text', contentHtml: 'html' } },
+  },
   list: () =>
     useDb()
       .select({
@@ -113,6 +142,7 @@ export const mapsResource = defineAdminResource({
     }
     const areas = db
       .select({
+        id: schema.mapAreas.id,
         label: schema.mapAreas.label,
         leftPercent: schema.mapAreas.leftPercent,
         topPercent: schema.mapAreas.topPercent,
@@ -139,19 +169,14 @@ export const mapsResource = defineAdminResource({
         .values(storedMapValues(input, slug))
         .returning({ id: schema.maps.id })
         .get();
-      if (input.areas.length) {
-        tx.insert(schema.mapAreas).values(storedAreaValues(created.id, input.areas)).run();
-      }
+      replaceAreas(tx, created.id, input.areas);
       return created;
     }),
   update: (id, input) => {
     useDb().transaction((tx) => {
       const slug = adminSlug(input.slug, input.title, (candidate) => isSlugTaken(candidate, id), 'mapa');
       tx.update(schema.maps).set(storedMapValues(input, slug)).where(eq(schema.maps.id, id)).run();
-      tx.delete(schema.mapAreas).where(eq(schema.mapAreas.mapId, id)).run();
-      if (input.areas.length) {
-        tx.insert(schema.mapAreas).values(storedAreaValues(id, input.areas)).run();
-      }
+      replaceAreas(tx, id, input.areas);
     });
   },
   remove: (id) => {

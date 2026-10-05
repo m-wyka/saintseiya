@@ -54,6 +54,10 @@ const storedValues = (input: NewsInput, slug: string) => ({
 export const newsResource = defineAdminResource({
   access: 'news',
   inputSchema,
+  translatable: {
+    table: schema.news,
+    fields: { title: 'text', excerptHtml: 'html', bodyHtml: 'html' },
+  },
   list: ({ page, search, filter }) => {
     const db = useDb();
     const where = and(

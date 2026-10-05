@@ -1,1 +1,1 @@
-export default defineEventHandler(() => listDownloads());
+export default defineEventHandler((event) => listDownloads(contentLocaleOf(event)));

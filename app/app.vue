@@ -1,10 +1,11 @@
 <script setup lang="ts">
 const SITE_NAME = 'Saint Seiya Revolution';
 const layout = useLayoutStore();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const localeHead = useLocaleHead();
 
 await callOnce('layout', layout.load);
+watch(locale, layout.load);
 
 useHead(() => ({
   htmlAttrs: { lang: localeHead.value.htmlAttrs.lang, dir: localeHead.value.htmlAttrs.dir },

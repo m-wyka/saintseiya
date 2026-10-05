@@ -5,6 +5,6 @@ export default defineEventHandler(async (event) => {
   const actor = await requireAdminAccess(event, resource.access);
   const id = requiredIdParam(event);
   foundOr404(resource.find(id));
-  resource.update(id, await readBody(event), actor);
+  resource.update(id, await readBody(event), actor, contentLocaleOf(event));
   return { id };
 });

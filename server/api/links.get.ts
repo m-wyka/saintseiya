@@ -1,1 +1,1 @@
-export default defineEventHandler(() => linkDirectory());
+export default defineEventHandler((event) => linkDirectory(contentLocaleOf(event)));

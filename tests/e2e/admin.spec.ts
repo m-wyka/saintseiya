@@ -33,6 +33,33 @@ test.describe('administration panel', () => {
     await expect(page.getByRole('link', { name: 'Lost Canvas' })).toBeVisible();
   });
 
+  test('an administrator translates a news and only the English site shows the translation', async ({ page }) => {
+    await signIn(page, { name: 'Admin Tłumaczeń', role: 'admin' });
+    await visit(page, '/admin/newsy/nowy');
+    await page.getByLabel('Tytuł').fill('Powrót Brązowych Rycerzy');
+    await page.getByLabel('Status').selectOption('published');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page).toHaveURL('/admin/newsy');
+
+    await page.getByRole('link', { name: 'Powrót Brązowych Rycerzy' }).click();
+    await page.getByRole('group', { name: 'Język treści' }).getByRole('button', { name: 'en' }).click();
+    await expect(page.getByText('Edytujesz wersję angielską.')).toBeVisible();
+    await expect(page.getByLabel('Tytuł')).toHaveValue('Powrót Brązowych Rycerzy');
+    await page.getByLabel('Tytuł').fill('Return of the Bronze Saints');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page).toHaveURL('/admin/newsy');
+    await expect(page.getByRole('link', { name: 'Powrót Brązowych Rycerzy' })).toBeVisible();
+
+    await visit(page, '/en/news/powrot-brazowych-rycerzy');
+    await expect(page.getByRole('heading', { level: 1, name: 'Return of the Bronze Saints' })).toBeVisible();
+    await visit(page, '/newsy/powrot-brazowych-rycerzy');
+    await expect(page.getByRole('heading', { level: 1, name: 'Powrót Brązowych Rycerzy' })).toBeVisible();
+
+    await page.getByRole('navigation', { name: 'Język' }).getByRole('link', { name: 'en' }).click();
+    await expect(page).toHaveURL('/en/news/powrot-brazowych-rycerzy');
+    await expect(page.getByRole('heading', { level: 1, name: 'Return of the Bronze Saints' })).toBeVisible();
+  });
+
   test('an administrator adds a tag and a sub-page under a hub', async ({ page }) => {
     await signIn(page, { name: 'Admin Treści', role: 'admin' });
     await visit(page, '/admin/tagi');

@@ -1,4 +1,6 @@
 import { asc, count, desc, eq, inArray, sql } from 'drizzle-orm';
+import type { ContentLocale } from '#shared/utils/locales';
+import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { schema, useDb } from './db';
 import { pageOffset, paginated } from './pagination';
 import { qualified } from './sqlHelpers';
@@ -10,7 +12,7 @@ const liveVoteCount = sql<number>`(
   WHERE ${qualified(schema.pollVotes.optionId)} = ${qualified(schema.pollOptions.id)}
 )`;
 
-const optionsOfPolls = (pollIds: number[]) => {
+const optionsOfPolls = (pollIds: number[], locale: ContentLocale) => {
   if (!pollIds.length) {
     return new Map<number, { id: number; label: string; voteCount: number }[]>();
   }
@@ -18,7 +20,7 @@ const optionsOfPolls = (pollIds: number[]) => {
     .select({
       id: schema.pollOptions.id,
       pollId: schema.pollOptions.pollId,
-      label: schema.pollOptions.label,
+      label: localized(schema.pollOptions.label, locale),
       voteCount: sql<number>`${schema.pollOptions.archivedVoteCount} + ${liveVoteCount}`,
     })
     .from(schema.pollOptions)
@@ -43,17 +45,22 @@ const votedOptionsOf = (userId: number | null, pollIds: number[]) => {
   return new Map(votes.map((vote) => [vote.pollId, vote.optionId]));
 };
 
-export const listPolls = (page: number, viewerId: number | null) => {
+export const listPolls = (page: number, viewerId: number | null, locale: ContentLocale = DEFAULT_LOCALE) => {
   const db = useDb();
   const polls = db
-    .select()
+    .select({
+      id: schema.polls.id,
+      question: localized(schema.polls.question, locale),
+      startedAt: schema.polls.startedAt,
+      endedAt: schema.polls.endedAt,
+    })
     .from(schema.polls)
     .orderBy(desc(schema.polls.startedAt), desc(schema.polls.id))
     .limit(POLLS_PAGE_SIZE)
     .offset(pageOffset(page, POLLS_PAGE_SIZE))
     .all();
   const pollIds = polls.map((poll) => poll.id);
-  const options = optionsOfPolls(pollIds);
+  const options = optionsOfPolls(pollIds, locale);
   const votedOptions = votedOptionsOf(viewerId, pollIds);
   const total = db.select({ total: count() }).from(schema.polls).get()?.total ?? 0;
   const items = polls.map((poll) => ({

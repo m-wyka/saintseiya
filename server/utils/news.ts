@@ -1,8 +1,11 @@
 import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
+import type { ContentLocale } from '#shared/utils/locales';
+import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { authorColumns } from './authors';
 import { schema, useDb } from './db';
 import { pageOffset, paginated } from './pagination';
 import { qualified } from './sqlHelpers';
+import { localized } from './translations';
 
 const NEWS_PAGE_SIZE = 9;
 
@@ -19,11 +22,11 @@ const visibleCommentCount = sql<number>`(
     AND ${qualified(schema.comments.isHidden)} = 0
 )`;
 
-const categoryColumns = {
+const categoryColumns = (locale: ContentLocale) => ({
   slug: schema.newsCategories.slug,
-  name: schema.newsCategories.name,
-  image: schema.newsCategories.image,
-};
+  name: localized(schema.newsCategories.name, locale),
+  image: localized(schema.newsCategories.image, locale),
+});
 
 const newsIdsWithTag = (tagSlug: string) =>
   useDb()
@@ -39,18 +42,22 @@ const publishedNewsFilter = ({ categorySlug, tagSlug }: Omit<NewsFilters, 'page'
     tagSlug ? inArray(schema.news.id, newsIdsWithTag(tagSlug)) : undefined,
   );
 
-export const listPublishedNews = (filters: NewsFilters, pageSize = NEWS_PAGE_SIZE) => {
+export const listPublishedNews = (
+  filters: NewsFilters,
+  pageSize = NEWS_PAGE_SIZE,
+  locale: ContentLocale = DEFAULT_LOCALE,
+) => {
   const db = useDb();
   const filter = publishedNewsFilter(filters);
   const items = db
     .select({
       slug: schema.news.slug,
-      title: schema.news.title,
-      excerptHtml: schema.news.excerptHtml,
-      hasBody: sql<boolean>`${schema.news.bodyHtml} <> ''`.mapWith(Boolean),
+      title: localized(schema.news.title, locale),
+      excerptHtml: localized(schema.news.excerptHtml, locale),
+      hasBody: sql<boolean>`${localized(schema.news.bodyHtml, locale)} <> ''`.mapWith(Boolean),
       publishedAt: schema.news.publishedAt,
       commentCount: visibleCommentCount,
-      category: categoryColumns,
+      category: categoryColumns(locale),
       author: authorColumns,
     })
     .from(schema.news)
@@ -72,27 +79,27 @@ export const listPublishedNews = (filters: NewsFilters, pageSize = NEWS_PAGE_SIZ
   return paginated(readableItems, total, filters.page, pageSize);
 };
 
-const tagsOfNews = (newsId: number) =>
+const tagsOfNews = (newsId: number, locale: ContentLocale) =>
   useDb()
-    .select({ slug: schema.tags.slug, name: schema.tags.name })
+    .select({ slug: schema.tags.slug, name: localized(schema.tags.name, locale) })
     .from(schema.newsTags)
     .innerJoin(schema.tags, eq(schema.tags.id, schema.newsTags.tagId))
     .where(eq(schema.newsTags.newsId, newsId))
-    .orderBy(schema.tags.name)
+    .orderBy(localized(schema.tags.name, locale))
     .all();
 
-export const findPublishedNews = (slug: string) => {
+export const findPublishedNews = (slug: string, locale: ContentLocale = DEFAULT_LOCALE) => {
   const news = useDb()
     .select({
       id: schema.news.id,
       slug: schema.news.slug,
-      title: schema.news.title,
-      excerptHtml: schema.news.excerptHtml,
-      bodyHtml: schema.news.bodyHtml,
+      title: localized(schema.news.title, locale),
+      excerptHtml: localized(schema.news.excerptHtml, locale),
+      bodyHtml: localized(schema.news.bodyHtml, locale),
       publishedAt: schema.news.publishedAt,
       commentsEnabled: schema.news.commentsEnabled,
       viewCount: schema.news.viewCount,
-      category: categoryColumns,
+      category: categoryColumns(locale),
       author: authorColumns,
     })
     .from(schema.news)
@@ -107,7 +114,7 @@ export const findPublishedNews = (slug: string) => {
     ...news,
     excerptHtml: markMissingImages(news.excerptHtml),
     bodyHtml: markMissingImages(news.bodyHtml),
-    tags: tagsOfNews(news.id),
+    tags: tagsOfNews(news.id, locale),
   };
 };
 
@@ -119,12 +126,12 @@ export const countNewsView = (newsId: number) => {
     .run();
 };
 
-export const listNewsCategories = () =>
+export const listNewsCategories = (locale: ContentLocale = DEFAULT_LOCALE) =>
   useDb()
     .select({
       slug: schema.newsCategories.slug,
-      name: schema.newsCategories.name,
-      image: schema.newsCategories.image,
+      name: localized(schema.newsCategories.name, locale),
+      image: localized(schema.newsCategories.image, locale),
       newsCount: count(schema.news.id),
     })
     .from(schema.newsCategories)
@@ -133,5 +140,5 @@ export const listNewsCategories = () =>
       and(eq(schema.news.categoryId, schema.newsCategories.id), eq(schema.news.status, 'published')),
     )
     .groupBy(schema.newsCategories.id)
-    .orderBy(desc(count(schema.news.id)), schema.newsCategories.name)
+    .orderBy(desc(count(schema.news.id)), localized(schema.newsCategories.name, locale))
     .all();

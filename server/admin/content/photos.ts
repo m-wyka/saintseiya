@@ -3,7 +3,10 @@ import type { H3Event, MultiPartData } from 'h3';
 import { z } from 'zod';
 import type { Tx } from '../../db';
 import type { Account } from '../../utils/accounts';
+import type { TranslationSource } from '../../utils/translations';
 import type { StoredImage } from '../../utils/uploads';
+import type { ContentLocale } from '#shared/utils/locales';
+import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import type { MoveDirection } from '#shared/utils/ordering';
 import { movedOrder } from './ordering';
 
@@ -13,6 +16,8 @@ const photoInputSchema = z.object({
   title: z.string().trim().max(200).default(''),
   description: z.string().trim().max(2000).default(''),
 });
+
+const PHOTO_TEXTS: TranslationSource = { table: schema.photos, fields: { title: 'text', description: 'text' } };
 
 const albumPhotoIdsInOrder = (tx: Tx, albumId: number): number[] =>
   tx
@@ -68,7 +73,7 @@ const storedAlbum = (albumId: number) =>
     'ERRORS.ALBUM_NOT_FOUND',
   );
 
-export const listAlbumPhotos = (albumId: number) => {
+export const listAlbumPhotos = (albumId: number, locale: ContentLocale = DEFAULT_LOCALE) => {
   const album = storedAlbum(albumId);
   const photos = useDb()
     .select({
@@ -81,7 +86,7 @@ export const listAlbumPhotos = (albumId: number) => {
     .where(eq(schema.photos.albumId, albumId))
     .orderBy(asc(schema.photos.sortOrder), asc(schema.photos.id))
     .all();
-  return { album, photos };
+  return { album, photos: locale === DEFAULT_LOCALE ? photos : withTranslations(photos, PHOTO_TEXTS, locale) };
 };
 
 export const uploadPhotos = async (event: H3Event, albumId: number, uploads: MultiPartData[], uploader: Account) => {
@@ -94,8 +99,16 @@ export const uploadPhotos = async (event: H3Event, albumId: number, uploads: Mul
   return added;
 };
 
-export const updatePhoto = (photoId: number, rawInput: unknown) => {
+export const updatePhoto = (photoId: number, rawInput: unknown, locale: ContentLocale = DEFAULT_LOCALE) => {
   const input = parseInput(photoInputSchema, rawInput);
+  if (locale !== DEFAULT_LOCALE) {
+    const base = foundOr404(
+      useDb().select().from(schema.photos).where(eq(schema.photos.id, photoId)).get(),
+      'ERRORS.PHOTO_NOT_FOUND',
+    );
+    storeTranslations(PHOTO_TEXTS, photoId, input, base, locale);
+    return { id: photoId };
+  }
   const updated = useDb()
     .update(schema.photos)
     .set(input)
@@ -117,6 +130,7 @@ export const removePhoto = async (event: H3Event, photoId: number) => {
       .run();
     tx.delete(schema.photos).where(eq(schema.photos.id, photoId)).run();
   });
+  pruneTranslations(schema.photos);
   await removeStoredFiles(event, [photo.image, photo.thumbnail]);
 };
 

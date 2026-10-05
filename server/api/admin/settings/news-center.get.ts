@@ -1,4 +1,4 @@
 export default defineEventHandler(async (event) => {
   await requireAdminAccess(event, 'admin');
-  return readSetting('newsCenterTabs');
+  return readSetting('newsCenterTabs', contentLocaleOf(event));
 });

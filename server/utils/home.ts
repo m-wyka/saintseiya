@@ -2,9 +2,12 @@ import { UNTITLED_PHOTO_KEY } from '#shared/utils/content';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { routes } from '#shared/utils/routes';
 import type { CommentTarget } from '#shared/utils/content';
+import type { ContentLocale } from '#shared/utils/locales';
+import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { authorColumns } from './authors';
 import { schema, useDb } from './db';
 import { readSetting } from './settings';
+import { localized } from './translations';
 
 const LATEST_THREAD_COUNT = 8;
 const BUSIEST_THREAD_COUNT = 5;
@@ -12,14 +15,14 @@ const LATEST_COMMENT_COUNT = 6;
 const LATEST_PHOTO_COUNT = 8;
 const LATEST_VIDEO_COUNT = 4;
 
-const publicThreads = (order: 'latest' | 'busiest', limit: number) =>
+const publicThreads = (order: 'latest' | 'busiest', limit: number, locale: ContentLocale) =>
   useDb()
     .select({
       id: schema.threads.id,
       title: schema.threads.title,
       postCount: schema.threads.postCount,
       lastPostAt: schema.threads.lastPostAt,
-      forumName: schema.forums.name,
+      forumName: localized(schema.forums.name, locale),
       lastPostAuthor: authorColumns,
     })
     .from(schema.threads)
@@ -35,14 +38,18 @@ interface CommentTargetSummary {
   url: string;
 }
 
-const describeTargets = (kind: CommentTarget, ids: number[]): Map<number, CommentTargetSummary> => {
+const describeTargets = (
+  kind: CommentTarget,
+  ids: number[],
+  locale: ContentLocale,
+): Map<number, CommentTargetSummary> => {
   const db = useDb();
   if (!ids.length) {
     return new Map();
   }
   if (kind === 'news') {
     const rows = db
-      .select({ id: schema.news.id, title: schema.news.title, slug: schema.news.slug })
+      .select({ id: schema.news.id, title: localized(schema.news.title, locale), slug: schema.news.slug })
       .from(schema.news)
       .where(and(inArray(schema.news.id, ids), eq(schema.news.status, 'published')))
       .all();
@@ -50,7 +57,7 @@ const describeTargets = (kind: CommentTarget, ids: number[]): Map<number, Commen
   }
   if (kind === 'page') {
     const rows = db
-      .select({ id: schema.pages.id, title: schema.pages.title, path: schema.pages.path })
+      .select({ id: schema.pages.id, title: localized(schema.pages.title, locale), path: schema.pages.path })
       .from(schema.pages)
       .where(and(inArray(schema.pages.id, ids), eq(schema.pages.status, 'published')))
       .all();
@@ -58,14 +65,14 @@ const describeTargets = (kind: CommentTarget, ids: number[]): Map<number, Commen
   }
   if (kind === 'photo') {
     const rows = db
-      .select({ id: schema.photos.id, title: schema.photos.title })
+      .select({ id: schema.photos.id, title: localized(schema.photos.title, locale) })
       .from(schema.photos)
       .where(inArray(schema.photos.id, ids))
       .all();
     return new Map(rows.map((row) => [row.id, { title: row.title || UNTITLED_PHOTO_KEY, url: routes.photo(row.id) }]));
   }
   const rows = db
-    .select({ id: schema.videos.id, title: schema.videos.title })
+    .select({ id: schema.videos.id, title: localized(schema.videos.title, locale) })
     .from(schema.videos)
     .where(inArray(schema.videos.id, ids))
     .all();
@@ -77,13 +84,14 @@ interface CommentTargetRef {
   targetId: number;
 }
 
-export const describeCommentTargets = (comments: CommentTargetRef[]) => {
+export const describeCommentTargets = (comments: CommentTargetRef[], locale: ContentLocale = DEFAULT_LOCALE) => {
   const targetsByKind = new Map(
     [...Map.groupBy(comments, (comment) => comment.targetKind)].map(([kind, group]) => [
       kind,
       describeTargets(
         kind,
         group.map((comment) => comment.targetId),
+        locale,
       ),
     ]),
   );
@@ -91,7 +99,7 @@ export const describeCommentTargets = (comments: CommentTargetRef[]) => {
     targetsByKind.get(targetKind)?.get(targetId);
 };
 
-export const latestComments = (limit = LATEST_COMMENT_COUNT) => {
+export const latestComments = (limit = LATEST_COMMENT_COUNT, locale: ContentLocale = DEFAULT_LOCALE) => {
   const comments = useDb()
     .select({
       id: schema.comments.id,
@@ -107,7 +115,7 @@ export const latestComments = (limit = LATEST_COMMENT_COUNT) => {
     .orderBy(desc(schema.comments.createdAt))
     .limit(limit * 2)
     .all();
-  const targetOf = describeCommentTargets(comments);
+  const targetOf = describeCommentTargets(comments, locale);
   return comments
     .flatMap(({ targetKind, targetId, bodyHtml, ...comment }) => {
       const target = targetOf({ targetKind, targetId });
@@ -116,15 +124,15 @@ export const latestComments = (limit = LATEST_COMMENT_COUNT) => {
     .slice(0, limit);
 };
 
-const latestPhotos = () =>
+const latestPhotos = (locale: ContentLocale) =>
   useDb()
     .select({
       id: schema.photos.id,
-      title: schema.photos.title,
+      title: localized(schema.photos.title, locale),
       thumbnail: schema.photos.thumbnail,
       width: schema.photos.width,
       height: schema.photos.height,
-      albumTitle: schema.albums.title,
+      albumTitle: localized(schema.albums.title, locale),
     })
     .from(schema.photos)
     .innerJoin(schema.albums, eq(schema.albums.id, schema.photos.albumId))
@@ -132,19 +140,26 @@ const latestPhotos = () =>
     .limit(LATEST_PHOTO_COUNT)
     .all();
 
-const latestVideos = () =>
+const latestVideos = (locale: ContentLocale) =>
   useDb()
-    .select({ id: schema.videos.id, title: schema.videos.title, youtubeId: schema.videos.youtubeId })
+    .select({
+      id: schema.videos.id,
+      title: localized(schema.videos.title, locale),
+      youtubeId: schema.videos.youtubeId,
+    })
     .from(schema.videos)
     .orderBy(desc(schema.videos.createdAt), desc(schema.videos.id))
     .limit(LATEST_VIDEO_COUNT)
     .all();
 
-export const homeContent = () => ({
-  newsCenterTabs: readSetting('newsCenterTabs').map((tab) => ({ ...tab, bodyHtml: markMissingImages(tab.bodyHtml) })),
-  latestThreads: publicThreads('latest', LATEST_THREAD_COUNT),
-  busiestThreads: publicThreads('busiest', BUSIEST_THREAD_COUNT),
-  latestComments: latestComments(),
-  latestPhotos: latestPhotos(),
-  latestVideos: latestVideos(),
+export const homeContent = (locale: ContentLocale = DEFAULT_LOCALE) => ({
+  newsCenterTabs: readSetting('newsCenterTabs', locale).map((tab) => ({
+    ...tab,
+    bodyHtml: markMissingImages(tab.bodyHtml),
+  })),
+  latestThreads: publicThreads('latest', LATEST_THREAD_COUNT, locale),
+  busiestThreads: publicThreads('busiest', BUSIEST_THREAD_COUNT, locale),
+  latestComments: latestComments(LATEST_COMMENT_COUNT, locale),
+  latestPhotos: latestPhotos(locale),
+  latestVideos: latestVideos(locale),
 });

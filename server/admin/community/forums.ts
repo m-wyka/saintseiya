@@ -46,6 +46,10 @@ const storedValues = ({ slug, ...input }: ForumInput, exceptId?: number) => ({
 export const forumsResource = defineAdminResource({
   access: 'forum',
   inputSchema,
+  translatable: {
+    table: schema.forums,
+    fields: { name: 'text', description: 'text' },
+  },
   list: () =>
     useDb()
       .select({

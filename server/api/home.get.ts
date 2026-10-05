@@ -1,1 +1,1 @@
-export default defineEventHandler(() => homeContent());
+export default defineEventHandler((event) => homeContent(contentLocaleOf(event)));

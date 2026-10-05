@@ -1,6 +1,7 @@
 import type { MapAreaTarget } from '#shared/utils/content';
 
 export interface EditableMapArea {
+  id?: number | null;
   label: string;
   leftPercent: number;
   topPercent: number;
@@ -29,9 +30,10 @@ export const clampPercent = (value: number, upperBound = PERCENT_MAX): number =>
 
 export const newMapArea = (
   frame: Pick<EditableMapArea, 'leftPercent' | 'topPercent' | 'widthPercent' | 'heightPercent'>,
+  label: string,
 ): EditableMapArea => ({
   ...frame,
-  label: 'Nowy obszar',
+  label,
   targetKind: 'page',
   pageId: null,
   pageTitle: null,

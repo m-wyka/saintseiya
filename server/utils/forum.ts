@@ -1,5 +1,7 @@
 import { and, asc, count, desc, eq, lt, max, or, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/sqlite-core';
+import type { ContentLocale } from '#shared/utils/locales';
+import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { authorColumns } from './authors';
 import { schema, useDb } from './db';
 import { pageOffset, paginated } from './pagination';
@@ -37,16 +39,20 @@ const latestThreadByForum = () => {
   return new Map(rows.map(({ forumId, ...thread }) => [forumId, thread]));
 };
 
-export const forumIndex = (viewer: Viewer) => {
+export const forumIndex = (viewer: Viewer, locale: ContentLocale = DEFAULT_LOCALE) => {
   const db = useDb();
-  const categories = db.select().from(schema.forumCategories).orderBy(asc(schema.forumCategories.sortOrder)).all();
+  const categories = db
+    .select({ id: schema.forumCategories.id, name: localized(schema.forumCategories.name, locale) })
+    .from(schema.forumCategories)
+    .orderBy(asc(schema.forumCategories.sortOrder))
+    .all();
   const forums = db
     .select({
       id: schema.forums.id,
       categoryId: schema.forums.categoryId,
       slug: schema.forums.slug,
-      name: schema.forums.name,
-      description: schema.forums.description,
+      name: localized(schema.forums.name, locale),
+      description: localized(schema.forums.description, locale),
       isStaffOnly: schema.forums.isStaffOnly,
       threadCount: schema.forums.threadCount,
       postCount: schema.forums.postCount,
@@ -69,23 +75,23 @@ export const forumIndex = (viewer: Viewer) => {
     .filter((category) => category.forums.length > 0);
 };
 
-const findVisibleForum = (slug: string, viewer: Viewer) =>
+const findVisibleForum = (slug: string, viewer: Viewer, locale: ContentLocale) =>
   useDb()
     .select({
       id: schema.forums.id,
       slug: schema.forums.slug,
-      name: schema.forums.name,
-      description: schema.forums.description,
+      name: localized(schema.forums.name, locale),
+      description: localized(schema.forums.description, locale),
       isStaffOnly: schema.forums.isStaffOnly,
-      categoryName: schema.forumCategories.name,
+      categoryName: localized(schema.forumCategories.name, locale),
     })
     .from(schema.forums)
     .innerJoin(schema.forumCategories, eq(schema.forumCategories.id, schema.forums.categoryId))
     .where(and(eq(schema.forums.slug, slug), visibleForumFilter(viewer)))
     .get();
 
-export const forumThreads = (slug: string, page: number, viewer: Viewer) => {
-  const forum = findVisibleForum(slug, viewer);
+export const forumThreads = (slug: string, page: number, viewer: Viewer, locale: ContentLocale = DEFAULT_LOCALE) => {
+  const forum = findVisibleForum(slug, viewer, locale);
   if (!forum) {
     return null;
   }
@@ -116,7 +122,7 @@ export const forumThreads = (slug: string, page: number, viewer: Viewer) => {
   return { forum, threads: paginated(threads, total, page, THREADS_PAGE_SIZE) };
 };
 
-export const findVisibleThread = (threadId: number, viewer: Viewer) =>
+export const findVisibleThread = (threadId: number, viewer: Viewer, locale: ContentLocale = DEFAULT_LOCALE) =>
   useDb()
     .select({
       id: schema.threads.id,
@@ -125,7 +131,7 @@ export const findVisibleThread = (threadId: number, viewer: Viewer) =>
       isLocked: schema.threads.isLocked,
       viewCount: schema.threads.viewCount,
       postCount: schema.threads.postCount,
-      forum: { id: schema.forums.id, slug: schema.forums.slug, name: schema.forums.name },
+      forum: { id: schema.forums.id, slug: schema.forums.slug, name: localized(schema.forums.name, locale) },
     })
     .from(schema.threads)
     .innerJoin(schema.forums, eq(schema.forums.id, schema.threads.forumId))
@@ -136,8 +142,8 @@ const authorPostCount = sql<number>`(
   SELECT COUNT(*) FROM ${schema.posts} AS authored WHERE authored.author_id = ${qualified(schema.users.id)}
 )`;
 
-export const threadPosts = (threadId: number, page: number, viewer: Viewer) => {
-  const thread = findVisibleThread(threadId, viewer);
+export const threadPosts = (threadId: number, page: number, viewer: Viewer, locale: ContentLocale = DEFAULT_LOCALE) => {
+  const thread = findVisibleThread(threadId, viewer, locale);
   if (!thread) {
     return null;
   }

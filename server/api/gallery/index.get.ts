@@ -1,1 +1,1 @@
-export default defineEventHandler(() => listAlbums());
+export default defineEventHandler((event) => listAlbums(contentLocaleOf(event)));

@@ -26,6 +26,10 @@ export const addDownload = (details: DownloadDetails, storedFile: StoredFile) =>
 export const downloadsResource = defineAdminResource({
   access: 'downloads',
   inputSchema,
+  translatable: {
+    table: schema.downloads,
+    fields: { title: 'text', description: 'text' },
+  },
   list: () =>
     useDb()
       .select({

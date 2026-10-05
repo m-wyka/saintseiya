@@ -19,6 +19,10 @@ const isSlugTaken = (slug: string, exceptId?: number): boolean =>
 export const newsCategoriesResource = defineAdminResource({
   access: 'news',
   inputSchema,
+  translatable: {
+    table: schema.newsCategories,
+    fields: { name: 'text', image: 'text' },
+  },
   list: () =>
     useDb()
       .select({

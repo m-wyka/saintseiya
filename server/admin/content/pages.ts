@@ -197,6 +197,10 @@ const removePage = (tx: Tx, id: number) => {
 export const pagesResource = defineAdminResource({
   access: 'pages',
   inputSchema,
+  translatable: {
+    table: schema.pages,
+    fields: { title: 'text', bodyHtml: 'html' },
+  },
   list: ({ page, search }) => {
     const db = useDb();
     const where = search ? like(schema.pages.title, `%${search}%`) : undefined;

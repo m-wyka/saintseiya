@@ -23,6 +23,10 @@ const usageCount = sql<number>`(
 export const tagsResource = defineAdminResource({
   access: 'news',
   inputSchema,
+  translatable: {
+    table: schema.tags,
+    fields: { name: 'text' },
+  },
   list: () =>
     useDb()
       .select({ id: schema.tags.id, name: schema.tags.name, slug: schema.tags.slug, usageCount })

@@ -1,4 +1,6 @@
 import { and, asc, count, desc, eq, gt, lt, or, sql } from 'drizzle-orm';
+import type { ContentLocale } from '#shared/utils/locales';
+import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { authorColumns } from './authors';
 import { schema, useDb } from './db';
 import { pageOffset, paginated } from './pagination';
@@ -7,13 +9,13 @@ const PHOTOS_PAGE_SIZE = 24;
 
 const photoOrder = [asc(schema.photos.sortOrder), asc(schema.photos.id)];
 
-export const listAlbums = () =>
+export const listAlbums = (locale: ContentLocale = DEFAULT_LOCALE) =>
   useDb()
     .select({
       slug: schema.albums.slug,
-      title: schema.albums.title,
-      description: schema.albums.description,
-      coverImage: schema.albums.coverImage,
+      title: localized(schema.albums.title, locale),
+      description: localized(schema.albums.description, locale),
+      coverImage: localized(schema.albums.coverImage, locale),
       photoCount: count(schema.photos.id),
     })
     .from(schema.albums)
@@ -22,14 +24,14 @@ export const listAlbums = () =>
     .orderBy(asc(schema.albums.sortOrder), asc(schema.albums.id))
     .all();
 
-export const albumPhotos = (slug: string, page: number) => {
+export const albumPhotos = (slug: string, page: number, locale: ContentLocale = DEFAULT_LOCALE) => {
   const db = useDb();
   const album = db
     .select({
       id: schema.albums.id,
       slug: schema.albums.slug,
-      title: schema.albums.title,
-      description: schema.albums.description,
+      title: localized(schema.albums.title, locale),
+      description: localized(schema.albums.description, locale),
     })
     .from(schema.albums)
     .where(eq(schema.albums.slug, slug))
@@ -40,7 +42,7 @@ export const albumPhotos = (slug: string, page: number) => {
   const photos = db
     .select({
       id: schema.photos.id,
-      title: schema.photos.title,
+      title: localized(schema.photos.title, locale),
       thumbnail: schema.photos.thumbnail,
       width: schema.photos.width,
       height: schema.photos.height,
@@ -78,20 +80,20 @@ const neighbourPhotoId = (albumId: number, sortOrder: number, photoId: number, d
   );
 };
 
-export const findPhoto = (photoId: number) => {
+export const findPhoto = (photoId: number, locale: ContentLocale = DEFAULT_LOCALE) => {
   const photo = useDb()
     .select({
       id: schema.photos.id,
       albumId: schema.photos.albumId,
       sortOrder: schema.photos.sortOrder,
-      title: schema.photos.title,
-      description: schema.photos.description,
+      title: localized(schema.photos.title, locale),
+      description: localized(schema.photos.description, locale),
       image: schema.photos.image,
       width: schema.photos.width,
       height: schema.photos.height,
       viewCount: schema.photos.viewCount,
       createdAt: schema.photos.createdAt,
-      album: { slug: schema.albums.slug, title: schema.albums.title },
+      album: { slug: schema.albums.slug, title: localized(schema.albums.title, locale) },
       author: authorColumns,
     })
     .from(schema.photos)

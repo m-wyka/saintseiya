@@ -1,11 +1,22 @@
-import { asc, count, eq } from 'drizzle-orm';
+import { asc, count, eq, getTableColumns } from 'drizzle-orm';
+import type { ContentLocale } from '#shared/utils/locales';
+import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { schema, useDb } from './db';
+import { localized } from './translations';
 
-const navigationSections = () => {
+const navigationSections = (locale: ContentLocale) => {
   const db = useDb();
-  const sections = db.select().from(schema.navigationSections).orderBy(asc(schema.navigationSections.sortOrder)).all();
+  const sections = db
+    .select({ id: schema.navigationSections.id, title: localized(schema.navigationSections.title, locale) })
+    .from(schema.navigationSections)
+    .orderBy(asc(schema.navigationSections.sortOrder))
+    .all();
   const links = db
-    .select()
+    .select({
+      ...getTableColumns(schema.navigationLinks),
+      groupTitle: localized(schema.navigationLinks.groupTitle, locale),
+      label: localized(schema.navigationLinks.label, locale),
+    })
     .from(schema.navigationLinks)
     .orderBy(asc(schema.navigationLinks.sectionId), asc(schema.navigationLinks.sortOrder))
     .all();
@@ -34,8 +45,8 @@ const siteStatistics = () => ({
   commentCount: totalOf(schema.comments),
 });
 
-export const siteLayout = () => ({
-  navigation: navigationSections(),
+export const siteLayout = (locale: ContentLocale = DEFAULT_LOCALE) => ({
+  navigation: navigationSections(locale),
   statistics: siteStatistics(),
-  maps: listPublishedMaps(),
+  maps: listPublishedMaps(locale),
 });

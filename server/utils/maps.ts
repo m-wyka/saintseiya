@@ -1,18 +1,22 @@
-import { and, asc, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, getTableColumns, inArray } from 'drizzle-orm';
+import type { ContentLocale } from '#shared/utils/locales';
+import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { routes } from '#shared/utils/routes';
 import { schema, useDb } from './db';
+import { localized } from './translations';
 
 const publishedMaps = eq(schema.maps.status, 'published');
 
-export const listPublishedMaps = () =>
+const localizedMapColumns = (locale: ContentLocale) => ({
+  title: localized(schema.maps.title, locale),
+  description: localized(schema.maps.description, locale),
+  image: localized(schema.maps.image, locale),
+  teaserImage: localized(schema.maps.teaserImage, locale),
+});
+
+export const listPublishedMaps = (locale: ContentLocale = DEFAULT_LOCALE) =>
   useDb()
-    .select({
-      slug: schema.maps.slug,
-      title: schema.maps.title,
-      description: schema.maps.description,
-      image: schema.maps.image,
-      teaserImage: schema.maps.teaserImage,
-    })
+    .select({ slug: schema.maps.slug, ...localizedMapColumns(locale) })
     .from(schema.maps)
     .where(publishedMaps)
     .orderBy(asc(schema.maps.sortOrder), asc(schema.maps.id))
@@ -30,10 +34,10 @@ const publishedPageAddresses = (pageIds: number[]): Map<number, string> => {
   return new Map(pages.map((page) => [page.id, routes.page(page.path)]));
 };
 
-export const findPublishedMap = (slug: string) => {
+export const findPublishedMap = (slug: string, locale: ContentLocale = DEFAULT_LOCALE) => {
   const db = useDb();
   const map = db
-    .select()
+    .select({ ...getTableColumns(schema.maps), ...localizedMapColumns(locale) })
     .from(schema.maps)
     .where(and(eq(schema.maps.slug, slug), publishedMaps))
     .get();
@@ -41,7 +45,11 @@ export const findPublishedMap = (slug: string) => {
     return null;
   }
   const areas = db
-    .select()
+    .select({
+      ...getTableColumns(schema.mapAreas),
+      label: localized(schema.mapAreas.label, locale),
+      contentHtml: localized(schema.mapAreas.contentHtml, locale),
+    })
     .from(schema.mapAreas)
     .where(eq(schema.mapAreas.mapId, map.id))
     .orderBy(asc(schema.mapAreas.sortOrder), asc(schema.mapAreas.id))

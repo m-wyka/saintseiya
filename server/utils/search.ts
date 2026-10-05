@@ -1,7 +1,11 @@
 import { and, desc, eq, sql } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 import type { SQLiteColumn } from 'drizzle-orm/sqlite-core';
+import type { ContentLocale } from '#shared/utils/locales';
+import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { routes } from '#shared/utils/routes';
 import { schema, useDb } from './db';
+import { localized } from './translations';
 
 const RESULTS_PER_KIND = 12;
 const EXCERPT_RADIUS = 90;
@@ -16,7 +20,8 @@ export interface SearchResult {
 
 const likePattern = (phrase: string): string => `%${phrase.toLocaleLowerCase('pl').replace(/[\\%_]/g, '\\$&')}%`;
 
-const contains = (column: SQLiteColumn, pattern: string) => sql`lower_unicode(${column}) LIKE ${pattern} ESCAPE '\\'`;
+const contains = (column: SQLiteColumn | SQL, pattern: string) =>
+  sql`lower_unicode(${column}) LIKE ${pattern} ESCAPE '\\'`;
 
 const excerptAround = (html: string, phrase: string): string => {
   const text = htmlToPlainText(html);
@@ -26,19 +31,17 @@ const excerptAround = (html: string, phrase: string): string => {
   return `${start > 0 ? '…' : ''}${text.slice(start, end).trim()}${end < text.length ? '…' : ''}`;
 };
 
-const searchNews = (phrase: string, pattern: string): SearchResult[] =>
-  useDb()
-    .select({
-      title: schema.news.title,
-      slug: schema.news.slug,
-      excerptHtml: schema.news.excerptHtml,
-      bodyHtml: schema.news.bodyHtml,
-    })
+const searchNews = (phrase: string, pattern: string, locale: ContentLocale): SearchResult[] => {
+  const title = localized(schema.news.title, locale);
+  const excerptHtml = localized(schema.news.excerptHtml, locale);
+  const bodyHtml = localized(schema.news.bodyHtml, locale);
+  return useDb()
+    .select({ title, slug: schema.news.slug, excerptHtml, bodyHtml })
     .from(schema.news)
     .where(
       and(
         eq(schema.news.status, 'published'),
-        sql`(${contains(schema.news.title, pattern)} OR ${contains(schema.news.excerptHtml, pattern)} OR ${contains(schema.news.bodyHtml, pattern)})`,
+        sql`(${contains(title, pattern)} OR ${contains(excerptHtml, pattern)} OR ${contains(bodyHtml, pattern)})`,
       ),
     )
     .orderBy(desc(schema.news.publishedAt))
@@ -50,18 +53,18 @@ const searchNews = (phrase: string, pattern: string): SearchResult[] =>
       excerpt: excerptAround(`${news.excerptHtml} ${news.bodyHtml}`, phrase),
       context: 'News',
     }));
+};
 
-const searchPages = (phrase: string, pattern: string): SearchResult[] =>
-  useDb()
-    .select({ title: schema.pages.title, path: schema.pages.path, bodyHtml: schema.pages.bodyHtml })
+const searchPages = (phrase: string, pattern: string, locale: ContentLocale): SearchResult[] => {
+  const title = localized(schema.pages.title, locale);
+  const bodyHtml = localized(schema.pages.bodyHtml, locale);
+  return useDb()
+    .select({ title, path: schema.pages.path, bodyHtml })
     .from(schema.pages)
     .where(
-      and(
-        eq(schema.pages.status, 'published'),
-        sql`(${contains(schema.pages.title, pattern)} OR ${contains(schema.pages.bodyHtml, pattern)})`,
-      ),
+      and(eq(schema.pages.status, 'published'), sql`(${contains(title, pattern)} OR ${contains(bodyHtml, pattern)})`),
     )
-    .orderBy(sql`${contains(schema.pages.title, pattern)} DESC`, schema.pages.path)
+    .orderBy(sql`${contains(title, pattern)} DESC`, schema.pages.path)
     .limit(RESULTS_PER_KIND)
     .all()
     .map((page) => ({
@@ -70,14 +73,15 @@ const searchPages = (phrase: string, pattern: string): SearchResult[] =>
       excerpt: excerptAround(page.bodyHtml, phrase),
       context: `/${page.path}`,
     }));
+};
 
-const searchForum = (phrase: string, pattern: string): SearchResult[] =>
+const searchForum = (phrase: string, pattern: string, locale: ContentLocale): SearchResult[] =>
   useDb()
     .select({
       postId: schema.posts.id,
       bodyHtml: schema.posts.bodyHtml,
       threadTitle: schema.threads.title,
-      forumName: schema.forums.name,
+      forumName: localized(schema.forums.name, locale),
     })
     .from(schema.posts)
     .innerJoin(schema.threads, eq(schema.threads.id, schema.posts.threadId))
@@ -98,7 +102,7 @@ const searchForum = (phrase: string, pattern: string): SearchResult[] =>
       context: `Forum · ${post.forumName}`,
     }));
 
-export const searchSite = (rawPhrase: string) => {
+export const searchSite = (rawPhrase: string, locale: ContentLocale = DEFAULT_LOCALE) => {
   const phrase = rawPhrase.trim();
   if (phrase.length < MINIMUM_SEARCH_LENGTH) {
     return { phrase, news: [], pages: [], forum: [] };
@@ -106,8 +110,8 @@ export const searchSite = (rawPhrase: string) => {
   const pattern = likePattern(phrase);
   return {
     phrase,
-    news: searchNews(phrase, pattern),
-    pages: searchPages(phrase, pattern),
-    forum: searchForum(phrase, pattern),
+    news: searchNews(phrase, pattern, locale),
+    pages: searchPages(phrase, pattern, locale),
+    forum: searchForum(phrase, pattern, locale),
   };
 };

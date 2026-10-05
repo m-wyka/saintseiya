@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { withLocalePrefix } from '#shared/utils/locales';
 import type { InternalApi } from 'nitropack';
 import { routes } from '#shared/utils/routes';
 
@@ -9,7 +10,7 @@ const emit = defineEmits<{ changed: [] }>();
 
 const isEditing = ref(false);
 const moderate = useModerationAction();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const initialOf = (name: string) => name.trim().charAt(0).toLocaleUpperCase('pl');
 
@@ -77,7 +78,7 @@ const removePost = async () => {
           </BaseButton>
           <ConfirmButton v-if="canDelete" @confirm="removePost" />
           <a
-            :href="routes.post(post.id)"
+            :href="withLocalePrefix(routes.post(post.id), locale)"
             class="ml-1.5 font-semibold text-cosmo-400 hover:text-gold-300"
             :aria-label="t('POSTS.PERMALINK', { position })"
           >

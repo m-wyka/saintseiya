@@ -15,6 +15,10 @@ const hasLinks = (categoryId: number): boolean =>
 export const linkCategoriesResource = defineAdminResource({
   access: 'links',
   inputSchema,
+  translatable: {
+    table: schema.linkCategories,
+    fields: { name: 'text' },
+  },
   list: () =>
     useDb()
       .select({

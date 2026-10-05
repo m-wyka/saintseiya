@@ -39,6 +39,10 @@ export const moveNavigationSection = (id: number, direction: MoveDirection) => {
 export const navigationSectionsResource = defineAdminResource({
   access: 'admin',
   inputSchema,
+  translatable: {
+    table: schema.navigationSections,
+    fields: { title: 'text' },
+  },
   list: orderedSections,
   find: (id) => useDb().select().from(schema.navigationSections).where(eq(schema.navigationSections.id, id)).get(),
   create: (input) =>

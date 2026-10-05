@@ -4,5 +4,6 @@ const querySchema = z.object({ page: pageNumberSchema, category: z.string().trim
 
 export default defineEventHandler(async (event) => {
   const query = await getValidatedQuery(event, querySchema.parse);
-  return { categories: listVideoCategories(), videos: listVideos(query.page, query.category) };
+  const locale = contentLocaleOf(event);
+  return { categories: listVideoCategories(locale), videos: listVideos(query.page, query.category, locale) };
 });

@@ -60,7 +60,7 @@ Przepisanie portalu fanowskiego o anime Saint Seiya (Rycerze Zodiaku) ze starego
 - `pnpm check` — lint, format, typy, testy Vitest. Musi przejść przed uznaniem zmiany za gotową.
 - `pnpm test:e2e` — testy Playwright; same stawiają serwer i bazę w `.data/e2e`.
 - `pnpm db:generate` — po każdej zmianie `server/db/schema.ts`.
-- `pnpm legacy:import --force`, potem `pnpm images:check` — odtworzenie bazy z legacy (wymaga pomocniczego MySQL, patrz `docs/legacy.md`). Nigdy na bazie z treściami nowych użytkowników.
+- `pnpm legacy:import --force`, potem `pnpm images:check` — odtworzenie bazy z legacy (wymaga pomocniczego MySQL, patrz `docs/legacy.md`). Nigdy na bazie z treściami nowych użytkowników ani z wpisanymi tłumaczeniami — import kasuje też tabelę `translations`.
 - Node 22: przed komendami ustawić `PATH` na Node 22 z nvm (domyślny w powłoce to 18).
 
 ## Wzorce w kodzie
@@ -74,6 +74,8 @@ Przepisanie portalu fanowskiego o anime Saint Seiya (Rycerze Zodiaku) ze starego
 - **Tłumaczenia (i18n)**: `@nuxtjs/i18n`, domyślny `pl` bez prefiksu, `en` pod `/en`. Teksty leżą w `i18n/locales/pl.json` i `en.json` jako płaskie klucze `SEKCJA.NAZWA` wielkimi literami (np. `GENERAL.HOME`), bez głębszych zagnieżdżeń; oba pliki mają ten sam zestaw kluczy (pilnuje tego `tests/unit/messages.test.ts`). W komponencie `const { t } = useI18n()`, liczba mnoga przez `t(klucz, { count: formatNumber(n) }, n)` z formami `jeden | kilka | wiele`.
 - **Odnośniki i nawigacja**: `routes.*` zwraca polskie ścieżki; na język przekłada je `<NuxtLinkLocale>` (także w `BaseButton`), a w kodzie `navigateTo(localePath(...))`. Porównania z bieżącym adresem przez `useCurrentSitePath()`, parametry trasy przez `useRouteParam()`.
 - **Komunikaty z serwera**: serwer nie tłumaczy — w `statusMessage` i komunikatach Zod zwraca klucz (`ERRORS.*`, `VALIDATION.*`), z parametrami przez `messageKey()` z `shared/utils/messages.ts`. Front tłumaczy je w `apiErrorMessage` / `translateMessage`.
+- **Treści w dwóch językach**: tabele trzymają wersję polską, tłumaczenia leżą w tabeli `translations` (`entity` = nazwa tabeli SQL, `entity_id`, `field` = nazwa kolumny SQL, `locale`, `value`). Odczyt publiczny bierze `locale` jako ostatni parametr (handler podaje `contentLocaleOf(event)`) i owija tłumaczalne kolumny w `localized(kolumna, locale)` — brak tłumaczenia daje treść polską. W obiektach z `LEFT JOIN` pierwsze pole musi zostać zwykłą kolumną. Slugi i adresy nie są tłumaczone.
+- **Tłumaczenia w panelu**: zasób deklaruje `translatable: { table, fields, children? }` w `defineAdminResource`; wspólne handlery zapisują wtedy wersję EN do `translations`, a pola nietłumaczalne do rekordu. Język edycji wybiera `ContentLocaleSwitch` (stan w `useContentLocaleStore`), a `app/plugins/contentLocale.client.ts` dokleja go do żądań nagłówkiem `x-content-locale`. Grafika per język to zwykłe pole tekstowe ze ścieżką (`image: 'text'`).
 - **Podzapytania skorelowane w Drizzle**: kolumny przez `qualified()` z `server/utils/sqlHelpers.ts`, inaczej nazwa tabeli znika i warunek porównuje kolumnę samą ze sobą.
 - **Testy**: logika serwera w `tests/integration` na tymczasowej bazie (`tests/setup.ts`, `fixtures.ts`); nowy plik w `server/utils/` dopisać do listy w `tests/setup.ts`. Ścieżki użytkownika w `tests/e2e`, strony otwierać przez `visit()`.
 

@@ -8,8 +8,8 @@ Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportow
 
 | Kontrola | Wynik | Kiedy |
 |---|---|---|
-| `pnpm check` (lint, format, typy, Vitest) | zielone, 262 testy w 22 plikach | po ostatniej zmianie kodu, na Windows |
-| `pnpm test:e2e` (Playwright) | zielone, 34 testy | po ostatniej zmianie kodu, na Windows |
+| `pnpm check` (lint, format, typy, Vitest) | zielone, 278 testów w 25 plikach | po ostatniej zmianie kodu, na Windows |
+| `pnpm test:e2e` (Playwright) | zielone, 35 testów | po ostatniej zmianie kodu, na Windows |
 | `pnpm build` | nie ponawiany w tej sesji | ostatnio przechodził w poprzedniej sesji (macOS) |
 
 - **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**). Cały kod jest na gałęzi `staging`. `main` ma tylko początkowy commit z pustym README i na razie go nie ruszamy; `staging` wyrasta z niego, więc da się je później scalić. `legacy/`, `.data/`, `.env` są ignorowane.
@@ -96,12 +96,24 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 - Typowane trasy (`experimental.typedPages`) wyłączone — kłóciły się z trasami i18n; parametry trasy czyta `useRouteParam()`.
 - Angielskie tłumaczenia napisał Claude — do przejrzenia przez Mateusza.
 
-**Etap 2 (nie zaczęty)** — treści z bazy i grafiki w wersjach PL/EN, wybór języka przy edycji w panelu. Do tego etapu należą też:
+**i18n, etap 2 — treści z bazy i grafiki PL/EN** (ta sama sesja; niezacommitowane):
 
-- w wersji EN treści z bazy (newsy, podstrony, menu boczne, nazwy działów) są nadal po polsku, a ich adresy mają polskie slugi (`/en/mitologia/grecka`);
-- odnośniki wewnątrz treści HTML i odnośnik „permalink” posta (`/forum/post/<id>`) prowadzą na polskie adresy, więc z wersji EN przełączają na PL;
-- po logowaniu Google i w razie jego błędu użytkownik wraca na polską stronę główną;
-- tytuł `Film YouTube` wstawiany do osadzonych filmów przy zapisie treści oraz domyślne komunikaty Zod (reguły bez własnego tekstu) nie są tłumaczone.
+- Nowa tabela `translations` (migracja `0001_blue_bucky.sql`) — wersja polska zostaje w dotychczasowych tabelach, angielska jest nakładką z powrotem do polskiej, gdy tłumaczenia brak.
+- Tłumaczalne: newsy (tytuł, zajawka, treść), kategorie newsów (nazwa, obrazek), tagi, podstrony (tytuł, treść), mapy (tytuł, opis, obraz, zajawka graficzna) i ich obszary (etykieta, treść okienka), albumy (tytuł, opis, okładka), zdjęcia (tytuł, opis), kategorie video i filmy, kategorie i działy forum, ankiety i odpowiedzi, linki i ich kategorie, pliki (tytuł, opis), menu boczne, News Center.
+- Panel: przełącznik „Język treści” PL/EN nad każdą stroną panelu. W trybie EN formularz pokazuje tłumaczenie (albo polską treść do przetłumaczenia), zapis trafia do wersji angielskiej; pola wspólne (status, kategoria, kolejność, geometria obszarów mapy) zapisują się dla obu języków. Listy w panelu pokazują wersję polską.
+- Strona: `/en/...` pokazuje tłumaczenia (także w wyszukiwarce), odnośniki w treści i permalinki postów zostają w wersji EN.
+- Testy: 16 nowych testów integracyjnych i scenariusz e2e (tłumaczenie newsa w panelu → widoczne tylko pod `/en`).
+
+Świadomie poza zakresem etapu 2:
+
+- **Slugi i adresy treści** są wspólne dla obu języków (`/en/news/powrot-brazowych-rycerzy`, `/en/mitologia/grecka`).
+- **Treści użytkowników** (forum, komentarze, shoutbox) nie mają wersji językowych — założenie przyjęte bez odpowiedzi Mateusza, do potwierdzenia.
+- **Pliki zdjęć w galerii i pliki do pobrania** są jedne dla obu języków (tłumaczą się tylko podpisy). **Grafiki motywu** z `public/theme` (baner, przyciski partnerów) nie są zarządzane w panelu.
+- **Obraz mapy per język** musi mieć te same proporcje co polski — obszary są wspólne.
+- **Nowy rekord** powstaje zawsze jako wersja polska; tłumaczenie dodaje się przy edycji.
+- Edytor potrafi przeformatować stary HTML z legacy przy samym otwarciu — zapis w trybie EN utrwali wtedy polską treść jako „tłumaczenie” tego pola (późniejsze zmiany wersji polskiej nie przejdą do EN, dopóki pole EN nie zostanie wyczyszczone).
+- Po logowaniu Google użytkownik wraca na polską stronę główną; tytuł `Film YouTube` w osadzonych filmach i domyślne komunikaty Zod nie są tłumaczone.
+- Ponowny `pnpm legacy:import --force` kasuje tłumaczenia razem z bazą.
 
 ## Co jest zrobione
 

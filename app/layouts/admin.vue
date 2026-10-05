@@ -7,6 +7,7 @@ const route = useRoute();
 const sitePath = useCurrentSitePath();
 const { t } = useI18n();
 const isMenuOpen = ref(false);
+const contentLocale = useContentLocaleStore();
 
 const visibleGroups = computed(() =>
   ADMIN_NAVIGATION.map((group) => ({
@@ -88,7 +89,10 @@ useSeoMeta({ robots: 'noindex, nofollow' });
 
     <main class="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
       <div class="mx-auto max-w-page">
-        <slot />
+        <ContentLocaleSwitch />
+        <div :key="contentLocale.editedLocale">
+          <slot />
+        </div>
       </div>
     </main>
     <AppToaster />

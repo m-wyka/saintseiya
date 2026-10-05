@@ -68,6 +68,16 @@ export const localizePagePath = (filePath: string): string =>
     .map((segment) => PAGE_FILE_SEGMENT_URLS[segment] ?? segment)
     .join('/');
 
+const PAGE_URL_SEGMENT_FILES = Object.fromEntries(
+  Object.entries(PAGE_FILE_SEGMENT_URLS).map(([fileSegment, urlSegment]) => [urlSegment, fileSegment]),
+);
+
+export const englishPagePath = (polishPath: string): string =>
+  polishPath
+    .split('/')
+    .map((segment) => PAGE_URL_SEGMENT_FILES[segment] ?? segment)
+    .join('/');
+
 export const routes = {
   home: () => '/',
   newsList: () => '/newsy',

@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { withLocalePrefix } from '#shared/utils/locales';
 import { routes } from '#shared/utils/routes';
 
 const MINIMUM_PHRASE_LENGTH = 3;
 const NuxtLinkLocale = resolveComponent('NuxtLinkLocale');
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const route = useRoute();
 const phrase = computed(() => String(route.query.q ?? '').trim());
@@ -69,7 +70,7 @@ useSeoMeta({
           <li v-for="result in section.items" :key="result.url" class="reveal">
             <component
               :is="isForumPost(result.url) ? 'a' : NuxtLinkLocale"
-              :href="isForumPost(result.url) ? result.url : undefined"
+              :href="isForumPost(result.url) ? withLocalePrefix(result.url, locale) : undefined"
               :to="isForumPost(result.url) ? undefined : result.url"
               class="block panel px-5 py-3 transition duration-300 ease-cosmo hover:-translate-y-0.5 hover:border-cosmo-500/60"
             >

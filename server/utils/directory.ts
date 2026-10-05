@@ -1,19 +1,25 @@
 import { asc, desc, eq, sql } from 'drizzle-orm';
+import type { ContentLocale } from '#shared/utils/locales';
+import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { schema, useDb } from './db';
 
-export const linkDirectory = () => {
+export const linkDirectory = (locale: ContentLocale = DEFAULT_LOCALE) => {
   const db = useDb();
-  const categories = db.select().from(schema.linkCategories).orderBy(asc(schema.linkCategories.sortOrder)).all();
+  const categories = db
+    .select({ id: schema.linkCategories.id, name: localized(schema.linkCategories.name, locale) })
+    .from(schema.linkCategories)
+    .orderBy(asc(schema.linkCategories.sortOrder))
+    .all();
   const links = db
     .select({
       id: schema.links.id,
       categoryId: schema.links.categoryId,
-      title: schema.links.title,
-      description: schema.links.description,
+      title: localized(schema.links.title, locale),
+      description: localized(schema.links.description, locale),
       url: schema.links.url,
     })
     .from(schema.links)
-    .orderBy(asc(schema.links.title))
+    .orderBy(asc(localized(schema.links.title, locale)))
     .all();
   const linksByCategory = Map.groupBy(links, (link) => link.categoryId);
   return categories
@@ -25,12 +31,12 @@ export const linkDirectory = () => {
     .filter((category) => category.links.length > 0);
 };
 
-export const listDownloads = () =>
+export const listDownloads = (locale: ContentLocale = DEFAULT_LOCALE) =>
   useDb()
     .select({
       id: schema.downloads.id,
-      title: schema.downloads.title,
-      description: schema.downloads.description,
+      title: localized(schema.downloads.title, locale),
+      description: localized(schema.downloads.description, locale),
       fileSize: schema.downloads.fileSize,
       downloadCount: schema.downloads.downloadCount,
       createdAt: schema.downloads.createdAt,

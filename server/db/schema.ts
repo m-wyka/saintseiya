@@ -449,3 +449,15 @@ export const settings = sqliteTable('settings', {
   key: text('key').primaryKey(),
   value: text('value', { mode: 'json' }).notNull(),
 });
+
+export const translations = sqliteTable(
+  'translations',
+  {
+    entity: text('entity').notNull(),
+    entityId: integer('entity_id').notNull(),
+    field: text('field').notNull(),
+    locale: text('locale').notNull(),
+    value: text('value').notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.entity, table.entityId, table.field, table.locale] })],
+);

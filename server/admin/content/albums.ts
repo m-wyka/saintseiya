@@ -27,6 +27,10 @@ const hasPhotos = (albumId: number): boolean =>
 export const albumsResource = defineAdminResource({
   access: 'gallery',
   inputSchema,
+  translatable: {
+    table: schema.albums,
+    fields: { title: 'text', description: 'text', coverImage: 'text' },
+  },
   list: () =>
     useDb()
       .select({

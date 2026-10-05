@@ -92,7 +92,7 @@ const appendDrawnArea = (): number | null => {
   if (!drawn || drawn.widthPercent < MINIMUM_SIZE_PERCENT || drawn.heightPercent < MINIMUM_SIZE_PERCENT) {
     return null;
   }
-  const areasWithDrawn = [...areas.value, newMapArea(drawn)];
+  const areasWithDrawn = [...areas.value, newMapArea(drawn, t('ADMIN_FORMS.NEW_MAP_AREA'))];
   areas.value = areasWithDrawn;
   return areasWithDrawn.length - 1;
 };

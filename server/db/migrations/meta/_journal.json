@@ -8,6 +8,13 @@
       "when": 1791139331587,
       "tag": "0000_fearless_talos",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1791196258086,
+      "tag": "0001_blue_bucky",
+      "breakpoints": true
     }
   ]
 }
