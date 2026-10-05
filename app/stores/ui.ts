@@ -8,5 +8,15 @@ export const useUiStore = defineStore('ui', () => {
     isMenuOpen.value = false;
   };
 
-  return { isMenuOpen, openMenu, closeMenu };
+  const isSearchOpen = ref(false);
+
+  const openSearch = () => {
+    isMenuOpen.value = false;
+    isSearchOpen.value = true;
+  };
+  const closeSearch = () => {
+    isSearchOpen.value = false;
+  };
+
+  return { isMenuOpen, openMenu, closeMenu, isSearchOpen, openSearch, closeSearch };
 });

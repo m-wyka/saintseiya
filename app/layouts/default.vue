@@ -33,6 +33,7 @@ onMounted(() => {
     </div>
     <SiteFooter />
     <MobileMenu />
+    <SearchDialog />
     <AppToaster />
   </div>
 </template>

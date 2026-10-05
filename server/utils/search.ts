@@ -7,7 +7,7 @@ import { routes } from '#shared/utils/routes';
 import { schema, useDb } from './db';
 import { localized } from './translations';
 
-const RESULTS_PER_KIND = 12;
+const RESULTS_PER_KIND = 6;
 const EXCERPT_RADIUS = 90;
 export const MINIMUM_SEARCH_LENGTH = 3;
 

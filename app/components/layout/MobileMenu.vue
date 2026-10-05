@@ -28,14 +28,14 @@ useHead({ bodyAttrs: { class: computed(() => (ui.isMenuOpen ? 'overflow-hidden' 
   >
     <div
       v-if="ui.isMenuOpen"
-      class="fixed inset-0 z-50 lg:hidden"
+      class="fixed inset-0 z-50 backdrop-blur-sm lg:hidden"
       role="dialog"
       aria-modal="true"
       :aria-label="t('LAYOUT.MENU')"
     >
       <button
         type="button"
-        class="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm"
+        class="absolute inset-0 cursor-default bg-black/70"
         :aria-label="t('SIDE_NAV.CLOSE_MENU')"
         @click="ui.closeMenu"
       />
@@ -62,6 +62,17 @@ useHead({ bodyAttrs: { class: computed(() => (ui.isMenuOpen ? 'overflow-hidden' 
               <AppIcon :name="item.icon" />
               {{ t(item.labelKey) }}
             </NuxtLinkLocale>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-cosmo-500/30 px-3 py-2 font-display text-sm font-semibold tracking-wider text-cosmo-400 uppercase hover:bg-cosmo-500/10"
+              aria-haspopup="dialog"
+              @click="ui.openSearch"
+            >
+              <AppIcon name="search" />
+              {{ t('GENERAL.SEARCH') }}
+            </button>
           </li>
         </ul>
         <NavigationSections />

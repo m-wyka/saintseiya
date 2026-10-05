@@ -92,19 +92,31 @@ test.describe('public site', () => {
     await expect(page).toHaveURL('/mitologia/grecka/posejdon');
   });
 
-  test('search finds pages, news and forum posts', async ({ page }) => {
+  test('the search dialog suggests pages, news and forum posts as links', async ({ page }) => {
+    await visit(page, '/');
+    await page.getByRole('button', { name: 'Szukaj', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'Szukaj' });
+    const phrase = dialog.getByLabel('Szukana fraza');
+
+    await expect(phrase).toBeFocused();
+    await expect(dialog.getByRole('link', { name: 'Forum' })).toBeVisible();
+
+    await phrase.fill('Shiryu');
+    await expect(dialog.getByRole('heading', { name: 'Forum (1)' })).toBeVisible();
+
+    await phrase.fill('zzzqqq');
+    await expect(dialog.getByText('Nic nie znaleziono dla „zzzqqq”.')).toBeVisible();
+
+    await phrase.fill('posejdon');
+    await expect(dialog.getByRole('heading', { name: 'Podstrony (2)' })).toBeVisible();
+    await dialog.getByRole('link').first().click();
+    await expect(dialog).toBeHidden();
+    await expect(page).not.toHaveURL('/');
+  });
+
+  test('the old search address leads to the home page', async ({ page }) => {
     await visit(page, '/szukaj');
-    await page.getByLabel('Szukana fraza').fill('Shiryu');
-    await page.getByRole('button', { name: 'Szukaj' }).click();
-    await expect(page.getByRole('heading', { name: 'Forum (1)' })).toBeVisible();
-
-    await page.getByLabel('Szukana fraza').fill('posejdon');
-    await page.getByRole('button', { name: 'Szukaj' }).click();
-    await expect(page.getByRole('heading', { name: 'Podstrony (2)' })).toBeVisible();
-
-    await page.getByLabel('Szukana fraza').fill('zzzqqq');
-    await page.getByRole('button', { name: 'Szukaj' }).click();
-    await expect(page.getByText('Nic nie znaleziono dla „zzzqqq”.')).toBeVisible();
+    await expect(page).toHaveURL('/');
   });
 
   test('old addresses redirect to the new content', async ({ page }) => {

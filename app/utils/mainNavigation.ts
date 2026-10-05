@@ -15,5 +15,4 @@ export const MAIN_NAVIGATION: MainNavigationItem[] = [
   { labelKey: 'GENERAL.GALLERY', to: routes.gallery(), icon: 'image' },
   { labelKey: 'GENERAL.VIDEO', to: routes.videos(), icon: 'play' },
   { labelKey: 'GENERAL.MAPS', to: routes.maps(), icon: 'map' },
-  { labelKey: 'GENERAL.SEARCH', to: routes.search(), icon: 'search' },
 ];

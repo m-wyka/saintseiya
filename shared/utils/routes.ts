@@ -52,7 +52,6 @@ export const PAGE_FILE_SEGMENT_URLS: Record<string, string> = {
   pages: 'strony',
   photo: 'zdjecie',
   polls: 'ankiety',
-  search: 'szukaj',
   section: 'dzial',
   settings: 'ustawienia',
   tags: 'tagi',
@@ -100,7 +99,6 @@ export const routes = {
   downloads: () => '/pliki',
   polls: () => '/ankiety',
   shoutbox: () => '/shoutbox',
-  search: () => '/szukaj',
   user: (id: number) => `/uzytkownik/${id}`,
   media: (storedPath: string) => `${MEDIA_BASE_URL}/${storedPath.split('/').map(encodeURIComponent).join('/')}`,
 };

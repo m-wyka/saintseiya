@@ -16,15 +16,15 @@ const isCurrent = (item: (typeof MAIN_NAVIGATION)[number]) =>
   <header class="relative">
     <div class="mx-auto flex max-w-page items-center justify-between gap-4 px-4 py-2 text-xs text-aqua-300">
       <p v-if="layout.statistics" class="flex flex-wrap items-center gap-x-4 gap-y-1">
-        <span v-if="layout.statistics.memberCount">
+        <span v-if="layout.statistics.memberCount" class="hidden lg:inline">
           {{ t('LAYOUT.MEMBERS') }}:
           <strong class="text-gold-300">{{ formatNumber(layout.statistics.memberCount) }}</strong>
         </span>
-        <span class="max-sm:hidden">
+        <span class="hidden lg:inline">
           {{ t('LAYOUT.FORUM_POSTS') }}:
           <strong class="text-gold-300">{{ formatNumber(layout.statistics.postCount) }}</strong>
         </span>
-        <span class="max-md:hidden">
+        <span class="hidden lg:inline">
           {{ t('LAYOUT.COMMENTS') }}:
           <strong class="text-gold-300">{{ formatNumber(layout.statistics.commentCount) }}</strong>
         </span>
@@ -66,7 +66,7 @@ const isCurrent = (item: (typeof MAIN_NAVIGATION)[number]) =>
           v-for="item in MAIN_NAVIGATION"
           :key="item.to"
           class="flex"
-          :class="{ 'max-lg:hidden': !item.matchesExactly && item.icon !== 'search' }"
+          :class="{ 'max-lg:hidden': !item.matchesExactly }"
         >
           <NuxtLinkLocale
             :to="item.to"
@@ -79,8 +79,19 @@ const isCurrent = (item: (typeof MAIN_NAVIGATION)[number]) =>
             :aria-current="isCurrent(item) ? 'page' : undefined"
           >
             <AppIcon :name="item.icon" />
-            <span :class="{ 'max-sm:sr-only': item.icon === 'search' }">{{ t(item.labelKey) }}</span>
+            {{ t(item.labelKey) }}
           </NuxtLinkLocale>
+        </li>
+        <li class="flex">
+          <button
+            type="button"
+            class="flex cursor-pointer items-center gap-2 px-4 py-2.5 font-display text-sm font-semibold tracking-widest whitespace-nowrap text-aqua-200 uppercase transition duration-200 hover:bg-white/5 hover:text-gold-300"
+            aria-haspopup="dialog"
+            @click="ui.openSearch"
+          >
+            <AppIcon name="search" />
+            <span class="max-sm:sr-only">{{ t('GENERAL.SEARCH') }}</span>
+          </button>
         </li>
       </ul>
     </div>

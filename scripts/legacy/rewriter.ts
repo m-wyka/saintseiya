@@ -73,7 +73,7 @@ export const createLegacyRewriter = (lookups: LegacyLookups, assets: AssetRegist
       case 'downloads':
         return routes.downloads();
       case 'search':
-        return routes.search();
+        return routes.home();
       case 'map':
         return routes.map(target.slug);
       case 'asset':

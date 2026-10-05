@@ -123,7 +123,7 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 - Sprawdzanie obrazków zewnętrznych (`pnpm images:check`): 1701 działa, 852 martwe.
 
 **Strona publiczna**
-- Strona główna, newsy (kategorie, tagi), podstrony z okruszkami i hubami, forum, galeria, video, mapy z okienkami treści, linki, pliki, ankiety, shoutbox, wyszukiwarka, profile.
+- Strona główna, newsy (kategorie, tagi), podstrony z okruszkami i hubami, forum, galeria, video, mapy z okienkami treści, linki, pliki, ankiety, shoutbox, wyszukiwarka w oknie modalnym (przycisk „Szukaj” lub Ctrl+K; `/szukaj` przekierowuje na stronę główną), profile.
 - Logowanie Google, konto (zmiana nicku, usunięcie konta → „Konto nieaktywne”), pisanie na forum, komentarze, shoutbox, głosowanie; captcha Turnstile i limit częstotliwości.
 - Przekierowania 301 ze starych adresów (`viewpage.php`, `news.php`, `forum/viewthread.php`, `kr/index.html` itd.).
 - Zaślepka „Nie znaleziono zdjęcia” dla martwych obrazków.

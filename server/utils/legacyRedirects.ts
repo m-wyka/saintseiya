@@ -104,7 +104,7 @@ export const resolveLegacyTarget = (target: LegacyTarget): string => {
     case 'downloads':
       return routes.downloads();
     case 'search':
-      return routes.search();
+      return routes.home();
     case 'map':
       return routes.map(target.slug);
     case 'asset':

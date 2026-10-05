@@ -12,6 +12,7 @@ withDefaults(
     hideLabel?: boolean;
     maxlength?: number;
     name?: string;
+    autofocus?: boolean;
   }>(),
   { type: 'text', placeholder: undefined, hint: undefined, error: undefined, maxlength: undefined, name: undefined },
 );
@@ -38,6 +39,7 @@ const messageId = `${inputId}-message`;
       :placeholder="placeholder"
       :required="required"
       :maxlength="maxlength"
+      :autofocus="autofocus"
       :aria-invalid="Boolean(error) || undefined"
       :aria-describedby="error || hint ? messageId : undefined"
       class="w-full rounded-lg border bg-black/40 px-3 py-2 text-sm text-mist transition duration-200 placeholder:text-aqua-500/70 focus:border-cosmo-500 focus:shadow-aura focus:outline-none"
