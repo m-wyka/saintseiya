@@ -8,6 +8,17 @@ import { qualified } from './sqlHelpers';
 import { localized } from './translations';
 
 const NEWS_PAGE_SIZE = 9;
+const TEASER_LENGTH = 260;
+
+const teaserOf = (excerptHtml: string, bodyHtml: string): string => {
+  const text = htmlToPlainText(excerptHtml) || htmlToPlainText(bodyHtml);
+  if (text.length <= TEASER_LENGTH) {
+    return text;
+  }
+  const cut = text.slice(0, TEASER_LENGTH);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${cut.slice(0, lastSpace > 0 ? lastSpace : TEASER_LENGTH).replace(/[\s.,;:!?–-]+$/, '')}…`;
+};
 
 interface NewsFilters {
   page: number;
@@ -54,7 +65,7 @@ export const listPublishedNews = (
       slug: schema.news.slug,
       title: localized(schema.news.title, locale),
       excerptHtml: localized(schema.news.excerptHtml, locale),
-      hasBody: sql<boolean>`${localized(schema.news.bodyHtml, locale)} <> ''`.mapWith(Boolean),
+      bodyHtml: localized(schema.news.bodyHtml, locale),
       publishedAt: schema.news.publishedAt,
       commentCount: visibleCommentCount,
       category: categoryColumns(locale),
@@ -75,8 +86,11 @@ export const listPublishedNews = (
       .leftJoin(schema.newsCategories, eq(schema.newsCategories.id, schema.news.categoryId))
       .where(filter)
       .get()?.total ?? 0;
-  const readableItems = items.map((item) => ({ ...item, excerptHtml: markMissingImages(item.excerptHtml) }));
-  return paginated(readableItems, total, filters.page, pageSize);
+  const summaries = items.map(({ excerptHtml, bodyHtml, ...item }) => ({
+    ...item,
+    teaser: teaserOf(excerptHtml, bodyHtml),
+  }));
+  return paginated(summaries, total, filters.page, pageSize);
 };
 
 const tagsOfNews = (newsId: number, locale: ContentLocale) =>

@@ -591,7 +591,6 @@
   "VIDEO_LIST.EMPTY": "There are no videos in this category yet.",
   "NEWS_LIST.COMMENT_COUNT": "{count} comment | {count} comments",
   "NEWS_LIST.READ_MORE": "Read more",
-  "NEWS_LIST.OPEN": "Open",
   "NEWS_LIST.LOAD_FAILED": "Could not load the news",
   "NEWS_LIST.EMPTY": "There is no news here yet.",
   "HOME.LATEST_THREADS": "Latest threads",

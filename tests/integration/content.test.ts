@@ -16,11 +16,29 @@ describe('news reading', () => {
 
     expect(listed.items.map((news) => news.title)).toEqual(['Nowszy', 'Starszy']);
     expect(listed.items[0]).toMatchObject({
-      hasBody: true,
+      teaser: 'Zajawka',
       commentCount: 0,
       author: { name: 'Verien', isGhost: true },
     });
-    expect(listed.items[1]!.hasBody).toBe(false);
+  });
+
+  it('lists a short plain-text teaser instead of the whole excerpt', () => {
+    const author = createAccount();
+    const longExcerpt = `<p><img src="/media/a.jpg" alt="" /><strong>Rycerze</strong> ${'Zodiaku wracają. '.repeat(40)}</p>`;
+    createNews(author.id, { title: 'Długi', excerptHtml: longExcerpt, publishedAt: new Date(2019, 0, 1) });
+    createNews(author.id, {
+      title: 'Sam obrazek',
+      excerptHtml: '<p><img src="/media/a.jpg" alt="" /></p>',
+      bodyHtml: '<p>Rozwinięcie</p>',
+      publishedAt: new Date(2015, 0, 1),
+    });
+
+    const [long, imageOnly] = listPublishedNews({ page: 1 }).items;
+
+    expect(long!.teaser).toMatch(/^Rycerze Zodiaku wracają\. .*(?:Zodiaku|wracają)…$/);
+    expect(long!.teaser.length).toBeLessThanOrEqual(261);
+    expect(long).not.toHaveProperty('excerptHtml');
+    expect(imageOnly!.teaser).toBe('Rozwinięcie');
   });
 
   it('filters by category and paginates', () => {

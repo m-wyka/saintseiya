@@ -591,7 +591,6 @@
   "VIDEO_LIST.EMPTY": "W tej kategorii nie ma jeszcze filmów.",
   "NEWS_LIST.COMMENT_COUNT": "{count} komentarz | {count} komentarze | {count} komentarzy",
   "NEWS_LIST.READ_MORE": "Czytaj więcej",
-  "NEWS_LIST.OPEN": "Otwórz",
   "NEWS_LIST.LOAD_FAILED": "Nie udało się wczytać newsów",
   "NEWS_LIST.EMPTY": "Nie ma jeszcze żadnych newsów w tym miejscu.",
   "HOME.LATEST_THREADS": "Najnowsze tematy",

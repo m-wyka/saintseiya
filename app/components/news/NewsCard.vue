@@ -41,7 +41,9 @@ const { t } = useI18n();
         loading="lazy"
         class="h-40 w-30 shrink-0 rounded-lg border border-gold-300/40 object-cover shadow-panel transition duration-500 ease-cosmo group-hover:scale-[1.03] group-hover:-rotate-1 max-sm:h-28 max-sm:w-21"
       />
-      <RichContent :html="news.excerptHtml" class="relative z-10 min-w-0 flex-1" />
+      <p v-if="news.teaser" class="line-clamp-4 min-w-0 flex-1 text-[0.95rem]/7 wrap-anywhere text-mist">
+        {{ news.teaser }}
+      </p>
     </div>
 
     <footer
@@ -64,7 +66,7 @@ const { t } = useI18n();
       <span
         class="flex items-center gap-1.5 font-semibold text-cosmo-400 transition duration-200 group-hover:gap-2.5 group-hover:text-gold-300"
       >
-        {{ news.hasBody ? t('NEWS_LIST.READ_MORE') : t('NEWS_LIST.OPEN') }}
+        {{ t('NEWS_LIST.READ_MORE') }}
         <span class="grid size-5 place-items-center rounded-full cosmo-bar text-abyss-950">
           <AppIcon name="plus" class="text-[0.7rem]" />
         </span>

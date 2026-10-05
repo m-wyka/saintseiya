@@ -38,7 +38,7 @@ describe('translated public content', () => {
     const uncategorised = createNews(author.id, { slug: 'bez-kategorii', title: 'Bez kategorii' });
     translate(schema.news.title, news.id, 'The Return');
     translate(schema.news.bodyHtml, news.id, '<p>Body</p>');
-    translate(schema.news.bodyHtml, uncategorised.id, '<p>Only English body</p>');
+    translate(schema.news.excerptHtml, uncategorised.id, '<p>Only English teaser</p>');
     translate(schema.newsCategories.name, category.id, 'Manga in English');
     translate(schema.tags.name, tag.id, 'Knights');
 
@@ -59,13 +59,13 @@ describe('translated public content', () => {
 
     const polish = listPublishedNews({ page: 1 }).items;
     const english = listPublishedNews({ page: 1 }, undefined, 'en').items;
-    expect(polish.map((item) => [item.title, item.hasBody, item.category?.name ?? null])).toEqual([
-      ['Bez kategorii', false, null],
-      ['Powrót', true, 'Manga po polsku'],
+    expect(polish.map((item) => [item.title, item.teaser, item.category?.name ?? null])).toEqual([
+      ['Bez kategorii', 'Zajawka', null],
+      ['Powrót', 'Zajawka', 'Manga po polsku'],
     ]);
-    expect(english.map((item) => [item.title, item.hasBody, item.category])).toEqual([
-      ['Bez kategorii', true, null],
-      ['The Return', true, { slug: category.slug, name: 'Manga in English', image: null }],
+    expect(english.map((item) => [item.title, item.teaser, item.category])).toEqual([
+      ['Bez kategorii', 'Only English teaser', null],
+      ['The Return', 'Zajawka', { slug: category.slug, name: 'Manga in English', image: null }],
     ]);
     expect(listNewsCategories('en')).toEqual([
       { slug: category.slug, name: 'Manga in English', image: null, newsCount: 1 },
