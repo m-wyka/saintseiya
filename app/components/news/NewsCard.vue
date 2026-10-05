@@ -64,7 +64,7 @@ const { t } = useI18n();
         </span>
       </p>
       <span
-        class="flex items-center gap-1.5 font-semibold text-cosmo-400 transition duration-200 group-hover:gap-2.5 group-hover:text-gold-300"
+        class="flex items-center gap-1.5 font-semibold text-cosmo-400 transition duration-200 group-hover:text-gold-300"
       >
         {{ t('NEWS_LIST.READ_MORE') }}
         <span class="grid size-5 place-items-center rounded-full cosmo-bar text-abyss-950">

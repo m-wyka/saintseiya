@@ -47,11 +47,10 @@ const isCurrent = (item: (typeof MAIN_NAVIGATION)[number]) =>
     </NuxtLinkLocale>
   </header>
 
-  <nav
-    class="sticky top-0 z-40 border-y border-white/10 bg-abyss-950/55 shadow-[0_12px_32px_-16px_rgb(0_0_0/0.9)] backdrop-blur-xl backdrop-saturate-150"
-    :aria-label="t('LAYOUT.MAIN_MENU')"
-  >
-    <div class="mx-auto flex max-w-page items-stretch px-2 lg:px-4">
+  <nav class="sticky top-0 z-40 mx-auto w-full max-w-page lg:px-4" :aria-label="t('LAYOUT.MAIN_MENU')">
+    <div
+      class="flex items-stretch border-y border-white/10 bg-abyss-950/55 px-2 shadow-[0_12px_32px_-16px_rgb(0_0_0/0.9)] backdrop-blur-xl backdrop-saturate-150 lg:border-x lg:px-0"
+    >
       <button
         type="button"
         class="flex cursor-pointer items-center gap-2 px-3 py-2.5 font-display text-sm font-semibold tracking-widest text-gold-300 uppercase lg:hidden"

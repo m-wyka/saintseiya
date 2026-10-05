@@ -24,12 +24,19 @@ const { t } = useI18n();
 const editedId = ref<number | null>(null);
 const isFormOpen = ref(false);
 const input = ref<Record<string, unknown>>({ ...props.emptyInput });
+const form = ref<HTMLFormElement | null>(null);
+
+const showForm = async () => {
+  isFormOpen.value = true;
+  await nextTick();
+  form.value?.scrollIntoView({ block: 'start' });
+};
 
 const openNew = () => {
   errorMessage.value = '';
   editedId.value = null;
   input.value = { ...props.emptyInput };
-  isFormOpen.value = true;
+  return showForm();
 };
 
 const openExisting = async (id: number) => {
@@ -42,7 +49,7 @@ const openExisting = async (id: number) => {
     Object.keys(props.emptyInput).map((key) => [key, stored[key] ?? props.emptyInput[key]]),
   );
   editedId.value = id;
-  isFormOpen.value = true;
+  await showForm();
 };
 
 const save = async () => {
@@ -79,7 +86,12 @@ useSeoMeta({ title: props.title });
       </BaseButton>
     </AdminHeader>
 
-    <form v-if="isFormOpen" class="mb-6 flex animate-rise flex-col gap-4 panel p-5" @submit.prevent="save">
+    <form
+      v-if="isFormOpen"
+      ref="form"
+      class="mb-6 flex animate-rise scroll-mt-6 flex-col gap-4 panel p-5"
+      @submit.prevent="save"
+    >
       <h2 class="heading-display text-lg text-gold-300">
         {{ editedId === null ? addLabel : t('GENERAL.EDITING') }}
       </h2>
