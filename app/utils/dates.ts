@@ -35,6 +35,18 @@ export const formatDateTime = (value: DateInput): string => currentFormats().dat
 
 export const formatNumber = (value: number): string => currentFormats().number.format(value);
 
+const monthAndDayFormat = new Intl.DateTimeFormat('en-US', {
+  month: 'numeric',
+  day: 'numeric',
+  timeZone: SITE_TIME_ZONE,
+});
+
+export const siteMonthAndDay = (value: DateInput): { month: number; day: number } => {
+  const parts = monthAndDayFormat.formatToParts(new Date(value));
+  const numberOf = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((part) => part.type === type)?.value);
+  return { month: numberOf('month'), day: numberOf('day') };
+};
+
 const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB'];
 const FILE_SIZE_STEP = 1024;
 

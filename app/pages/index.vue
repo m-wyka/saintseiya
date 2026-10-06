@@ -15,12 +15,14 @@ const { data: home } = await useFetch('/api/home');
       </div>
     </div>
 
-    <section>
+    <section v-if="home">
       <SectionHeading :title="t('GENERAL.NEWS')" :link-to="routes.newsList()" :link-label="t('HOME.ALL_NEWS')" />
-      <NewsListing />
+      <NewsGrid v-if="home.latestNews.length" :news="home.latestNews" />
+      <EmptyState v-else :message="t('NEWS_LIST.EMPTY')" />
     </section>
 
     <LatestComments v-if="home" :comments="home.latestComments" />
-    <LatestMedia v-if="home" :photos="home.latestPhotos" :videos="home.latestVideos" />
+    <LatestPhotos v-if="home" :photos="home.latestPhotos" />
+    <LatestVideos v-if="home" :videos="home.latestVideos" />
   </div>
 </template>

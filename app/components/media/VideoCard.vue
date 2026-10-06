@@ -5,8 +5,8 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const isPlaying = ref(false);
-const posterUrl = computed(() => `https://i.ytimg.com/vi/${props.video.youtubeId}/hqdefault.jpg`);
-const playerUrl = computed(() => `https://www.youtube-nocookie.com/embed/${props.video.youtubeId}?autoplay=1`);
+const posterUrl = computed(() => youtubePosterUrl(props.video.youtubeId, 'hqdefault'));
+const playerUrl = computed(() => youtubePlayerUrl(props.video.youtubeId));
 </script>
 
 <template>

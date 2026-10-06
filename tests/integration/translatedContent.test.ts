@@ -229,4 +229,23 @@ describe('translated public content', () => {
     expect(homeContent().latestComments.map((comment) => comment.target.title)).toEqual(['Powrót']);
     expect(homeContent('en').latestComments.map((comment) => comment.target.title)).toEqual(['The Return']);
   });
+
+  it('quotes a long comment on the home page up to a whole word', () => {
+    const author = createAccount();
+    const news = createNews(author.id);
+    useDb()
+      .insert(schema.comments)
+      .values({
+        targetKind: 'news',
+        targetId: news.id,
+        authorId: author.id,
+        bodyHtml: `<p><strong>Pegaz</strong> ${'płonie kosmosem. '.repeat(20)}</p>`,
+      })
+      .run();
+
+    const [{ excerpt }] = homeContent().latestComments;
+
+    expect(excerpt).toMatch(/^Pegaz płonie kosmosem\. .*(?:płonie|kosmosem)…$/);
+    expect(excerpt.length).toBeLessThanOrEqual(161);
+  });
 });

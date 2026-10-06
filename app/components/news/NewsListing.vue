@@ -22,9 +22,7 @@ await redirectPastLastPage(listing.value);
 
 <template>
   <div v-if="listing">
-    <div v-if="listing.items.length" class="flex flex-col gap-6">
-      <NewsCard v-for="news in listing.items" :key="news.slug" :news="news" />
-    </div>
+    <NewsGrid v-if="listing.items.length" :news="listing.items" />
     <EmptyState v-else :message="t('NEWS_LIST.EMPTY')" />
     <PaginationNav :page="listing.page" :page-count="listing.pageCount" />
   </div>

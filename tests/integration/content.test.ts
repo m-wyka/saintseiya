@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { homeContent } from '../../server/utils/home';
 import { findPublishedNews, listNewsCategories, listPublishedNews } from '../../server/utils/news';
 import { findPublishedPage } from '../../server/utils/pages';
 import { createAccount, createNews, createNewsCategory, createPage, resetDatabase } from './fixtures';
@@ -53,6 +54,15 @@ describe('news reading', () => {
     ]);
     expect(listPublishedNews({ page: 2 }, 2)).toMatchObject({ page: 2, pageCount: 2, total: 3 });
     expect(listNewsCategories().find((category) => category.slug === manga.slug)?.newsCount).toBe(1);
+  });
+
+  it('shows the six newest published news on the home page', () => {
+    const author = createAccount();
+    const titles = Array.from({ length: 8 }, (_, index) => `News z dnia ${index + 1}`);
+    titles.forEach((title, index) => createNews(author.id, { title, publishedAt: new Date(2021, 4, index + 1) }));
+    createNews(author.id, { title: 'Szkic', status: 'draft', publishedAt: new Date(2022, 0, 1) });
+
+    expect(homeContent().latestNews.map((news) => news.title)).toEqual(titles.toReversed().slice(0, 6));
   });
 
   it('finds a published news by its address and hides drafts', () => {

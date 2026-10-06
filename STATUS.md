@@ -8,13 +8,14 @@ Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportow
 
 | Kontrola | Wynik | Kiedy |
 |---|---|---|
-| `pnpm check` (lint, format, typy, Vitest) | zielone, 324 testy w 30 plikach | 2026-10-05 ok. 18:50, macOS, ze zmianami nagłówka, nagłówków paneli i sekcji oraz gwiezdnego tła razem |
-| `pnpm test:e2e` (Playwright) | zielone, 41 testów | 2026-10-05 ok. 18:55, macOS, pełny przebieg ze zmianami nagłówka, nagłówków paneli i sekcji oraz gwiezdnego tła razem |
+| `pnpm check` (lint, format, typy, Vitest) | zielone, 334 testy w 32 plikach | 2026-10-06, macOS, po usunięciu przycisku „Więcej newsów” i poprawce `BaseDialog` |
+| `pnpm test:e2e` (Playwright) | zielone, 43 testy | 2026-10-06, macOS, pełny przebieg po poprawce `BaseDialog`; testy wyszukiwarki dodatkowo 12 razy z rzędu |
 | `pnpm build` | nie ponawiany w tej sesji | ostatnio przechodził w poprzedniej sesji (macOS) |
 
 - **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**). Cały kod jest na gałęzi `staging`. `main` ma tylko początkowy commit z pustym README i na razie go nie ruszamy; `staging` wyrasta z niego, więc da się je później scalić. `legacy/`, `.data/`, `.env` są ignorowane.
 - **Niezacommitowane**: zmiany z tej sesji (lista w „Zrobione w ostatniej sesji”) leżą w katalogu roboczym na `staging` — czekają na decyzję Mateusza o commicie. Do tego nieśledzony `pnpm-workspace.yaml` (zgoda na skrypty instalacyjne `esbuild` i `unrs-resolver`, wymagana przez pnpm 12 na tym komputerze) — nie mój, do decyzji, czy trafia do repozytorium.
 - **Niezacommitowane na macOS (2026-10-05)**: przebudowa nagłówka (sekcja „Przebudowa nagłówka” niżej) — czeka na decyzję o commicie. W tym samym drzewie leżą zmiany gwiezdnego tła (`StarrySky.vue`, `app/utils/sky*.ts`, `starfield.ts`, `constellations.ts`, `main.css`, `layouts/default.vue`, `tests/unit/starfield.test.ts`, scenariusz w `public.spec.ts`) z równoległej sesji — opis w sekcji „Gwiezdne tło” niżej, też czekają na decyzję o commicie.
+- **Niezacommitowane na macOS, wieczór 2026-10-05**: siatka newsów i przebudowa sekcji strony głównej (obie opisane w „Zrobione w ostatniej sesji”) — czekają na decyzję o commicie.
 - **Dostęp do GitHuba**: na pierwszym komputerze `origin` używa aliasu SSH `git@github-m-wyka:m-wyka/saintseiya.git` (jak `dot-sport-shop`), bo domyślne dane GitHuba należą tam do innego konta, bez prawa zapisu. Na drugim komputerze do wypychania potrzebny jest dostęp konta `m-wyka`.
 - **Procesy**: nic z projektu nie działa w tle (serwer dev i pomocniczy MySQL na porcie 3399 zatrzymane).
 - **Baza**: `.data/saintseiya.db` z importu 2026-10-05, obrazki zewnętrzne sprawdzone. Przegląd jej nie dotknął — 339 kont archiwalnych, żadnych kont testowych. Na tym komputerze są baza i `.data/uploads`; nie ma `legacy/` ani pomocniczego MySQL.
@@ -53,6 +54,45 @@ Na drugim komputerze:
 - Pamięć Claude dla projektu jest pusta — nie ma czego przenosić.
 
 ## Zrobione w ostatniej sesji
+
+**Animacja `reveal` na wysokich blokach** (macOS, 2026-10-06; niezacommitowane):
+
+- Błąd: na stronie głównej przewiniętej do góry duży kafel newsa stał kilka pikseli niżej niż mały obok i był przygaszony. `reveal` kończył animację po wjechaniu 55% wysokości elementu, więc kafel 563 px potrzebował 310 px, a kafel 272 px tylko 150 px.
+- Poprawka w `main.css`: zasięg `entry min(55%, 8rem)` — najwyżej 128 px, niezależnie od wysokości. Dotyczy wszystkich użyć `reveal`, także długich postów na forum i sekcji `stage`, które wcześniej długo zostawały półprzezroczyste.
+- Sprawdzone: `pnpm check`; pomiar w Chrome przez Playwright przy 1456×1201, 1456×1100 i 2560×1300 — oba kafle mają teraz to samo przesunięcie i krycie.
+- Nie sprawdzone: `pnpm test:e2e`, Safari i Firefox, pozostałe strony z `reveal` na żywo.
+
+**Sekcje strony głównej: komentarze, grafiki, video** (macOS, 2026-10-05; niezacommitowane):
+
+- Powód: „Rycerze komentują”, „Najnowsze grafiki” i „Najnowsze video” leżały wprost na gwiezdnym niebie i zlewały się z nim. Każda sekcja ma teraz własną nieprzezroczystą „scenę” (`stage` w `main.css`) razem z nagłówkiem. Grafiki i video nie stoją już obok siebie — każda sekcja zajmuje całą szerokość kolumny treści; strona główna jest przez to dłuższa o ok. 700 px na komputerze.
+- **Rycerze komentują** (`LatestComments`): zamiast karuzeli lista sześciu rycerzy (awatar z inicjałów, nick, tytuł komentowanej treści) i obok duży cytat. Głos przełącza najechanie myszą, kliknięcie i klawiatura (zakładki ARIA: strzałki, Home, End). Zaznaczenie przesuwa się pod aktywny wiersz (`sliding-thumb-x` / `sliding-thumb-y`), a przy cytacie rysuje się na złoto gwiazdozbiór znaku zodiaku z dnia komentarza, podpisany znakiem i datą — jak w kaflach newsów. Poniżej 576 px szerokości sceny lista zamienia się w rząd awatarów nad cytatem.
+- **Najnowsze grafiki** (`LatestPhotos`): skośne pasy (`roster` w `main.css`). Gdzie jest mysz i co najmniej 576 px szerokości sceny, osiem pasów wypełnia rząd, a najechany lub wybrany klawiaturą rozsuwa się i pokazuje tytuł z albumem; ostatnio otwarty zostaje otwarty. Na ekranach dotykowych i w wąskiej kolumnie ten sam rząd jest przewijanym paskiem scroll-snap z podpisem na każdym pasie.
+- **Najnowsze video** (`LatestVideos`): duży ekran i playlista czterech filmów. Kliknięcie w pozycję playlisty albo w ekran odtwarza film na miejscu (ramka `youtube-nocookie`), wcześniej kafle prowadziły tylko na `/video`.
+- **Filmy usunięte z YouTube**: YouTube zamiast błędu odsyła szarą miniaturę 120×90 — `VideoPoster` rozpoznaje ją po rozmiarze (`isRemovedVideoPoster` w `app/utils/youtube.ts`). Taki film dostaje zaślepkę z gwiazdami, podpis „Niedostępny” i komunikat „Tego filmu nie ma już na YouTube.” zamiast przycisku odtwarzania; ekran sam ustawia się na najnowszym filmie, który jeszcze istnieje.
+- **Stan danych**: z 74 filmów w bazie 36 nie ma już miniatury na YouTube (sprawdzone 2026-10-05 zapytaniami o `mqdefault.jpg`), w tym wszystkie cztery najnowsze — sekcja video na stronie głównej pokazuje więc teraz cztery zaślepki. Patrz „Decyzje dla Mateusza”, punkt 12.
+- Cytat komentarza jest ucinany na granicy słowa z wielokropkiem (wcześniej twardo po 160 znakach, co ukrywało obcinanie CSS w karuzeli). Ucinanie wyszło z `news.ts` do `truncateAtWord` w `server/utils/html.ts`; zajawki newsów działają jak dotąd.
+- Usunięte: `LatestMedia.vue`, narzędzie `carousel-arrows` w `main.css` (używała go tylko stara karuzela komentarzy) oraz zmienne `--carousel-*-label` w `NewsCenter` i klucze `HOME_PANELS.CAROUSEL_PREVIOUS` / `CAROUSEL_NEXT`, które służyły wyłącznie temu narzędziu. `VideoCard` bierze adresy z `app/utils/youtube.ts`, bez zmiany działania.
+- Testy: `tests/unit/youtube.test.ts`, test cytatu w `translatedContent.test.ts`, dwa scenariusze e2e w `public.spec.ts` (przełączanie komentarzy myszą i strzałkami, przejście do grafiki, odtworzenie filmu; film usunięty z YouTube — miniatura podstawiona w teście). Dane e2e mają drugi komentarz, pod zdjęciem „Złota zbroja”.
+- Obejrzane na zrzutach Playwright na zaimportowanej bazie: 1440, 1100, 800, 600, 390 i 360 px, `/en`, stan po najechaniu, fokus z klawiatury, dotyk, sekcje z jednym elementem, video z żywymi miniaturami (podstawionymi w przeglądarce) i z samym najnowszym filmem usuniętym.
+- Nie sprawdzone: Safari i Firefox (zapytania kontenerowe, `tan()` w CSS, przejście `flex-grow`), prawdziwy telefon, płynność animacji na żywo (widziałem stany końcowe i jedną klatkę w trakcie), odtwarzanie filmu w ramce YouTube (sprawdzony jest tylko adres ramki), czytnik ekranu.
+- Znane ograniczenia: miniatury grafik mają 480 px szerokości, więc rozsunięty pas (do ok. 410 px) jest na ekranie Retina lekko miękki, a panorama „12 Złotych Rycerzy” wyraźnie rozmyta — zniknie po podmianie grafik albo przy większych miniaturach. Lista filmów `/video` (`VideoCard`) nadal pokazuje szarą miniaturę YouTube przy usuniętych filmach.
+
+**Siatka newsów** (macOS, 2026-10-05; niezacommitowane):
+
+- Newsy to siatka zamiast szerokich kafli jeden pod drugim (`NewsGrid` — sam układ, bez pobierania danych). Liczba kolumn zależy od szerokości kolumny treści, nie okna (zapytania kontenerowe): 1 kolumna do 576 px, 2 do 896 px, 3 powyżej. Pierwszy news jest duży: 2×2 w trzech kolumnach; w dwóch zajmuje cały wiersz tylko wtedy, gdy pod nim zostaje parzysta liczba kafli, więc ostatni wiersz nigdy nie jest w połowie pusty.
+- Strona główna pokazuje 6 najnowszych newsów (`latestNews` w `/api/home`, `LATEST_NEWS_COUNT`) bez paginacji; do pełnej listy prowadzi odnośnik „Wszystkie newsy” w nagłówku sekcji (przycisk „Więcej newsów” pod siatką Mateusz uznał za zbędny — usunięty). Paginacja jest tylko na liście wszystkich newsów, w kategorii i w tagu (`NewsListing`, 9 na stronę — bez zmian).
+- Kafel (`NewsCard`, prop `featured`): na górze „wycinek nieba” (`star-chart` w `main.css`) z okładką kategorii i gwiazdozbiorem znaku zodiaku z dnia publikacji, podpisanym nazwą znaku i datą; niżej kategoria, tytuł (najwyżej 3 linie), zajawka (2 linie, w dużym kaflu 3), autor i liczba komentarzy. „Czytaj więcej” zniknęło — klikalny jest cały kafel; klucz `NEWS_LIST.READ_MORE` usunięty. Duży kafel ma przy 1440 px ok. 563 px wysokości (pierwsza wersja ok. 690 px — Mateusz uznał ją za za wysoką), mały 272–296 px. Wygląd „duży” włącza się dopiero, gdy kafel ma co najmniej 448 px szerokości, więc na telefonie i w jednej kolumnie pierwszy news wygląda jak pozostałe.
+- Okładka kategorii jest pokazywana mała (80 px wysokości, w dużym kaflu 176 px), a za nią leży jej rozmyta, podbita kopia — poświata w kolorach grafiki. Dzięki temu grafiki 150×200 z legacy nie są rozciągane; po podmianie na lepsze układ się nie zmieni (proporcje 3:4, `object-cover`).
+- Newsy bez kategorii (89 z 378) nie mają okładki — gwiazdozbiór stoi wtedy na środku.
+- Znak zodiaku: `app/utils/zodiac.ts` (`zodiacSignOf`), dzień liczony w strefie `Europe/Warsaw` (`siteMonthAndDay` w `dates.ts`), nazwy w kluczach `ZODIAC.*`. News bez daty dostaje Pegaza bez podpisu.
+- Po najechaniu lub fokusie z klawiatury: okładka się prostuje i raz błyska (`prism-glint`), poświata rośnie, linie gwiazdozbioru rysują się na złoto. Na ekranach dotykowych i przy `prefers-reduced-motion` kafel zostaje w stanie spoczynku albo zmienia się bez animacji.
+- Geometria gwiazdozbioru w SVG wyszła z `PanelHeading` do `constellationFigure` w `app/utils/constellations.ts` — korzystają z niej oba komponenty; wygląd nagłówków paneli bez zmian.
+- Testy: `tests/unit/zodiac.test.ts` (granice znaków, przełom roku, strefa czasowa), test `constellationFigure` w `starfield.test.ts`, test integracyjny sześciu najnowszych newsów w `homeContent`, w e2e kafel pokazuje datę i znak, a strona główna ma odnośnik „Wszystkie newsy” do `/newsy`.
+- Obejrzane na zrzutach Playwright na zaimportowanej bazie: pierwsza wersja w 1440, 1100, 800 i 390 px (strona główna, `/newsy` strony 1, 2 i 40 — bez okładek, kategorie z jednym i dwoma newsami, `/en/news`, stan po najechaniu; fokus sprawdzony odczytem stylów); po zmniejszeniu kafli strona główna w 1440 i 1100 px, reszta tylko pomiarem rozmiarów kafli i brakiem poziomego przewijania (390 px, `/newsy` w 1440 i 1100 px, strona 40).
+- **Poprawiony błąd w `BaseDialog`**: przeglądarka wysyła zdarzenie `close` ok. 40 ms po zamknięciu okna, a komponent ustawiał wtedy „zamknięte” bez sprawdzania stanu — okno otwarte ponownie w tym czasie (np. skrótem Ctrl/⌘+K tuż po „Zamknij”) od razu się zamykało. Teraz spóźnione zdarzenie jest pomijane, gdy okno jest już znów otwarte (`followNativeClose`). Objawem był test e2e „the search opens from the keyboard”, który padał w mniej więcej co trzecim przebiegu (wcześniejsze przypuszczenie o przeładowaniu strony przez równoległą sesję było błędne). Dotyczyło wszystkich okien dialogowych, nie tylko wyszukiwarki.
+- Serwer dev po zmianie pliku serwera potrafi utknąć na błędzie 500 („Could not load virtual:#nitro-internal-virtual/public-assets-data … `.nuxt/dev/migrations/0001_blue_bucky.sql`”) do następnej zmiany pliku serwera; zdarzyło się raz, po dopisaniu `latestNews` w `server/utils/home.ts`. Wygląda na wyścig kopiowania migracji w haku `compiled` (`nuxt.config.ts`) z przebudową Nitro — nie badałem. Po dodaniu nowego pliku komponentu (`NewsGrid.vue`) przeglądarka nie widziała go, dopóki nie zapisałem ponownie stron, które go używają.
+- Nie sprawdzone: Safari i Firefox (rozmycie, maski, zapytania kontenerowe), prawdziwy telefon, płynność animacji na żywo (widziałem tylko stan końcowy), bardzo długie nazwy znaku lub daty po angielsku w wąskim kaflu.
+- Do decyzji: strona newsa (`/newsy/<slug>`) pokazuje okładkę kategorii po staremu, pływającą po prawej — nie ruszałem.
 
 **Przebudowa nagłówka** (macOS, 2026-10-05; niezacommitowane):
 
@@ -230,7 +270,7 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 1. **Wygląd** — do obejrzenia i uwag. Grafiki z legacy czekają na wersje w lepszej jakości.
 2. **Pobranie działających obrazków zewnętrznych na własny serwer** (1701 adresów). Chroni przed ich zniknięciem i przed blokowaniem obrazków `http://` na stronie `https://`. Nie robiłem bez zgody.
 3. **Sekcja Multimedia** (odcinki, skany, soundtracki). Strony są publiczne zgodnie z decyzją, ale nie ma ich w menu — w legacy te odnośniki widział tylko właściciel. Dodać do menu czy zostawić?
-4. **Hosting**: VPS czy Render, domena, kopie zapasowe.
+4. **Hosting**: VPS czy Render, domena, kopie zapasowe. Pomiary i zalecane parametry VPS w sekcji „Wymagania serwera” niżej.
 5. **Klucze**: Google OAuth, Cloudflare Turnstile, `NUXT_ADMIN_EMAILS`.
 6. **`legacy/php-cgi53.core`** (653 MB zrzutu pamięci) — można usunąć.
 7. **Repozytorium na GitHubie jest publiczne** — zostaje publiczne czy przełączyć na prywatne? W `docs/legacy.md` są wymienione nazwy prywatnych plików z `legacy/` (same nazwy, bez treści).
@@ -238,6 +278,28 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 9. **Commit zmian z sesji na Windows** i los `pnpm-workspace.yaml` (patrz „Gdzie jesteśmy”).
 10. **Statystyki portalu** — gdzie mają wrócić (stopka, strona główna?) i czy „Rycerzy” ukrywać przy zerze, czy liczyć też konta archiwalne (uwaga 2 wyżej).
 11. **Nagłówek** — gość ma język schowany w menu „Zaloguj” (dwa kliknięcia do EN); alternatywa to przełącznik PL/EN na wierzchu paska. Rozmiar odnośników (`text-xs`) do oceny — przy 1024 px zmieściłby się też poprzedni `text-sm`.
+12. **Usunięte filmy** — 36 z 74 filmów nie istnieje już na YouTube, w tym cztery najnowsze, które trafiają na stronę główną. Do wyboru: sprawdzać filmy skryptem (jak `pnpm images:check` dla obrazków) i pomijać usunięte na stronie głównej, usunąć je z bazy w panelu albo podmienić adresy na działające kopie. Do tego czasu strona główna pokazuje zaślepki.
+
+## Wymagania serwera
+
+Pomiar z 2026-10-05 na kopii projektu poza repozytorium (macOS, M2 Max, Node 22.22.1, zaimportowana baza); na Linuksie nie mierzone. Te same pomiary zrobione dla `dot-sport-shop`; zalecenie niżej zakłada oba projekty na jednym VPS (założenie, nie decyzja Mateusza).
+
+| | Portal | Sklep (`dot-sport-shop`) |
+|---|---|---|
+| Proces bezczynny | 100–130 MB | ok. 145 MB |
+| Pod obciążeniem (25 połączeń naraz) | do 634 MB | do 368 MB |
+| To samo z `--max-old-space-size=256` | do 319 MB | do 211 MB |
+| Szczyt przy `nuxt build` | 1,8 GB (1,3 GB przy stercie 640 MB) | 2,2–2,5 GB (1,6 GB przy stercie 1024 MB; przy 640 MB build pada) |
+| Strony SSR na jednym rdzeniu | 55–85 na sekundę | 70–105 na sekundę |
+| `.output` | 52 MB | 59 MB |
+
+- O pamięci decyduje build, nie działająca aplikacja. Zalecane: 2 vCPU, 4 GB RAM, 40 GB NVMe, x64, publiczny IPv4, plik wymiany 2 GB. Przy 2 GB RAM build tylko poza serwerem (CI), a na serwer sam `.output`.
+- Wariant rozszerzony (pytanie Mateusza z 2026-10-05): trzy aplikacje (portal, sklep, landing page z własnym CMS i wideo) × środowiska dev i prod = sześć procesów na jednym VPS. Zalecane wtedy: 4 vCPU, 8 GB RAM, 80 GB NVMe; 4 GB wystarczy tylko z buildem poza serwerem. Landing page nie był mierzony — przyjęty jak sklep (ten sam stack). Dev na serwerze to build produkcyjny, nie `nuxt dev` (lokalny `nuxt dev` portalu zajmuje ok. 860 MB). Wideo ma podawać reverse proxy z dysku, nie Node.
+- Wariant bez środowisk dev (same trzy produkcje): ok. 1,1 GB bez buildu, 2,7–3,6 GB z buildem na serwerze — wystarcza 2 vCPU, 4 GB RAM, 40 GB NVMe (80 GB przy większej ilości wideo), z plikiem wymiany 2 GB.
+- OVH (strona ovhcloud.com/pl, sprawdzone 2026-10-05, ceny netto przy opłacie za 12 miesięcy): VPS-1 to 2 vCore / 4 GB / 40 GB NVMe od 16,32 zł miesięcznie, VPS-2 to 4 vCore / 8 GB / 75 GB od 30,77 zł. Oba z IPv4, codzienną kopią i nielimitowanym transferem. Na same trzy produkcje wystarcza VPS-1.
+- Mikrus (mikr.us, sprawdzone 2026-10-05): planu 3.1 nie ma; 3.0 to 2 GB / 25 GB, 3.5 to 4 GB / 40 GB. Kontener LXC bez pliku wymiany, bez własnego IPv4 (domena tylko przez Cloudflare albo ich proxy), bez gwarancji CPU i SLA. Na 3.0 build wyłącznie poza serwerem; 3.5 mieści build na miejscu.
+- Wyszukiwarka (`/api/search`) liczy się 170–200 ms na zapytanie i na ten czas wstrzymuje serwer; nie ma limitu częstotliwości.
+- `server/routes/media` wczytuje cały plik do pamięci przed wysłaniem; największy dziś ma 3 MB, limit wgrywania to 50 MB.
 
 ## Znane ograniczenia
 

@@ -1,37 +1,17 @@
 <script setup lang="ts">
-import { CONSTELLATIONS, fitConstellation } from '~/utils/constellations';
+import { CONSTELLATIONS, constellationFigure } from '~/utils/constellations';
 
 const props = defineProps<{ constellationIndex: number }>();
 
-const FIGURE_HEIGHT = 24;
-const FIGURE_MAX_WIDTH = 60;
+const FIGURE_SIZE = { width: 60, height: 24 };
 const FIGURE_MARGIN = 4;
 const STAR_RADIUS = 0.9;
 const BRIGHTEST_STAR_RADIUS = 1.5;
 const BRIGHTEST_STAR_HALO_RADIUS = 3.6;
 
-const toTenths = (value: number) => Math.round(value * 10) / 10;
-
-const constellation = computed(() => CONSTELLATIONS.at(props.constellationIndex % CONSTELLATIONS.length)!);
-
-const figure = computed(() => {
-  const { paths, brightest } = constellation.value;
-  const stars = fitConstellation(
-    constellation.value,
-    { x: 0, y: 0, width: FIGURE_MAX_WIDTH, height: FIGURE_HEIGHT },
-    0,
-  ).map(([x, y]) => ({ x: toTenths(x), y: toTenths(y) }));
-  const left = Math.min(...stars.map((star) => star.x)) - FIGURE_MARGIN;
-  const width = toTenths(Math.max(...stars.map((star) => star.x)) - left + FIGURE_MARGIN);
-  const height = FIGURE_HEIGHT + 2 * FIGURE_MARGIN;
-  return {
-    viewBox: `${toTenths(left)} ${-FIGURE_MARGIN} ${width} ${height}`,
-    aspectRatio: `${width} / ${height}`,
-    lines: paths.map((path) => `M${path.map((star) => `${stars[star]!.x} ${stars[star]!.y}`).join('L')}`),
-    stars,
-    brightest: stars[brightest]!,
-  };
-});
+const figure = computed(() =>
+  constellationFigure(CONSTELLATIONS.at(props.constellationIndex % CONSTELLATIONS.length)!, FIGURE_SIZE, FIGURE_MARGIN),
+);
 </script>
 
 <template>

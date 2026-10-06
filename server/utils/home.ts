@@ -9,9 +9,11 @@ import { schema, useDb } from './db';
 import { readSetting } from './settings';
 import { localized } from './translations';
 
+const LATEST_NEWS_COUNT = 6;
 const LATEST_THREAD_COUNT = 8;
 const BUSIEST_THREAD_COUNT = 5;
 const LATEST_COMMENT_COUNT = 6;
+const COMMENT_EXCERPT_LENGTH = 160;
 const LATEST_PHOTO_COUNT = 8;
 const LATEST_VIDEO_COUNT = 4;
 
@@ -119,7 +121,9 @@ export const latestComments = (limit = LATEST_COMMENT_COUNT, locale: ContentLoca
   return comments
     .flatMap(({ targetKind, targetId, bodyHtml, ...comment }) => {
       const target = targetOf({ targetKind, targetId });
-      return target ? [{ ...comment, excerpt: htmlToPlainText(bodyHtml).slice(0, 160), target }] : [];
+      return target
+        ? [{ ...comment, excerpt: truncateAtWord(htmlToPlainText(bodyHtml), COMMENT_EXCERPT_LENGTH), target }]
+        : [];
     })
     .slice(0, limit);
 };
@@ -157,6 +161,7 @@ export const homeContent = (locale: ContentLocale = DEFAULT_LOCALE) => ({
     ...tab,
     bodyHtml: markMissingImages(tab.bodyHtml),
   })),
+  latestNews: listPublishedNews({ page: 1 }, LATEST_NEWS_COUNT, locale).items,
   latestThreads: publicThreads('latest', LATEST_THREAD_COUNT, locale),
   busiestThreads: publicThreads('busiest', BUSIEST_THREAD_COUNT, locale),
   latestComments: latestComments(LATEST_COMMENT_COUNT, locale),

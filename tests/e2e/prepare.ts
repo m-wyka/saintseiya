@@ -190,7 +190,8 @@ const seed = async () => {
     })
     .returning()
     .get();
-  db.insert(schema.photos)
+  const photo = db
+    .insert(schema.photos)
     .values({
       albumId: album.id,
       title: 'Złota zbroja',
@@ -199,6 +200,16 @@ const seed = async () => {
       width: PHOTO_IMAGE.width,
       height: PHOTO_IMAGE.height,
       authorId: ghost.id,
+    })
+    .returning()
+    .get();
+  db.insert(schema.comments)
+    .values({
+      targetKind: 'photo',
+      targetId: photo.id,
+      authorId: ghost.id,
+      bodyHtml: '<p>Piękna zbroja!</p>',
+      createdAt: new Date('2019-12-28T10:00:00Z'),
     })
     .run();
 

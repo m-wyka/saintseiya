@@ -18,6 +18,13 @@ watch(isOpen, (shouldOpen) => {
   }
 });
 
+// The browser sends `close` a moment after the dialog closes; by then it may be open again.
+const followNativeClose = () => {
+  if (!dialog.value?.open) {
+    isOpen.value = false;
+  }
+};
+
 let pressStartedOnBackdrop = false;
 
 const rememberPressTarget = (event: MouseEvent) => {
@@ -37,7 +44,7 @@ const closeOnBackdrop = (event: MouseEvent) => {
     class="m-auto max-h-[85dvh] overflow-hidden rounded-2xl border border-cosmo-500/40 bg-abyss-900 p-0 text-mist backdrop:bg-black/75 backdrop:backdrop-blur-sm open:animate-rise"
     :class="compact ? 'w-[min(26rem,94vw)]' : 'w-[min(52rem,94vw)]'"
     :aria-label="title"
-    @close="isOpen = false"
+    @close="followNativeClose"
     @mousedown="rememberPressTarget"
     @click="closeOnBackdrop"
   >

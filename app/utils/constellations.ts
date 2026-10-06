@@ -405,3 +405,36 @@ export const fitConstellation = ({ stars }: Constellation, box: Box, turn: numbe
   const top = box.y + (box.height - bounds.height * scale) / 2 - bounds.y * scale;
   return points.map(([x, y]) => [left + x * scale, top + y * scale]);
 };
+
+export interface ConstellationFigure {
+  viewBox: string;
+  aspectRatio: string;
+  lines: string[];
+  stars: { x: number; y: number }[];
+  brightest: { x: number; y: number };
+}
+
+const toTenths = (value: number) => Math.round(value * 10) / 10;
+
+// SVG geometry of a figure as tall as the given height and no wider than the given width,
+// cropped to the figure's own width. Rounded, so the server and the browser draw the same markup.
+export const constellationFigure = (
+  constellation: Constellation,
+  size: { width: number; height: number },
+  margin: number,
+): ConstellationFigure => {
+  const stars = fitConstellation(constellation, { x: 0, y: 0, ...size }, 0).map(([x, y]) => ({
+    x: toTenths(x),
+    y: toTenths(y),
+  }));
+  const left = Math.min(...stars.map((star) => star.x)) - margin;
+  const width = toTenths(Math.max(...stars.map((star) => star.x)) - left + margin);
+  const height = size.height + 2 * margin;
+  return {
+    viewBox: `${toTenths(left)} ${-margin} ${width} ${height}`,
+    aspectRatio: `${width} / ${height}`,
+    lines: constellation.paths.map((path) => `M${path.map((star) => `${stars[star]!.x} ${stars[star]!.y}`).join('L')}`),
+    stars,
+    brightest: stars[constellation.brightest]!,
+  };
+};

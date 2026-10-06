@@ -10,15 +10,8 @@ import { localized } from './translations';
 const NEWS_PAGE_SIZE = 9;
 const TEASER_LENGTH = 260;
 
-const teaserOf = (excerptHtml: string, bodyHtml: string): string => {
-  const text = htmlToPlainText(excerptHtml) || htmlToPlainText(bodyHtml);
-  if (text.length <= TEASER_LENGTH) {
-    return text;
-  }
-  const cut = text.slice(0, TEASER_LENGTH);
-  const lastSpace = cut.lastIndexOf(' ');
-  return `${cut.slice(0, lastSpace > 0 ? lastSpace : TEASER_LENGTH).replace(/[\s.,;:!?–-]+$/, '')}…`;
-};
+const teaserOf = (excerptHtml: string, bodyHtml: string): string =>
+  truncateAtWord(htmlToPlainText(excerptHtml) || htmlToPlainText(bodyHtml), TEASER_LENGTH);
 
 interface NewsFilters {
   page: number;

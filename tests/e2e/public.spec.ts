@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import sharp from 'sharp';
 import { openAccountMenu, starrySky, visit } from './helpers';
 
 test.describe('public site', () => {
@@ -10,13 +11,60 @@ test.describe('public site', () => {
       page.getByRole('navigation', { name: 'Menu główne' }).getByRole('link', { name: 'Forum' }),
     ).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Saint Seiya Revolution powraca!' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Wszystkie newsy' })).toHaveAttribute('href', '/newsy');
     await expect(page.getByText('Nowy rozdział mangi już dostępny.')).toBeVisible();
     await expect(page.getByText('Szkic redakcyjny')).toHaveCount(0);
     await expect(page.getByText('Konto nieaktywne').first()).toBeVisible();
   });
 
+  test('home page switches between comments, opens an artwork and plays a video in place', async ({ page }) => {
+    await page.route(/ytimg\.com|youtube-nocookie\.com/, (route) => route.abort());
+    await visit(page, '/');
+
+    const comments = page.getByRole('region', { name: 'Rycerze komentują' });
+    const photoComment = comments.getByRole('tab', { name: /Złota zbroja/ });
+    await photoComment.click();
+    await expect(photoComment).toHaveAttribute('aria-selected', 'true');
+    await expect(comments.getByRole('tabpanel')).toContainText('„Piękna zbroja!”');
+    await page.keyboard.press('ArrowUp');
+    await expect(photoComment).toHaveAttribute('aria-selected', 'false');
+    await expect(comments.getByRole('tabpanel')).not.toContainText('Piękna zbroja!');
+    await page.keyboard.press('ArrowDown');
+    await comments.getByRole('link', { name: 'Komentarz do Złota zbroja' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Złota zbroja' })).toBeVisible();
+
+    await visit(page, '/');
+    await page.getByRole('region', { name: 'Najnowsze grafiki' }).getByRole('link', { name: 'Złota zbroja' }).click();
+    await expect(page).toHaveURL(/\/galeria\/zdjecie\/\d+$/);
+
+    await visit(page, '/');
+    const videos = page.getByRole('region', { name: 'Najnowsze video' });
+    await videos.getByRole('button', { name: 'Odtwórz: Pegasus Fantasy' }).click();
+    await expect(videos.locator('iframe')).toHaveAttribute('src', /youtube-nocookie\.com\/embed\/dEY9fXqqaFE/);
+    await expect(videos.getByText('Odtwarzane')).toBeVisible();
+  });
+
+  test('home page marks a video removed from YouTube instead of offering to play it', async ({ page }) => {
+    const removedVideoPoster = await sharp({ create: { width: 120, height: 90, channels: 3, background: '#808080' } })
+      .jpeg()
+      .toBuffer();
+    await page.route(/ytimg\.com/, (route) =>
+      route.fulfill({ status: 404, contentType: 'image/jpeg', body: removedVideoPoster }),
+    );
+    await visit(page, '/');
+
+    const videos = page.getByRole('region', { name: 'Najnowsze video' });
+    await videos.scrollIntoViewIfNeeded();
+    await expect(videos.getByText('Tego filmu nie ma już na YouTube.')).toBeVisible();
+    await expect(videos.getByText('Niedostępny')).toBeVisible();
+    await expect(videos.getByRole('button', { name: /^Odtwórz/ })).toHaveCount(0);
+  });
+
   test('a news opens with its body, a placeholder for a dead image and comments', async ({ page }) => {
     await visit(page, '/newsy');
+    const tile = page.getByRole('article').filter({ hasText: 'Saint Seiya Revolution powraca!' });
+    await expect(tile.getByText('27 grudnia 2019')).toBeVisible();
+    await expect(tile.getByText('Koziorożec')).toBeVisible();
     await page.getByRole('link', { name: 'Saint Seiya Revolution powraca!' }).click();
 
     await expect(page).toHaveURL('/newsy/saint-seiya-revolution-powraca');

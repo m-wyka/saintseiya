@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CONSTELLATIONS, fitConstellation, segmentsOf } from '../../app/utils/constellations';
+import { CONSTELLATIONS, constellationFigure, fitConstellation, segmentsOf } from '../../app/utils/constellations';
 import type { Box, Constellation } from '../../app/utils/constellations';
 import { GLOW_MIN_RADIUS, createSeededRandom, generateStars, starCountFor } from '../../app/utils/starfield';
 
@@ -99,6 +99,25 @@ describe('constellations', () => {
     const scale = distance(fitted, 0, 1) / distance(figure.stars, 0, 1);
     for (const [from, to] of segmentsOf(figure)) {
       expect(distance(fitted, from, to)).toBeCloseTo(distance(figure.stars, from, to) * scale, 6);
+    }
+  });
+
+  it('frame every star of a drawn figure with the margin around it', () => {
+    const size = { width: 120, height: 72 };
+    const margin = 6;
+    for (const figure of CONSTELLATIONS) {
+      const drawing = constellationFigure(figure, size, margin);
+      const [left, top, width, height] = drawing.viewBox.split(' ').map(Number) as [number, number, number, number];
+      expect(height).toBe(size.height + 2 * margin);
+      expect(width).toBeLessThanOrEqual(size.width + 2 * margin + ROUNDING);
+      expect(drawing.lines).toHaveLength(figure.paths.length);
+      expect(drawing.brightest).toBe(drawing.stars[figure.brightest]);
+      for (const star of drawing.stars) {
+        expect(star.x).toBeGreaterThanOrEqual(left + margin - ROUNDING);
+        expect(star.x).toBeLessThanOrEqual(left + width - margin + ROUNDING);
+        expect(star.y).toBeGreaterThanOrEqual(top + margin - ROUNDING);
+        expect(star.y).toBeLessThanOrEqual(top + height - margin + ROUNDING);
+      }
     }
   });
 });

@@ -184,6 +184,15 @@ export const sanitizedHtmlToText = (html: string): string =>
     .replace(/\s+/g, ' ')
     .trim();
 
+export const truncateAtWord = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  const cut = text.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${cut.slice(0, lastSpace > 0 ? lastSpace : maxLength).replace(/[\s.,;:!?–-]+$/, '')}…`;
+};
+
 export const htmlToPlainText = (html: string): string =>
   decodeTextEntities(
     sanitizeHtml(html.replace(LINE_BREAKING_TAG_PATTERN, ' $&'), { allowedTags: [], allowedAttributes: {} }),
