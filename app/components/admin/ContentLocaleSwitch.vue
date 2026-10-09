@@ -1,8 +1,19 @@
 <script setup lang="ts">
 import { CONTENT_LOCALES } from '#shared/utils/locales';
+import type { ContentLocale } from '#shared/utils/locales';
 
 const contentLocale = useContentLocaleStore();
+const confirmation = useConfirmationStore();
 const { t } = useI18n();
+
+const switchTo = async (code: ContentLocale) => {
+  if (code === contentLocale.editedLocale) {
+    return;
+  }
+  if (!contentLocale.hasUnsavedChanges || (await confirmation.ask(t('ADMIN_UI.DISCARD_UNSAVED_CHANGES')))) {
+    contentLocale.editedLocale = code;
+  }
+};
 </script>
 
 <template>
@@ -20,7 +31,7 @@ const { t } = useI18n();
             : 'border-aqua-500/30 text-aqua-200 hover:border-cosmo-500 hover:text-gold-300'
         "
         :aria-pressed="code === contentLocale.editedLocale"
-        @click="contentLocale.editedLocale = code"
+        @click="switchTo(code)"
       >
         {{ code }}
       </button>

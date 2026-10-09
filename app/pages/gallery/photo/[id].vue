@@ -13,9 +13,16 @@ if (error.value || !photo.value) {
   });
 }
 
-const title = computed(() => photo.value?.title || photo.value?.album.title || t('GALLERY.PHOTO_FALLBACK_TITLE'));
+const title = computed(
+  () =>
+    photo.value?.title ||
+    t('GALLERY.PHOTO_FALLBACK_TITLE', {
+      position: photo.value?.position ?? 1,
+      count: photo.value?.albumPhotoCount ?? 1,
+    }),
+);
 
-useSeoMeta({ title: () => `${title.value} – ${t('GENERAL.GALLERY')}` });
+useSeoMeta({ title: () => `${title.value} – ${photo.value?.album.title ?? ''} – ${t('GENERAL.GALLERY')}` });
 </script>
 
 <template>
@@ -28,7 +35,14 @@ useSeoMeta({ title: () => `${title.value} – ${t('GENERAL.GALLERY')}` });
     />
     <PageHeading :title="title" />
     <figure class="overflow-hidden panel">
-      <div class="relative grid place-items-center bg-black/60 p-3">
+      <div class="relative isolate grid min-h-56 place-items-center overflow-hidden bg-black/60 p-3">
+        <!-- The picture's own colours fill the stage, so a small one does not sit in an empty band. -->
+        <img
+          :src="routes.media(photo.image)"
+          alt=""
+          aria-hidden="true"
+          class="absolute inset-0 -z-1 size-full scale-110 object-cover opacity-35 blur-2xl"
+        />
         <img
           :src="routes.media(photo.image)"
           :alt="title"

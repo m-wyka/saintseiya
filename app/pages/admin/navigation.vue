@@ -153,7 +153,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.NAVIGATION') });
               <p class="text-aqua-200">
                 <span
                   v-if="link.groupTitle"
-                  class="mr-1.5 rounded-sm bg-white/10 px-1.5 py-0.5 text-[0.65rem] font-semibold tracking-wide text-gold-200 uppercase"
+                  class="mr-1.5 rounded-sm bg-white/10 px-1.5 py-0.5 text-[0.7rem] font-semibold tracking-wide text-gold-200 uppercase"
                 >
                   {{ link.groupTitle }}
                 </span>

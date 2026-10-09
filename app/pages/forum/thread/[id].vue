@@ -76,6 +76,7 @@ useSeoMeta({ title: () => `${data.value?.thread.title ?? ''} – ${t('GENERAL.FO
       {{ t('FORUM.THREAD_LOCKED_NOTICE') }}
     </p>
     <ThreadModeration v-if="canModerate" :thread="data.thread" @changed="refresh()" />
+    <PaginationNav :page="data.posts.page" :page-count="data.posts.pageCount" placement="above" />
     <div class="flex flex-col gap-4">
       <PostCard
         v-for="(post, index) in data.posts.items"

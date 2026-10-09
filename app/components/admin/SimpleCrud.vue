@@ -19,14 +19,21 @@ const { rows, page, pageCount, search, isLoading, refresh, remove } = useAdminLi
 const { isBusy, errorMessage, run } = useApiAction();
 const toasts = useToastStore();
 const fetchStored = useAdminRecord();
+const contentLocale = useContentLocaleStore();
+const mayCreate = useCreationLocaleGuard();
 const { t } = useI18n();
 
 const editedId = ref<number | null>(null);
 const isFormOpen = ref(false);
 const input = ref<Record<string, unknown>>({ ...props.emptyInput });
 const form = ref<HTMLFormElement | null>(null);
+const { markSaved } = useUnsavedChanges(
+  () => input.value,
+  () => isFormOpen.value,
+);
 
 const showForm = async () => {
+  markSaved();
   isFormOpen.value = true;
   await nextTick();
   form.value?.scrollIntoView({ block: 'start' });
@@ -53,6 +60,9 @@ const openExisting = async (id: number) => {
 };
 
 const save = async () => {
+  if (!(await mayCreate(editedId.value === null))) {
+    return;
+  }
   const wasSaved = await run(() =>
     editedId.value === null
       ? apiRequest(`/api/admin/${props.resource}`, { method: 'POST', body: input.value })
@@ -103,7 +113,7 @@ useSeoMeta({ title: props.title });
             class="md:col-span-2"
             :label="field.label"
             :hint="field.hint"
-            :required="field.required"
+            :required="field.required && !contentLocale.isTranslating"
           />
           <div v-else-if="field.kind === 'richText'" class="flex flex-col gap-1.5 md:col-span-2">
             <p class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">{{ field.label }}</p>
@@ -146,7 +156,7 @@ useSeoMeta({ title: props.title });
             :type="field.kind === 'url' ? 'url' : 'text'"
             :label="field.label"
             :hint="field.hint"
-            :required="field.required"
+            :required="field.required && !contentLocale.isTranslating"
           />
         </template>
       </div>

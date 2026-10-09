@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, isNotNull, isNull, like, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { messageKey } from '#shared/utils/messages';
 import { MAX_POLL_OPTIONS, MIN_POLL_OPTIONS } from '#shared/utils/pollLimits';
@@ -117,7 +117,7 @@ export const pollsResource = defineAdminResource({
   list: ({ page, search, filter }) => {
     const db = useDb();
     const where = and(
-      search ? like(schema.polls.question, `%${search}%`) : undefined,
+      search ? containsText(schema.polls.question, search) : undefined,
       filter === 'open' ? isNull(schema.polls.endedAt) : undefined,
       filter === 'closed' ? isNotNull(schema.polls.endedAt) : undefined,
     );

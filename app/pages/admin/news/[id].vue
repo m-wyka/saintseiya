@@ -26,6 +26,7 @@ const statusOptions = computed<{ value: ContentStatus; label: string }[]>(() => 
 ]);
 
 const routeId = useRouteParam('id');
+const contentLocale = useContentLocaleStore();
 const { input, isNew, isBusy, errorMessage, save } = await useAdminForm<NewsInput>({
   resource: 'news',
   recordId: routeId.value,
@@ -73,7 +74,12 @@ useSeoMeta({ title: pageTitle });
     <AdminHeader :title="pageTitle" />
     <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
       <div class="flex flex-col gap-5 panel p-5">
-        <BaseInput v-model="input.title" :label="t('GENERAL.TITLE')" :maxlength="200" required />
+        <BaseInput
+          v-model="input.title"
+          :label="t('GENERAL.TITLE')"
+          :maxlength="200"
+          :required="!contentLocale.isTranslating"
+        />
         <div class="flex flex-col gap-1.5">
           <p class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">{{ t('ADMIN_NEWS.EXCERPT') }}</p>
           <ClientOnly>

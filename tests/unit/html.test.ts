@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { escapeHtml, htmlToPlainText, sanitizeRichHtml, youtubeIdFromUrl } from '../../server/utils/html';
+import { markLayoutHints } from '../../server/utils/layoutHints';
 
 describe('sanitizeRichHtml', () => {
   it('removes scripts, event handlers and unknown tags', () => {
@@ -28,6 +29,27 @@ describe('sanitizeRichHtml', () => {
     const html = '<p><a href="/uzytkownik/1"></a><a href="/forum"> &nbsp;</a><a href="/uzytkownik/1">Jamnik</a></p>';
     expect(sanitizeRichHtml(html)).toBe('<p><a href="/uzytkownik/1">Jamnik</a></p>');
     expect(sanitizeRichHtml('<a href="/galeria"><img src="/media/a.jpg" /></a>')).toContain('<img');
+    expect(sanitizeRichHtml('<p><a href="/x"><span style="color:#ffcc99"><strong> </strong></span></a>tekst</p>')).toBe(
+      '<p>tekst</p>',
+    );
+  });
+
+  it('keeps a linked picture that sits deeper inside its link', () => {
+    const html = '<a href="/mapy/mapa-nieba"><span style="color:#ffcc99"><img src="/media/logo.png" /></span></a>';
+
+    expect(sanitizeRichHtml(html)).toBe(
+      '<a href="/mapy/mapa-nieba"><span style="color:#ffcc99"><img src="/media/logo.png" alt="" loading="lazy" /></span></a>',
+    );
+  });
+
+  it('stores colours written by the editor as rgb() in the hex form the theme rules match', () => {
+    expect(sanitizeRichHtml('<span style="color: rgb(255, 204, 153);">A</span>')).toBe(
+      '<span style="color:#ffcc99">A</span>',
+    );
+    expect(sanitizeRichHtml('<p style="text-align: center; color: rgb(255 155 13 / 1)">B</p>')).toBe(
+      '<p style="text-align:center;color:#ff9b0d">B</p>',
+    );
+    expect(sanitizeRichHtml('<span style="color: rgb(0, 0, 0);">C</span>')).toBe('C');
   });
 
   it('marks external links and leaves internal ones plain', () => {
@@ -114,5 +136,55 @@ describe('helpers', () => {
       'Cały świat? Isko25 Saga Milo Aiolia',
     );
     expect(htmlToPlainText('<table><tr><td>Saori</td><td>Sho</td></tr></table>')).toBe('Saori Sho');
+  });
+});
+
+describe('markLayoutHints', () => {
+  it('marks a paragraph that is one short bold phrase as a subheading', () => {
+    expect(markLayoutHints('<p><strong>Manga jako kanon?</strong></p>')).toBe(
+      '<p class="subheading"><strong>Manga jako kanon?</strong></p>',
+    );
+    expect(markLayoutHints('<p style="text-align:center"><span style="color:#ffcc99"><b>Dane:</b></span></p>')).toBe(
+      '<p class="subheading" style="text-align:center"><span style="color:#ffcc99"><b>Dane:</b></span></p>',
+    );
+  });
+
+  it('leaves labels, empty and long bold paragraphs as plain text', () => {
+    const label = '<p><strong>Na podstawie: </strong>mangi o tym samym tytule</p>';
+    const twoPhrases = '<p><strong>Jedno</strong> i <strong>drugie</strong></p>';
+    const empty = '<p style="text-align:center"><strong><br /></strong></p>';
+    const sentence = `<p><strong>${'Bardzo długie zdanie wyróżnione pogrubieniem. '.repeat(3)}</strong></p>`;
+
+    for (const html of [label, twoPhrases, empty, sentence]) {
+      expect(markLayoutHints(html)).toBe(html);
+    }
+  });
+
+  it('tells a picture cut into cells from rows of picture tiles', () => {
+    const sliced =
+      '<table><tbody><tr><td rowspan="2"><img src="/a.png" /></td><td><a href="/x"> <img src="/b.png" /></a></td></tr><tr><td><br /></td></tr></tbody></table>';
+    const tiles =
+      '<table><tbody><tr><td><a href="/x"><img src="/a.jpg" /></a> <a href="/y"><img src="/b.jpg" /></a></td></tr></tbody></table>';
+
+    expect(markLayoutHints(sliced)).toContain('<table class="sliced-image">');
+    expect(markLayoutHints(tiles)).toContain('<table class="image-grid">');
+  });
+
+  it('leaves tables with any text and single pictures alone', () => {
+    const profile = '<table><tbody><tr><td><img src="/a.png" /></td><td>Seiya</td></tr></tbody></table>';
+    const single = '<table><tbody><tr><td><img src="/a.png" /></td></tr></tbody></table>';
+
+    expect(markLayoutHints(profile)).toBe(profile);
+    expect(markLayoutHints(single)).toBe(single);
+  });
+
+  it('centres a paragraph made only of linked pictures', () => {
+    const tiles = '<p><a href="/x"><img src="/a.jpg" /></a> <a href="/y"> <img src="/b.jpg" /></a></p>';
+
+    expect(markLayoutHints(tiles)).toBe(`<p class="image-grid">${tiles.slice(3)}`);
+    expect(markLayoutHints('<p><a href="/x"><img src="/a.jpg" /></a></p>')).not.toContain('image-grid');
+    expect(markLayoutHints('<p><a href="/x"><img src="/a.jpg" /></a> <a href="/y">dalej</a></p>')).not.toContain(
+      'image-grid',
+    );
   });
 });

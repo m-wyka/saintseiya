@@ -1,4 +1,4 @@
-import { asc, count, eq, like, or } from 'drizzle-orm';
+import { asc, count, eq, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { existingIdSchema, isWebUrl } from './inputs';
 
@@ -30,7 +30,7 @@ export const linksResource = defineAdminResource({
   list: ({ page, search }) => {
     const db = useDb();
     const where = search
-      ? or(like(schema.links.title, `%${search}%`), like(schema.links.url, `%${search}%`))
+      ? or(containsText(schema.links.title, search), containsText(schema.links.url, search))
       : undefined;
     const items = db
       .select({

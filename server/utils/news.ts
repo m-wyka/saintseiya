@@ -127,7 +127,7 @@ export const findPublishedNews = (slug: string, locale: ContentLocale = DEFAULT_
   return {
     ...news,
     excerptHtml: isExcerptRepeatedInBody(news.excerptHtml, news.bodyHtml) ? '' : markMissingImages(news.excerptHtml),
-    bodyHtml: markMissingImages(news.bodyHtml),
+    bodyHtml: markMissingImages(markLayoutHints(news.bodyHtml)),
     tags: tagsOfNews(news.id, locale),
   };
 };

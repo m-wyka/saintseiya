@@ -89,6 +89,17 @@ describe('image library usage', () => {
 
     expect(isMediaImageUsed('images/2026/teaser.png')).toBe(true);
     expect(isMediaImageUsed('images/2026/in-news.jpg')).toBe(true);
+    expect(isMediaImageUsed('images/2026/in-faq.png')).toBe(false);
+    const faqCategory = useDb().insert(schema.faqCategories).values({ name: 'Strona' }).returning().get();
+    useDb()
+      .insert(schema.faqItems)
+      .values({
+        categoryId: faqCategory.id,
+        title: 'Pytanie',
+        descriptionHtml: '<p><img src="/media/images/2026/in-faq.png" /></p>',
+      })
+      .run();
+    expect(isMediaImageUsed('images/2026/in-faq.png')).toBe(true);
     expect(isMediaImageUsed('images/2026/unused.jpg')).toBe(false);
   });
 });

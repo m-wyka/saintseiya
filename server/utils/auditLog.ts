@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, getTableName, like, or } from 'drizzle-orm';
+import { and, count, desc, eq, getTableColumns, getTableName, or } from 'drizzle-orm';
 import type { SQLiteColumn, SQLiteTable } from 'drizzle-orm/sqlite-core';
 import { AUDIT_ACTIONS } from '#shared/utils/audit';
 import type { AuditAction, AuditChange } from '#shared/utils/audit';
@@ -176,7 +176,7 @@ export const listAuditLog = ({ page, search, filter, entity }: AdminListQuery & 
   const db = useDb();
   const where = and(
     search
-      ? or(like(schema.auditLogs.actorName, `%${search}%`), like(schema.auditLogs.label, `%${search}%`))
+      ? or(containsText(schema.auditLogs.actorName, search), containsText(schema.auditLogs.label, search))
       : undefined,
     isAuditAction(filter) ? eq(schema.auditLogs.action, filter) : undefined,
     entity ? eq(schema.auditLogs.entity, entity) : undefined,

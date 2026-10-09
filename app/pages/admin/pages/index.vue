@@ -57,9 +57,12 @@ const rows = computed(() => (isSearchMode.value ? matches.value : siblings.value
 const isLoading = computed(() => (isSearchMode.value ? isSearching.value : levelStatus.value === 'pending'));
 const subtitle = computed(() => {
   const count = formatNumber(total.value);
-  return isSearchMode.value
-    ? t('ADMIN_PAGES.FOUND', { pages: t('ADMIN_PAGES.PAGE_COUNT', { count }, total.value) })
-    : t('ADMIN_PAGES.SUBPAGE_COUNT', { count }, total.value);
+  if (isSearchMode.value) {
+    return t('ADMIN_PAGES.FOUND', { pages: t('ADMIN_PAGES.PAGE_COUNT', { count }, total.value) });
+  }
+  return parentId.value === null
+    ? t('ADMIN_PAGES.SUBPAGE_COUNT', { count }, total.value)
+    : t('ADMIN_PAGES.LEVEL_COUNT', { count: formatNumber(siblings.value.length) }, siblings.value.length);
 });
 const emptyMessage = computed(() => {
   if (isSearchMode.value) {

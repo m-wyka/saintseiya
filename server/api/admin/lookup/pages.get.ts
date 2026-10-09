@@ -1,4 +1,4 @@
-import { asc, like } from 'drizzle-orm';
+import { asc } from 'drizzle-orm';
 import { z } from 'zod';
 
 const LOOKUP_LIMIT = 12;
@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   return useDb()
     .select({ id: schema.pages.id, title: schema.pages.title, path: schema.pages.path })
     .from(schema.pages)
-    .where(search ? like(schema.pages.title, `%${search}%`) : undefined)
+    .where(search ? containsText(schema.pages.title, search) : undefined)
     .orderBy(asc(schema.pages.path))
     .limit(LOOKUP_LIMIT)
     .all();

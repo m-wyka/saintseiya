@@ -22,32 +22,48 @@ const rowLabel = (row: Row): string => {
 
 <template>
   <div class="overflow-x-auto panel" :class="{ 'opacity-60': isLoading }">
-    <table class="w-full min-w-160 text-left text-sm">
-      <thead class="border-b border-aqua-500/20 bg-black/40 text-[0.7rem] tracking-wide text-aqua-500 uppercase">
-        <tr>
+    <!-- Explicit roles keep the table readable to assistive technology when the rows turn into cards on a phone. -->
+    <table class="admin-table w-full text-left text-sm md:min-w-160" role="table">
+      <thead
+        class="border-b border-aqua-500/20 bg-black/40 text-[0.7rem] tracking-wide text-aqua-500 uppercase max-md:sr-only"
+        role="rowgroup"
+      >
+        <tr role="row">
           <th
             v-for="column in columns"
             :key="column.key"
             scope="col"
-            class="px-4 py-2.5 font-semibold first:max-md:sticky first:max-md:left-0 first:max-md:z-10 first:max-md:max-w-44 first:max-md:min-w-36 first:max-md:bg-abyss-950"
+            role="columnheader"
+            class="px-4 py-2.5 font-semibold"
             :class="{ 'text-right': column.alignsRight }"
           >
             {{ column.label }}
           </th>
-          <th scope="col" class="px-4 py-2.5 text-right font-semibold">{{ t('GENERAL.ACTIONS') }}</th>
+          <th
+            scope="col"
+            role="columnheader"
+            class="px-4 py-2.5 text-right font-semibold md:sticky md:right-0 md:bg-abyss-950"
+          >
+            {{ t('GENERAL.ACTIONS') }}
+          </th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-aqua-500/10">
-        <tr v-for="row in rows" :key="row.id" class="transition duration-150 hover:bg-white/5">
+      <tbody class="divide-y divide-aqua-500/10" role="rowgroup">
+        <tr v-for="row in rows" :key="row.id" role="row" class="transition duration-150 hover:bg-white/5">
           <td
-            v-for="column in columns"
+            v-for="(column, columnIndex) in columns"
             :key="column.key"
-            class="px-4 py-2.5 align-middle text-aqua-200 first:max-md:sticky first:max-md:left-0 first:max-md:z-10 first:max-md:max-w-44 first:max-md:min-w-36 first:max-md:bg-abyss-900 first:max-md:wrap-break-word"
+            role="cell"
+            class="px-4 py-2.5 align-middle text-aqua-200"
             :class="{ 'text-right tabular-nums': column.alignsRight }"
+            :data-label="columnIndex > 0 ? column.label : undefined"
           >
             <slot :name="`cell-${column.key}`" :row="row">{{ cellText(row, column.key) }}</slot>
           </td>
-          <td class="px-4 py-2.5 align-middle">
+          <td
+            role="cell"
+            class="px-4 py-2.5 align-middle md:sticky md:right-0 md:bg-abyss-900 md:shadow-[-12px_0_12px_-12px_rgb(0_0_0/0.7)]"
+          >
             <div
               class="flex items-center justify-end gap-1.5"
               role="group"

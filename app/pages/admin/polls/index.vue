@@ -30,10 +30,17 @@ const columns = computed(() => [
 
 const { rows, page, pageCount, total, search, filter, isLoading, refresh, remove } = useAdminList<PollRow>('polls');
 const toasts = useToastStore();
+const confirmation = useConfirmationStore();
 
 const isOpen = (poll: PollRow) => poll.endedAt === null;
 
+const mayReopen = async (poll: PollRow): Promise<boolean> =>
+  poll.endedAt === null || confirmation.ask(t('ADMIN_POLLS.CONFIRM_REOPEN', { date: formatLongDate(poll.endedAt) }));
+
 const setClosed = async (poll: PollRow, isClosed: boolean) => {
+  if (!isClosed && !(await mayReopen(poll))) {
+    return;
+  }
   try {
     const { question, options } = await $fetch<StoredPoll>(`/api/admin/polls/${poll.id}`);
     await apiRequest(`/api/admin/polls/${poll.id}`, { method: 'PUT', body: { question, options, isClosed } });

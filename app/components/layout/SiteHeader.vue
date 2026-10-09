@@ -27,7 +27,7 @@ const isCurrent = (item: (typeof MAIN_NAVIGATION)[number]) =>
 
   <nav class="sticky top-0 z-40 mx-auto w-full max-w-page lg:px-4" :aria-label="t('LAYOUT.MAIN_MENU')">
     <div
-      class="flex items-stretch rounded-b-xl border-y border-white/10 bg-abyss-950/55 p-2 shadow-[0_12px_32px_-16px_rgb(0_0_0/0.9)] backdrop-blur-xl backdrop-saturate-150 lg:border-x"
+      class="flex items-stretch rounded-b-xl border-y border-white/10 bg-abyss-950/80 p-2 shadow-[0_12px_32px_-16px_rgb(0_0_0/0.9)] backdrop-blur-xl backdrop-saturate-150 lg:border-x"
     >
       <button
         type="button"

@@ -35,7 +35,7 @@ const coverImage = computed(() => props.categoryImage && routes.media(props.cate
     <span
       v-if="coverImage"
       class="relative h-20 shrink-0 -rotate-3 transition duration-500 ease-cosmo group-hover:scale-105 group-hover:rotate-0"
-      :class="{ '@md:h-44': featured }"
+      :class="{ '@md:h-56': featured }"
     >
       <img
         :src="coverImage"
@@ -63,7 +63,7 @@ const coverImage = computed(() => props.categoryImage && routes.media(props.cate
       <svg
         :viewBox="figure.viewBox"
         class="h-14 max-w-full shrink-0 overflow-visible fill-white"
-        :class="{ '@md:h-40': featured }"
+        :class="{ '@md:h-48': featured }"
         :style="{ aspectRatio: figure.aspectRatio }"
         aria-hidden="true"
       >

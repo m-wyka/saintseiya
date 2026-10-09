@@ -156,7 +156,7 @@ const highlightedIndex = computed(() => {
         @focus="selectOnFocus(index)"
       >
         <span
-          class="pointer-events-none absolute top-0 left-0 max-w-full truncate rounded-br bg-abyss-950/90 px-1 text-[0.65rem] text-gold-300"
+          class="pointer-events-none absolute top-0 left-0 max-w-full truncate rounded-br bg-abyss-950/90 px-1 text-[0.7rem] text-gold-300"
         >
           {{ area.label }}
         </span>

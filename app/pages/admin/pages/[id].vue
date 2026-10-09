@@ -27,6 +27,7 @@ const kindOptions = computed<{ value: PageKind; label: string }[]>(() => [
 
 const route = useRoute();
 const routeId = useRouteParam('id');
+const contentLocale = useContentLocaleStore();
 const { input, isNew, isBusy, errorMessage, save } = await useAdminForm<PageInput>({
   resource: 'pages',
   recordId: routeId.value,
@@ -34,7 +35,7 @@ const { input, isNew, isBusy, errorMessage, save } = await useAdminForm<PageInpu
   emptyInput: {
     title: '',
     slug: '',
-    parentId: null,
+    parentId: Number(route.query.parent) || null,
     kind: 'article',
     bodyHtml: '',
     status: 'draft',
@@ -42,10 +43,6 @@ const { input, isNew, isBusy, errorMessage, save } = await useAdminForm<PageInpu
     tagIds: [],
   },
 });
-
-if (isNew) {
-  input.value.parentId = Number(route.query.parent) || null;
-}
 
 const editedPageId = isNew ? undefined : Number(routeId.value);
 const tags = await $fetch<{ id: number; name: string }[]>('/api/admin/lookup/tags');
@@ -66,7 +63,12 @@ useSeoMeta({ title: pageTitle });
     <AdminHeader :title="pageTitle" />
     <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
       <div class="flex flex-col gap-5 panel p-5">
-        <BaseInput v-model="input.title" :label="t('GENERAL.TITLE')" :maxlength="200" required />
+        <BaseInput
+          v-model="input.title"
+          :label="t('GENERAL.TITLE')"
+          :maxlength="200"
+          :required="!contentLocale.isTranslating"
+        />
         <div class="flex flex-col gap-1.5">
           <p class="text-xs font-semibold tracking-wide text-aqua-300 uppercase">{{ t('GENERAL.CONTENT') }}</p>
           <ClientOnly>

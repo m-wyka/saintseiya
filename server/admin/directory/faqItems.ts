@@ -1,4 +1,4 @@
-import { and, asc, count, eq, like } from 'drizzle-orm';
+import { and, asc, count, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { existingIdSchema, sortOrderSchema } from './inputs';
 
@@ -37,7 +37,7 @@ export const faqItemsResource = defineAdminResource({
   list: ({ page, search, filter }) => {
     const db = useDb();
     const where = and(
-      search ? like(schema.faqItems.title, `%${search}%`) : undefined,
+      search ? containsText(schema.faqItems.title, search) : undefined,
       Number(filter) ? eq(schema.faqItems.categoryId, Number(filter)) : undefined,
     );
     const items = db

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, like } from 'drizzle-orm';
+import { and, count, desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { existingIdSchema } from './inputs';
 
@@ -43,7 +43,7 @@ export const videosResource = defineAdminResource({
   },
   list: ({ page, search }) => {
     const db = useDb();
-    const where = search ? like(schema.videos.title, `%${search}%`) : undefined;
+    const where = search ? containsText(schema.videos.title, search) : undefined;
     const items = db
       .select({
         id: schema.videos.id,

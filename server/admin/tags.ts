@@ -15,6 +15,17 @@ const isSlugTaken = (slug: string, exceptId?: number): boolean =>
       .get(),
   );
 
+const assertNameIsFree = (name: string, exceptId?: number) => {
+  const namesake = useDb()
+    .select({ id: schema.tags.id })
+    .from(schema.tags)
+    .where(and(equalsText(schema.tags.name, name), exceptId ? ne(schema.tags.id, exceptId) : undefined))
+    .get();
+  if (namesake) {
+    throw conflict('ERRORS.TAG_NAME_TAKEN');
+  }
+};
+
 const usageCount = sql<number>`(
   (SELECT COUNT(*) FROM ${schema.newsTags} WHERE ${qualified(schema.newsTags.tagId)} = ${qualified(schema.tags.id)}) +
   (SELECT COUNT(*) FROM ${schema.pageTags} WHERE ${qualified(schema.pageTags.tagId)} = ${qualified(schema.tags.id)})
@@ -34,16 +45,19 @@ export const tagsResource = defineAdminResource({
       .orderBy(asc(schema.tags.name))
       .all(),
   find: (id) => useDb().select().from(schema.tags).where(eq(schema.tags.id, id)).get(),
-  create: (input) =>
-    useDb()
+  create: (input) => {
+    assertNameIsFree(input.name);
+    return useDb()
       .insert(schema.tags)
       .values({
         name: input.name,
         slug: adminSlug(input.slug, input.name, (candidate) => isSlugTaken(candidate), 'tag'),
       })
       .returning({ id: schema.tags.id })
-      .get(),
+      .get();
+  },
   update: (id, input) => {
+    assertNameIsFree(input.name, id);
     useDb()
       .update(schema.tags)
       .set({

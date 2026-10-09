@@ -7,6 +7,9 @@ import { messageKey } from '#shared/utils/messages';
 import { THUMBNAILS_MEDIA_FOLDER } from '#shared/utils/routes';
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+// A small file can still unpack into a picture that takes gigabytes of memory to resize.
+const MAX_IMAGE_MEGAPIXELS = 50;
+const PIXELS_PER_MEGAPIXEL = 1_000_000;
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const IMAGE_EXTENSION_BY_FORMAT: Record<string, string> = { jpeg: 'jpg', png: 'png', gif: 'gif', webp: 'webp' };
 const DOWNLOAD_EXTENSIONS = new Set(['.zip', '.rar', '.7z', '.pdf', '.doc', '.docx', '.txt', '.srt', '.ass', '.mp3']);
@@ -60,6 +63,10 @@ export const storeUploadedImage = async (
   const extension = metadata?.format ? IMAGE_EXTENSION_BY_FORMAT[metadata.format] : undefined;
   if (!metadata?.width || !metadata.height || !extension) {
     throw invalidUpload('ERRORS.IMAGE_FORMAT_NOT_ALLOWED');
+  }
+  const frameHeight = metadata.pageHeight ?? metadata.height;
+  if (metadata.width * frameHeight > MAX_IMAGE_MEGAPIXELS * PIXELS_PER_MEGAPIXEL) {
+    throw invalidUpload(messageKey('ERRORS.IMAGE_DIMENSIONS_TOO_LARGE', { megapixels: MAX_IMAGE_MEGAPIXELS }));
   }
   const image = `${datedFolder(folder)}/${randomUUID()}.${extension}`;
   const thumbnail = thumbnailPathFor(image, THUMBNAILS_MEDIA_FOLDER);

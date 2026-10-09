@@ -1,4 +1,5 @@
 import { and, asc, count, desc, eq, gt, lt, or, sql } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 import type { ContentLocale } from '#shared/utils/locales';
 import { DEFAULT_LOCALE } from '#shared/utils/locales';
 import { authorColumns } from './authors';
@@ -80,6 +81,18 @@ const neighbourPhotoId = (albumId: number, sortOrder: number, photoId: number, d
   );
 };
 
+const albumPhotoCounts = (albumId: number, sortOrder: number, photoId: number) => {
+  const db = useDb();
+  const inAlbum = eq(schema.photos.albumId, albumId);
+  const before = or(
+    lt(schema.photos.sortOrder, sortOrder),
+    and(eq(schema.photos.sortOrder, sortOrder), lt(schema.photos.id, photoId)),
+  );
+  const photosWhere = (condition: SQL | undefined) =>
+    db.select({ total: count() }).from(schema.photos).where(condition).get()?.total ?? 0;
+  return { position: photosWhere(and(inAlbum, before)) + 1, albumPhotoCount: photosWhere(inAlbum) };
+};
+
 export const findPhoto = (photoId: number, locale: ContentLocale = DEFAULT_LOCALE) => {
   const photo = useDb()
     .select({
@@ -107,6 +120,7 @@ export const findPhoto = (photoId: number, locale: ContentLocale = DEFAULT_LOCAL
   const { albumId, sortOrder, ...details } = photo;
   return {
     ...details,
+    ...albumPhotoCounts(albumId, sortOrder, photo.id),
     previousPhotoId: neighbourPhotoId(albumId, sortOrder, photo.id, 'previous'),
     nextPhotoId: neighbourPhotoId(albumId, sortOrder, photo.id, 'next'),
   };

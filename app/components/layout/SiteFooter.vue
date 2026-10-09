@@ -7,13 +7,16 @@ const PARTNERS = [
     nameKey: 'FOOTER.PARTNER_RYUUTSURU_TEIKOKU',
     url: 'http://ryuutsuruteikoku.eu/',
     image: '/theme/partners/ryuutsuru-teikoku.png',
+    width: 280,
   },
   {
     nameKey: 'FOOTER.PARTNER_SAINT_SEIYA_LEGENDS',
     url: 'http://saintseiyalegends.bestdiscussion.net/',
     image: '/theme/partners/saint-seiya-legends.png',
+    width: 251,
   },
 ];
+const PARTNER_IMAGE_HEIGHT = 42;
 const FOUNDING_YEAR = 2006;
 const layout = useLayoutStore();
 const { t, locale } = useI18n();
@@ -27,24 +30,25 @@ const currentYear = new Date().getFullYear();
         <h2 id="projects-heading" class="mb-4 text-center heading-display text-lg text-gold-300">
           {{ t('FOOTER.PROJECTS') }}
         </h2>
-        <ul class="flex flex-wrap items-end justify-center gap-x-8 gap-y-4">
+        <ul class="flex flex-wrap items-start justify-center gap-4">
           <li v-for="map in layout.maps" :key="map.slug">
             <NuxtLinkLocale
               :to="routes.map(map.slug)"
-              class="group flex flex-col items-center gap-1 text-xs text-aqua-300 transition duration-300 ease-cosmo hover:-translate-y-1 hover:text-gold-300"
+              class="group flex w-40 flex-col items-center gap-2 text-xs text-aqua-300 transition duration-300 ease-cosmo hover:-translate-y-1 hover:text-gold-300"
             >
-              <img
-                v-if="map.teaserImage"
-                :src="routes.media(map.teaserImage)"
-                alt=""
-                loading="lazy"
-                class="h-24 w-auto opacity-60 grayscale transition duration-500 ease-cosmo group-hover:opacity-100 group-hover:grayscale-0"
-              />
+              <!-- One frame for every project, whatever the size and shape of its legacy picture. -->
               <span
-                v-else
-                class="grid size-24 place-items-center rounded-full border border-aqua-500/30 text-3xl text-cosmo-500"
+                class="relative flex h-24 w-full items-center justify-center overflow-hidden rounded-lg border border-aqua-500/25 bg-black/40 text-3xl text-cosmo-500 transition duration-300 group-hover:border-cosmo-500/60"
               >
-                <AppIcon name="map" />
+                <img
+                  v-if="map.teaserImage ?? map.image"
+                  :src="routes.media(map.teaserImage ?? map.image)"
+                  alt=""
+                  loading="lazy"
+                  class="absolute inset-0 size-full opacity-60 grayscale transition duration-500 ease-cosmo group-hover:opacity-100 group-hover:grayscale-0"
+                  :class="map.teaserImage ? 'object-contain p-1.5' : 'object-cover'"
+                />
+                <AppIcon v-else name="map" />
               </span>
               {{ map.title }}
             </NuxtLinkLocale>
@@ -59,7 +63,14 @@ const currentYear = new Date().getFullYear();
             rel="noopener"
             class="block opacity-60 grayscale transition duration-300 ease-cosmo hover:scale-105 hover:opacity-100 hover:grayscale-0"
           >
-            <img :src="partner.image" :alt="t(partner.nameKey)" class="h-10 w-auto" loading="lazy" />
+            <img
+              :src="partner.image"
+              :alt="t(partner.nameKey)"
+              :width="partner.width"
+              :height="PARTNER_IMAGE_HEIGHT"
+              class="h-10 w-auto"
+              loading="lazy"
+            />
           </a>
         </li>
       </ul>

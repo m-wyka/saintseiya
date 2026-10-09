@@ -20,7 +20,7 @@ const isApplePlatform = useState('isApplePlatform', () =>
     <AppIcon name="search" />
     <span class="text-left max-sm:sr-only lg:w-24">{{ t('GENERAL.SEARCH') }}</span>
     <kbd
-      class="rounded-full border border-white/10 bg-abyss-950/70 px-2 py-0.5 font-sans text-[0.65rem] font-semibold tracking-wide text-aqua-300 transition-colors duration-200 group-hover:border-cosmo-500/40 group-hover:text-gold-300 max-lg:hidden"
+      class="rounded-full border border-white/10 bg-abyss-950/70 px-2 py-0.5 font-sans text-[0.7rem] font-semibold tracking-wide text-aqua-300 transition-colors duration-200 group-hover:border-cosmo-500/40 group-hover:text-gold-300 max-lg:hidden"
       aria-hidden="true"
     >
       {{ isApplePlatform ? '⌘K' : 'Ctrl K' }}

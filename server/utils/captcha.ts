@@ -14,7 +14,7 @@ export const verifyCaptcha = async (event: H3Event, token: string | undefined): 
   const verdict = token
     ? await $fetch<TurnstileVerdict>(TURNSTILE_VERIFY_URL, {
         method: 'POST',
-        body: { secret, response: token, remoteip: getRequestIP(event, { xForwardedFor: true }) },
+        body: { secret, response: token, remoteip: clientAddressOf(event) },
       }).catch(() => ({ success: false }))
     : { success: false };
   if (!verdict.success) {

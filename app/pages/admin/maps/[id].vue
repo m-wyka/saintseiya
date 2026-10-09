@@ -34,6 +34,7 @@ const targetOptions = computed(() =>
 );
 
 const routeId = useRouteParam('id');
+const contentLocale = useContentLocaleStore();
 const { input, isNew, isBusy, errorMessage, save } = await useAdminForm<MapInput>({
   resource: 'maps',
   recordId: routeId.value,
@@ -175,7 +176,7 @@ useSeoMeta({ title: pageTitle });
               :label="t('ADMIN_MAPS.AREA_LABEL')"
               :hint="t('ADMIN_MAPS.AREA_LABEL_HINT')"
               :maxlength="120"
-              required
+              :required="!contentLocale.isTranslating"
             />
             <BaseSelect v-model="selectedArea.targetKind" :label="t('ADMIN_MAPS.TARGET')" :options="targetOptions" />
           </div>
@@ -212,7 +213,12 @@ useSeoMeta({ title: pageTitle });
       </div>
 
       <div class="flex flex-col gap-5 self-start panel p-5">
-        <BaseInput v-model="input.title" :label="t('GENERAL.TITLE')" :maxlength="120" required />
+        <BaseInput
+          v-model="input.title"
+          :label="t('GENERAL.TITLE')"
+          :maxlength="120"
+          :required="!contentLocale.isTranslating"
+        />
         <BaseInput v-model="input.slug" :label="t('ADMIN_MAPS.SLUG')" :hint="t('ADMIN_MAPS.SLUG_HINT')" />
         <BaseTextarea v-model="input.description" :label="t('GENERAL.DESCRIPTION')" :rows="3" :maxlength="600" />
         <BaseSelect v-model="input.status" :label="t('GENERAL.STATUS')" :options="statusOptions" />
@@ -234,7 +240,7 @@ useSeoMeta({ title: pageTitle });
                 @click="selectedIndex = index"
               >
                 <span class="truncate">{{ area.label }}</span>
-                <span class="shrink-0 text-[0.65rem] opacity-70">{{
+                <span class="shrink-0 text-[0.7rem] opacity-70">{{
                   t(MAP_AREA_TARGET_LABEL_KEYS[area.targetKind])
                 }}</span>
               </button>

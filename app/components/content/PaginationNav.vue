@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const props = defineProps<{ page: number; pageCount: number }>();
+const props = withDefaults(defineProps<{ page: number; pageCount: number; placement?: 'above' | 'below' }>(), {
+  placement: 'below',
+});
 
 const NEIGHBOUR_COUNT = 2;
 const route = useRoute();
@@ -23,8 +25,9 @@ const linkTo = (page: number) => ({ path: route.path, query: { ...route.query, p
 <template>
   <nav
     v-if="pageCount > 1"
-    class="mt-8 flex flex-wrap items-center justify-center gap-1.5"
-    :aria-label="t('CONTENT.PAGINATION')"
+    class="flex flex-wrap items-center justify-center gap-1.5"
+    :class="placement === 'above' ? 'mb-6' : 'mt-8'"
+    :aria-label="t(placement === 'above' ? 'CONTENT.PAGINATION_ABOVE' : 'CONTENT.PAGINATION')"
   >
     <template v-for="(candidate, index) in visiblePages" :key="candidate">
       <span v-if="hasGapBefore(index)" class="px-1 text-aqua-500" aria-hidden="true">…</span>

@@ -1,5 +1,8 @@
+import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { forwardedClientAddress } from '../../server/utils/clientAddress';
+import { contentSecurityPolicy, inlineScriptHashes } from '../../server/utils/contentSecurityPolicy';
 import { mediaContentType, resolveMediaFile } from '../../server/utils/media';
 import {
   assertWithinRateLimit,
@@ -69,6 +72,44 @@ describe('rate limit', () => {
 
     assertWithinRateLimit('search:late', SEARCH_RATE_LIMIT, start + 120_000);
     expect(trackedRateLimitKeys()).toBe(1);
+  });
+});
+
+describe('client address', () => {
+  it('takes the address written by our own proxy, not the one the client sent', () => {
+    expect(forwardedClientAddress('203.0.113.7', 1)).toBe('203.0.113.7');
+    expect(forwardedClientAddress('10.9.9.9, 203.0.113.7', 1)).toBe('203.0.113.7');
+    expect(forwardedClientAddress('10.9.9.9, 203.0.113.7, 198.51.100.2', 2)).toBe('203.0.113.7');
+  });
+
+  it('ignores the header without a proxy or when it is shorter than the proxy chain', () => {
+    expect(forwardedClientAddress('203.0.113.7', 0)).toBeNull();
+    expect(forwardedClientAddress('203.0.113.7', Number.NaN)).toBeNull();
+    expect(forwardedClientAddress('203.0.113.7', 2)).toBeNull();
+    expect(forwardedClientAddress(undefined, 1)).toBeNull();
+    expect(forwardedClientAddress(' , ', 1)).toBeNull();
+  });
+});
+
+describe('content security policy', () => {
+  const hashOf = (code: string) => `'sha256-${createHash('sha256').update(code).digest('base64')}'`;
+
+  it('allows the inline scripts of a page by their hash and skips linked scripts and data blocks', () => {
+    const hashes = inlineScriptHashes([
+      '<script type="importmap">{"imports":{}}</script><script type="module" src="/_nuxt/entry.js" crossorigin></script>',
+      '<script type="application/json" id="__NUXT_DATA__">[1]</script><script>window.__NUXT__={}</script>',
+      '<script>window.__NUXT__={}</script>',
+    ]);
+
+    expect(hashes).toEqual([hashOf('{"imports":{}}'), hashOf('window.__NUXT__={}')]);
+  });
+
+  it('lets scripts run only from the site, the captcha and the listed hashes', () => {
+    const policy = contentSecurityPolicy(["'sha256-abc='"]);
+
+    expect(policy).toContain("script-src 'self' https://challenges.cloudflare.com 'sha256-abc='");
+    expect(policy).toContain("frame-ancestors 'none'");
+    expect(policy.split('; ').find((directive) => directive.startsWith('script-src'))).not.toContain('unsafe-inline');
   });
 });
 

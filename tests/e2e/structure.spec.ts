@@ -220,6 +220,8 @@ test.describe('page tree, forum structure and account roles in the panel', () =>
     await signIn(guardPage, { name: 'Strażnik Kont', role: 'moderator', permissions: ['users'] });
     await visit(guardPage, '/admin/uzytkownicy');
     await guardPage.getByRole('searchbox', { name: 'Szukaj' }).fill('kandydat');
+    // The filtered list has to arrive before the promotion, otherwise it would bring the new role with it.
+    await expect(guardPage.getByText('1 konto', { exact: true })).toBeVisible();
     const candidateRow = guardPage.getByRole('row', { name: /Kandydat Na Admina/ });
     await expect(candidateRow.getByRole('button', { name: 'Zablokuj' })).toBeVisible();
     await expect(candidateRow.getByRole('button', { name: 'Rola' })).toHaveCount(0);

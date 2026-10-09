@@ -1,4 +1,4 @@
-import { and, count, desc, eq, like } from 'drizzle-orm';
+import { and, count, desc, eq } from 'drizzle-orm';
 import type { AdminListQuery } from '../../utils/adminResource';
 import { visibilityFilter } from './visibility';
 
@@ -9,7 +9,7 @@ const COMMENT_NOT_FOUND = 'ERRORS.COMMENT_NOT_FOUND';
 export const moderatedComments = ({ page, search, filter }: AdminListQuery) => {
   const db = useDb();
   const where = and(
-    search ? like(schema.comments.bodyHtml, `%${search}%`) : undefined,
+    search ? containsText(schema.comments.bodyHtml, search) : undefined,
     visibilityFilter(schema.comments.isHidden, filter),
   );
   const comments = db

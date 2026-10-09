@@ -5,7 +5,7 @@ Portal fanowski o Saint Seiya (Rycerze Zodiaku): podstrony, newsy, forum, galeri
 ## Wymagania
 
 - Node 22.19 lub nowszy (`.nvmrc`)
-- pnpm 9
+- pnpm 12 (wersję przypina pole `packageManager` w `package.json`)
 
 ## Start lokalny
 
@@ -26,7 +26,8 @@ Strona działa pod `http://localhost:3000`.
 | `NUXT_OAUTH_GOOGLE_CLIENT_ID`, `NUXT_OAUTH_GOOGLE_CLIENT_SECRET` | Logowanie przez Google. Adres zwrotny w konsoli Google: `<adres strony>/auth/google`. |
 | `NUXT_ADMIN_EMAILS` | Adresy e-mail (po przecinku), które po zalogowaniu dostają rolę administratora. |
 | `NUXT_PUBLIC_TURNSTILE_SITE_KEY`, `NUXT_TURNSTILE_SECRET_KEY` | Captcha Cloudflare Turnstile na forum, w komentarzach i shoutboxie. Puste = captcha wyłączona. |
-| `NUXT_PUBLIC_SITE_URL` | Publiczny adres strony. |
+| `NUXT_PUBLIC_SITE_URL` | Publiczny adres strony: z niego powstają adresy w mapie strony, RSS oraz znaczniki `canonical` i `hreflang`. Czytany przy starcie serwera. |
+| `NUXT_TRUSTED_PROXY_HOPS` | Liczba własnych reverse proxy przed aplikacją (domyślnie 1; Cloudflare + nginx = 2, bez proxy = 0). Wskazuje, który adres z `X-Forwarded-For` jest adresem odwiedzającego. |
 | `NUXT_DB_PATH` | Plik bazy SQLite (domyślnie `.data/saintseiya.db`). |
 | `NUXT_UPLOADS_DIR` | Katalog wgranych plików (domyślnie `.data/uploads`). |
 | `NUXT_E2E_LOGIN` | `true` włącza logowanie testowe pod `/logowanie-testowe`. Tylko lokalnie i w testach — nigdy na produkcji. |
@@ -50,6 +51,7 @@ Strona działa pod `http://localhost:3000`.
 | `pnpm db:generate` | Nowa migracja SQL po zmianie `server/db/schema.ts` |
 | `pnpm db:migrate` | Zastosowanie migracji (serwer robi to też sam przy starcie) |
 | `pnpm legacy:import` | Import treści ze starej bazy (opis niżej) |
+| `pnpm legacy:corrections` | Poprawki redakcyjne z `scripts/legacy/corrections.ts` (miejsca i adresy podstron w drzewie, tytuły podstron, FAQ, nazwa kategorii newsów) nałożone na istniejącą bazę; import robi to sam |
 | `pnpm images:check` | Sprawdzenie, które zewnętrzne obrazki w treściach jeszcze działają |
 
 Te same kroki wykonuje GitHub Actions (`.github/workflows/ci.yml`) przy każdym wypchnięciu na `staging` i `main` oraz w pull requestach: `pnpm check`, a osobno `pnpm build` i testy Playwright na buildzie.
@@ -84,23 +86,16 @@ Import jest powtarzalny: `--force` zastępuje bazę, więc uruchamiać go tylko 
 
 ## Wdrożenie
 
-- Serwer z trwałym dyskiem (VPS lub Render). `NUXT_DB_PATH` i `NUXT_UPLOADS_DIR` muszą wskazywać na ten dysk.
-- `pnpm build`, potem `pnpm start` (`node .output/server/index.mjs`) ze zmiennymi środowiskowymi z tabeli wyżej. `NUXT_PUBLIC_SITE_URL` musi być ustawione już przy `pnpm build`.
+- VPS z trwałym dyskiem. `NUXT_DB_PATH` i `NUXT_UPLOADS_DIR` muszą wskazywać na ten dysk.
+- `pnpm build`, potem `pnpm start` (`node .output/server/index.mjs`) ze zmiennymi środowiskowymi z tabeli wyżej. Na serwerze z małą pamięcią: `node --max-old-space-size=256 .output/server/index.mjs`.
+- Przed aplikacją stoi reverse proxy (nginx, Caddy): kończy HTTPS, kompresuje strony HTML (pliki statyczne mają gotowe wersje gzip i brotli) i dopisuje adres odwiedzającego do `X-Forwarded-For`. Liczbę takich proxy podaje `NUXT_TRUSTED_PROXY_HOPS`.
+- Nagłówki bezpieczeństwa (`Content-Security-Policy`, `X-Frame-Options`, `Strict-Transport-Security` i pozostałe) ustawia sama aplikacja — w proxy ich nie powtarzać.
 - Kopia zapasowa to plik bazy i katalog wgranych plików.
 
-### Render
+### Wgranie treści na serwer
 
-Ustawienia usługi są w `render.yaml` (Blueprint): komendy, dysk pod `/var/data` i lista zmiennych. Usługa utworzona ręcznie w panelu Rendera tego pliku nie czyta — te same wartości wpisać wtedy w jej ustawieniach (Settings):
+Pierwszy start na pustym dysku tworzy pustą bazę. Zaimportowane treści przenosi się osobno:
 
-| Pole | Wartość |
-|---|---|
-| Build Command | `corepack pnpm@12.9.1 install --frozen-lockfile && corepack pnpm@12.9.1 build` |
-| Start Command | `node --max-old-space-size=256 .output/server/index.mjs` |
-| Health Check Path | `/robots.txt` |
-
-- Domyślne komendy Rendera (`yarn` i `yarn start`) nie budują aplikacji i pomijają `pnpm-lock.yaml`.
-- Trwały dysk jest tylko na płatnej instancji. Na darmowej baza i wgrane pliki znikają przy każdym restarcie i uśpieniu usługi.
-- Pierwszy start na pustym dysku tworzy pustą bazę. Treści wgrać osobno przez `scp` (po dodaniu klucza SSH w panelu Rendera):
-  1. Lokalnie zatrzymać serwer i scalić dziennik WAL z plikiem bazy: `node -e "const db = require('better-sqlite3')('.data/saintseiya.db'); db.pragma('wal_checkpoint(TRUNCATE)'); db.close()"`.
-  2. Wgrać `.data/uploads` jako `/var/data/uploads`, a bazę jako `/var/data/saintseiya.db.new` — działający serwer trzyma otwarty plik `saintseiya.db`.
-  3. W konsoli usługi: `cd /var/data && rm -f saintseiya.db-wal saintseiya.db-shm && mv saintseiya.db.new saintseiya.db`, potem restart usługi.
+1. Lokalnie zatrzymać serwer i scalić dziennik WAL z plikiem bazy: `node -e "const db = require('better-sqlite3')('.data/saintseiya.db'); db.pragma('wal_checkpoint(TRUNCATE)'); db.close()"`.
+2. Skopiować `.data/uploads` do katalogu z `NUXT_UPLOADS_DIR`, a bazę obok docelowego pliku pod nazwą `saintseiya.db.new` — działający serwer trzyma otwarty plik bazy.
+3. Na serwerze zatrzymać aplikację, usunąć `saintseiya.db-wal` i `saintseiya.db-shm`, zamienić plik bazy na nowy i uruchomić aplikację.

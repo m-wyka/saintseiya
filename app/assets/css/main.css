@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-display: 'Cinzel', 'Trajan Pro', serif;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Cinzel', 'Times New Roman', 'Noto Serif', serif;
+  --font-sans: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, system-ui, sans-serif;
 
   --color-void: #000000;
   --color-abyss-950: #03090c;
@@ -111,6 +111,13 @@
   border-radius: var(--radius-2xl);
   background: linear-gradient(90deg, var(--color-abyss-900), rgb(9 38 49));
   box-shadow: var(--shadow-panel);
+}
+
+/* The long side menu stays beside the content and scrolls in its own column instead of stretching short pages. */
+@utility side-menu {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(81 141 163 / 0.45) transparent;
+  scrollbar-gutter: stable;
 }
 
 /* A highlight behind a row of equal items that slides to the one at --active-index. */
@@ -453,6 +460,19 @@
     outline: none;
   }
 
+  /* On a touch screen the target of a small place never shrinks below a fingertip. */
+  @media (pointer: coarse) {
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 2rem);
+      height: max(100%, 2rem);
+      translate: -50% -50%;
+    }
+  }
+
   &:hover > .map-area-label,
   &:focus-visible > .map-area-label {
     opacity: 1;
@@ -485,6 +505,60 @@
     transform 0.2s var(--ease-cosmo);
 }
 
+/* On a phone each row of a panel table becomes a card: the first column is its title, the others are labelled lines. */
+@utility admin-table {
+  @media (width < 48rem) {
+    display: block;
+
+    & :where(tbody, tr, td) {
+      display: block;
+    }
+
+    & tr {
+      padding: 0.75rem 1rem;
+    }
+
+    & td {
+      padding: 0.2rem 0;
+    }
+
+    & td:first-child {
+      padding-bottom: 0.4rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    & td[data-label] {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      text-align: right;
+
+      &::before {
+        content: attr(data-label);
+        flex-shrink: 0;
+        font-size: 0.7rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--color-aqua-500);
+      }
+    }
+
+    & td:last-child {
+      padding-top: 0.5rem;
+
+      & > [role='group'] {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+    }
+  }
+}
+
 @utility carousel-slides {
   display: flex;
   overflow-x: auto;
@@ -508,6 +582,21 @@
 
   &::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* For a row that scrolls sideways without a scrollbar: the fading edge says there is more and gives way at the end. */
+@utility scroll-hint-end {
+  &::after {
+    content: '';
+    position: sticky;
+    right: -0.5rem;
+    flex: none;
+    align-self: stretch;
+    width: 2rem;
+    margin-block: -0.375rem;
+    background: linear-gradient(to right, transparent, var(--color-abyss-950) 75%);
+    pointer-events: none;
   }
 }
 
@@ -549,6 +638,15 @@
     color: var(--color-danger) !important;
   }
 
+  /* Two legend colours that carry meaning, lifted to a readable contrast on the dark panel. */
+  & [style*='color:#8b4513'] {
+    color: #d08a52 !important;
+  }
+
+  & [style*='color:#993366'] {
+    color: #d977a8 !important;
+  }
+
   & :where(h2, h3, h4, h5, h6) {
     font-family: var(--font-display);
     font-weight: 600;
@@ -559,6 +657,20 @@
 
   & h2 {
     font-size: 1.4rem;
+  }
+
+  /* A bold one-line paragraph marked by the server: the way legacy articles wrote their headings. */
+  & p.subheading {
+    margin-top: 1.6em;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    letter-spacing: 0.03em;
+    line-height: 1.35;
+    color: var(--color-gold-300);
+  }
+
+  & > p.subheading:first-child {
+    margin-top: 0;
   }
 
   & h3 {
@@ -654,6 +766,64 @@
 
   & :where(td, th):has(img) {
     min-width: 4.5rem;
+  }
+
+  /* Spacer images hold a column open with their width; scaled by their own ratio they would be as tall as wide. */
+  & img[height='1'] {
+    height: 1px;
+  }
+
+  /* One picture cut into cells: any padding, rounding or text line height shows as a seam between the pieces. */
+  & table.sliced-image {
+    background: none;
+    line-height: 0;
+
+    & :where(td, th) {
+      min-width: 0;
+      padding: 0;
+    }
+
+    & img {
+      display: block;
+      max-width: none;
+      border-radius: 0;
+    }
+  }
+
+  /* Rows of linked picture tiles. */
+  & .image-grid {
+    text-align: center;
+
+    & a {
+      display: inline-block;
+      margin: 0.2rem;
+      line-height: 0;
+      transition:
+        translate 0.3s var(--ease-cosmo),
+        filter 0.3s;
+
+      &:hover {
+        translate: 0 -0.15rem;
+        filter: brightness(1.15);
+      }
+    }
+  }
+
+  & table.image-grid {
+    display: table;
+    margin-inline: auto;
+    background: none;
+
+    & :where(td, th) {
+      padding: 0;
+    }
+  }
+
+  /* A bold label in the first of two columns reads better on one line where the screen has room for it. */
+  @media (width >= 40rem) {
+    & tr > td:first-child:nth-last-child(2):has(> strong:only-child) {
+      white-space: nowrap;
+    }
   }
 
   @media (width < 48rem) {

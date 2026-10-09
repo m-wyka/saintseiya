@@ -76,6 +76,15 @@ describe('translated community content', () => {
     });
   });
 
+  it('tells where a photo stands in its album', () => {
+    const album = createAlbum();
+    const [first, second, third] = [0, 1, 1].map((sortOrder) => createPhoto(album.id, { sortOrder }));
+
+    expect(findPhoto(first!.id)).toMatchObject({ position: 1, albumPhotoCount: 3, previousPhotoId: null });
+    expect(findPhoto(second!.id)).toMatchObject({ position: 2, albumPhotoCount: 3 });
+    expect(findPhoto(third!.id)).toMatchObject({ position: 3, previousPhotoId: second!.id, nextPhotoId: null });
+  });
+
   it('translates video categories and videos', () => {
     const db = useDb();
     const category = db

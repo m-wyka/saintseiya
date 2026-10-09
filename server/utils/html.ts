@@ -8,6 +8,8 @@ const HEX_COLOR_PATTERN = /^#(?:[0-9a-f]{3}){1,2}$/i;
 const VISIBLE_HEX_COLOR_PATTERN = /^#(?!f{3}(?:f{3})?$|[0-3]{3}$|(?:[0-3][0-9a-f]){3}$)(?:[0-9a-f]{3}){1,2}$/i;
 const INTERNAL_URL_PATTERN = /^\/(?!\/)/;
 const VERBATIM_TEXT_TAGS = new Set(['pre', 'code']);
+const RGB_COLOR_PATTERN = /rgba?\(\s*(\d{1,3})[\s,]+(\d{1,3})[\s,]+(\d{1,3})\s*(?:[,/]\s*[\d.]+%?\s*)?\)/gi;
+const EMPTY_LINK_PATTERN = /<a\b[^>]*>(?:\s|&nbsp;|<br \/>|<\/?(?:span|strong|em|u|s|small|sub|sup)\b[^>]*>)*<\/a>/gi;
 
 export interface RichHtmlRewriter {
   link?: (href: string) => string | null;
@@ -66,6 +68,18 @@ const iframeTransformer = (_tagName: string, attribs: Attributes) => {
     allowfullscreen: '',
   });
 };
+
+const hexChannel = (value: string): string => Math.min(Number(value), 255).toString(16).padStart(2, '0');
+
+// The editor writes colours the way the browser reports them, as rgb(); stored content and the theme rules use hex.
+const withHexColors = (style: string): string =>
+  style.replace(
+    RGB_COLOR_PATTERN,
+    (_color, red: string, green: string, blue: string) => `#${hexChannel(red)}${hexChannel(green)}${hexChannel(blue)}`,
+  );
+
+const styleTransformer = (tagName: string, attribs: Attributes) =>
+  rename(tagName, attribs.style ? { ...attribs, style: withHexColors(attribs.style) } : attribs);
 
 const fontTransformer = (_tagName: string, attribs: Attributes) =>
   HEX_COLOR_PATTERN.test(attribs.color ?? '') ? rename('span', { style: `color:${attribs.color}` }) : rename('span');
@@ -137,8 +151,8 @@ const buildOptions = (rewriter: RichHtmlRewriter): IOptions => ({
   allowedSchemesByTag: { img: ['http', 'https'], iframe: ['https'] },
   allowProtocolRelative: false,
   allowedIframeHostnames: ['www.youtube-nocookie.com'],
-  exclusiveFilter: (frame) => frame.tag === 'a' && !frame.text.trim() && !frame.mediaChildren.length,
   transformTags: {
+    '*': styleTransformer,
     a: linkTransformer(rewriter),
     img: imageTransformer(rewriter),
     iframe: iframeTransformer,
@@ -167,8 +181,12 @@ const unwrapBareSpans = (html: string): string => {
   });
 };
 
+// A link around nothing visible is dropped. Checked on the finished markup, because a picture may sit deeper
+// inside the link than its direct child.
+const withoutEmptyLinks = (html: string): string => html.replace(EMPTY_LINK_PATTERN, '');
+
 export const sanitizeRichHtml = (html: string, rewriter: RichHtmlRewriter = {}): string =>
-  unwrapBareSpans(sanitizeHtml(html, buildOptions(rewriter))).trim();
+  withoutEmptyLinks(unwrapBareSpans(sanitizeHtml(html, buildOptions(rewriter)))).trim();
 
 const TEXT_ENTITIES: Record<string, string> = {
   '&amp;': '&',

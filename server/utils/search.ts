@@ -18,8 +18,6 @@ interface SearchResult {
   context: string;
 }
 
-const likePattern = (phrase: string): string => `%${phrase.toLocaleLowerCase('pl').replace(/[\\%_]/g, '\\$&')}%`;
-
 const contains = (column: SQLiteColumn | SQL, pattern: string) =>
   sql`lower_unicode(${column}) LIKE ${pattern} ESCAPE '\\'`;
 

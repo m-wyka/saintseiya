@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { newsResource } from '../../server/admin/news';
+import { newsCategoriesResource } from '../../server/admin/newsCategories';
 import { tagsResource } from '../../server/admin/tags';
 import { createComment } from '../../server/utils/communityWrites';
 import { schema, useDb } from '../../server/utils/db';
@@ -82,6 +83,52 @@ describe('news administration', () => {
 
     expect(newsResource.find(id)).toBeUndefined();
     expect(useDb().select().from(schema.comments).all()).toHaveLength(0);
+  });
+
+  it('refuses to remove a category that still has news', () => {
+    const editor = createAccount({ role: 'admin' });
+    const category = newsCategoriesResource.create({ name: 'Manga', slug: '', image: null }, editor);
+    const { id } = newsResource.create({ ...validInput, categoryId: category.id }, editor);
+
+    expect(() => newsCategoriesResource.remove(category.id, editor)).toThrowError('ERRORS.NEWS_CATEGORY_HAS_NEWS');
+    expect(storedNews(id).categoryId).toBe(category.id);
+
+    newsResource.remove(id, editor);
+    newsCategoriesResource.remove(category.id, editor);
+
+    expect(newsCategoriesResource.find(category.id)).toBeUndefined();
+  });
+
+  it('refuses a second tag of the same name, whatever the case of its letters', () => {
+    const editor = createAccount({ role: 'admin' });
+    const gold = tagsResource.create({ name: 'Złoci Rycerze', slug: '' }, editor);
+    const omega = tagsResource.create({ name: 'Omega', slug: '' }, editor);
+
+    expect(() => tagsResource.create({ name: 'ZŁOCI rycerze', slug: '' }, editor)).toThrowError(
+      'ERRORS.TAG_NAME_TAKEN',
+    );
+    expect(() => tagsResource.update(omega.id, { name: 'złoci rycerze', slug: '' }, editor)).toThrowError(
+      'ERRORS.TAG_NAME_TAKEN',
+    );
+
+    tagsResource.update(gold.id, { name: 'Złoci rycerze', slug: '' }, editor);
+
+    expect(tagsResource.find(gold.id)).toMatchObject({ name: 'Złoci rycerze' });
+  });
+
+  it('searches without regard to the case of Polish letters and takes % and _ literally', () => {
+    const editor = createAccount({ role: 'admin' });
+    newsResource.create({ ...validInput, title: 'Życzenia świąteczne' }, editor);
+    newsResource.create({ ...validInput, title: 'Rabat 50% na mangi' }, editor);
+    const found = (search: string) =>
+      (newsResource.list({ page: 1, search, filter: '' }) as { items: { title: string }[] }).items.map(
+        (item) => item.title,
+      );
+
+    expect(found('życzenia')).toEqual(['Życzenia świąteczne']);
+    expect(found('ŚWIĄT')).toEqual(['Życzenia świąteczne']);
+    expect(found('%')).toEqual(['Rabat 50% na mangi']);
+    expect(found('_')).toEqual([]);
   });
 
   it('lists with search and status filter', () => {

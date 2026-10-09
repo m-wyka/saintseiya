@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { MOVE_DIRECTIONS } from '#shared/utils/ordering';
 import type { ContentLocale } from '#shared/utils/locales';
 import { DEFAULT_LOCALE } from '#shared/utils/locales';
+import { messageKey, parseMessageKey } from '#shared/utils/messages';
 import type { AdminAccess } from '#shared/utils/roles';
 import type { Account } from './accounts';
 import type { TranslationSource } from './translations';
@@ -47,12 +48,38 @@ export interface AdminResource {
   remove: (id: number, actor: Account) => void;
 }
 
+interface ValidationIssue {
+  code?: string;
+  message: string;
+  origin?: string;
+  minimum?: unknown;
+  maximum?: unknown;
+}
+
+// Limits declared without a message of their own would reach the form as the validator's English sentence.
+const issueMessage = (issue: ValidationIssue | undefined): string => {
+  if (!issue) {
+    return INVALID_INPUT_MESSAGE;
+  }
+  if (parseMessageKey(issue.message)) {
+    return issue.message;
+  }
+  const isText = issue.origin === 'string';
+  if (issue.code === 'too_big' && typeof issue.maximum === 'number') {
+    return messageKey(isText ? 'VALIDATION.TEXT_TOO_LONG' : 'VALIDATION.NUMBER_TOO_BIG', { max: issue.maximum });
+  }
+  if (issue.code === 'too_small' && typeof issue.minimum === 'number') {
+    return messageKey(isText ? 'VALIDATION.TEXT_TOO_SHORT' : 'VALIDATION.NUMBER_TOO_SMALL', { min: issue.minimum });
+  }
+  return INVALID_INPUT_MESSAGE;
+};
+
 export const parseInput = <Input>(inputSchema: ZodType<Input>, rawInput: unknown): Input => {
   const parsed = inputSchema.safeParse(rawInput);
   if (!parsed.success) {
     throw createError({
       statusCode: BAD_REQUEST,
-      statusMessage: parsed.error.issues[0]?.message ?? INVALID_INPUT_MESSAGE,
+      statusMessage: issueMessage(parsed.error.issues[0]),
       data: { issues: parsed.error.issues },
     });
   }
@@ -73,6 +100,37 @@ const translatedRecord = (record: Row, content: TranslatableContent, locale: Con
     return translated ?? record;
   }
   return { ...translated, [children.key]: withTranslations(childRowsOf(translated, children.key), children, locale) };
+};
+
+const isBlankText = (value: unknown): boolean => typeof value === 'string' && !value.trim();
+
+const originalsForBlanks = (input: Row, base: Row, source: TranslationSource): Row => ({
+  ...input,
+  ...Object.fromEntries(
+    Object.keys(source.fields)
+      .filter((property) => isBlankText(input[property]))
+      .map((property) => [property, base[property]]),
+  ),
+});
+
+// An emptied field of a translation means "use the original", also where the original itself must not be empty.
+const translationWithOriginalsForBlanks = (rawInput: unknown, base: Row, content: TranslatableContent): unknown => {
+  if (typeof rawInput !== 'object' || rawInput === null) {
+    return rawInput;
+  }
+  const input = originalsForBlanks(rawInput as Row, base, content);
+  const { children } = content;
+  if (!children) {
+    return input;
+  }
+  const storedChildren = childRowsOf(base, children.key);
+  return {
+    ...input,
+    [children.key]: childRowsOf(input, children.key).map((child) => {
+      const stored = storedChildOf(storedChildren, child);
+      return stored ? originalsForBlanks(child, stored, children) : child;
+    }),
+  };
 };
 
 const inputWithBaseTexts = (input: Row, base: Row, content: TranslatableContent): Row => {
@@ -135,15 +193,19 @@ export const defineAdminResource = <Input>(definition: AdminResourceDefinition<I
     },
     create: (rawInput, actor) => changed(() => definition.create(parseInput(definition.inputSchema, rawInput), actor)),
     update: (id, rawInput, actor, locale = DEFAULT_LOCALE) => {
-      const input = parseInput(definition.inputSchema, rawInput);
-      changed(() => {
-        if (!content || locale === DEFAULT_LOCALE) {
+      if (!content || locale === DEFAULT_LOCALE) {
+        const input = parseInput(definition.inputSchema, rawInput);
+        changed(() => {
           definition.update(id, input, actor);
-        } else {
-          const base = definition.find(id) as Row;
-          definition.update(id, inputWithBaseTexts(input as Row, base, content) as Input, actor);
-          storeRecordTranslations(id, input as Row, base, content, locale);
-        }
+          pruneRecordTranslations(content);
+        });
+        return;
+      }
+      const base = definition.find(id) as Row;
+      const input = parseInput(definition.inputSchema, translationWithOriginalsForBlanks(rawInput, base, content));
+      changed(() => {
+        definition.update(id, inputWithBaseTexts(input as Row, base, content) as Input, actor);
+        storeRecordTranslations(id, input as Row, base, content, locale);
         pruneRecordTranslations(content);
       });
     },

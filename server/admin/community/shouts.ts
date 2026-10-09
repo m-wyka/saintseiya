@@ -1,4 +1,4 @@
-import { and, count, desc, eq, like } from 'drizzle-orm';
+import { and, count, desc, eq } from 'drizzle-orm';
 import type { AdminListQuery } from '../../utils/adminResource';
 import { visibilityFilter } from './visibility';
 
@@ -8,7 +8,7 @@ const SHOUT_NOT_FOUND = 'ERRORS.SHOUT_NOT_FOUND';
 export const moderatedShouts = ({ page, search, filter }: AdminListQuery) => {
   const db = useDb();
   const where = and(
-    search ? like(schema.shouts.bodyHtml, `%${search}%`) : undefined,
+    search ? containsText(schema.shouts.bodyHtml, search) : undefined,
     visibilityFilter(schema.shouts.isHidden, filter),
   );
   const shouts = db

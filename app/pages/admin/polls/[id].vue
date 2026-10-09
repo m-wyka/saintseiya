@@ -23,6 +23,7 @@ const emptyOption = (): PollOptionInput => ({ id: null, label: '' });
 
 const { t } = useI18n();
 const routeId = useRouteParam('id');
+const contentLocale = useContentLocaleStore();
 const { input, isNew, isBusy, errorMessage, save } = await useAdminForm<PollInput>({
   resource: 'polls',
   recordId: routeId.value,
@@ -60,7 +61,12 @@ useSeoMeta({ title: pageTitle });
     <AdminHeader :title="pageTitle" />
     <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
       <div class="flex flex-col gap-5 panel p-5">
-        <BaseInput v-model="input.question" :label="t('ADMIN_POLLS.QUESTION')" :maxlength="300" required />
+        <BaseInput
+          v-model="input.question"
+          :label="t('ADMIN_POLLS.QUESTION')"
+          :maxlength="300"
+          :required="!contentLocale.isTranslating"
+        />
         <fieldset class="flex flex-col gap-3">
           <legend class="mb-2 text-xs font-semibold tracking-wide text-aqua-300 uppercase">
             {{ t('ADMIN_POLLS.ANSWERS_LEGEND', { min: MIN_POLL_OPTIONS, max: MAX_POLL_OPTIONS }) }}
@@ -77,7 +83,7 @@ useSeoMeta({ title: pageTitle });
                 :hint="votesHintOf(option)"
                 :maxlength="200"
                 hide-label
-                required
+                :required="!contentLocale.isTranslating"
               />
               <MoveButtons
                 :item-label="t('ADMIN_POLLS.ANSWER_ITEM', { number: index + 1 })"

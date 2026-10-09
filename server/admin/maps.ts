@@ -8,6 +8,8 @@ const PERCENT_MAX = 100;
 const MAX_AREAS = 300;
 const WEB_OR_INTERNAL_URL_PATTERN = /^(?:https?:\/\/|\/(?!\/))/i;
 
+// Legacy maps carry areas as thin as 0.06% of the picture.
+const SMALLEST_AREA_SIDE_PERCENT = 0.01;
 const percent = z.number().min(0).max(PERCENT_MAX);
 
 const areaSchema = z
@@ -16,8 +18,8 @@ const areaSchema = z
     label: z.string().trim().min(1, 'VALIDATION.MAP_AREA_LABEL_REQUIRED').max(120),
     leftPercent: percent,
     topPercent: percent,
-    widthPercent: percent.min(0.1),
-    heightPercent: percent.min(0.1),
+    widthPercent: percent.min(SMALLEST_AREA_SIDE_PERCENT),
+    heightPercent: percent.min(SMALLEST_AREA_SIDE_PERCENT),
     targetKind: z.enum(MAP_AREA_TARGETS),
     pageId: z.number().int().positive().nullable().default(null),
     url: z.string().trim().max(500).nullable().default(null),

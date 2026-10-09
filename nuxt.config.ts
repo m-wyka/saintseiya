@@ -6,6 +6,14 @@ import { localizePagePath } from './shared/utils/routes';
 
 const SESSION_MAX_AGE_SEC = 30 * 24 * 3600;
 const STATIC_IMAGE_CACHE = 'public, max-age=86400, stale-while-revalidate=604800';
+// The content security policy is added per page in server/plugins/contentSecurityPolicy.ts.
+const SECURITY_HEADERS = {
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'DENY',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'permissions-policy': 'camera=(), geolocation=(), microphone=(), payment=(), usb=()',
+  'strict-transport-security': 'max-age=31536000',
+};
 
 const PAGES_DIR = 'app/pages';
 const DEFAULT_LOCALE = 'pl';
@@ -35,9 +43,12 @@ export default defineNuxtConfig({
     },
   },
   fonts: {
+    // Families are resolved through the provider list instead of a fixed provider: only that path keeps the
+    // fallbacks named here, and those get metric overrides so text holds its line breaks when the web font arrives.
+    priority: ['google'],
     families: [
-      { name: 'Cinzel', provider: 'google', weights: [500, 600, 700] },
-      { name: 'Inter', provider: 'google', weights: [400, 500, 600, 700] },
+      { name: 'Cinzel', weights: [500, 600, 700], fallbacks: ['Times New Roman', 'Georgia', 'Noto Serif'] },
+      { name: 'Inter', weights: [400, 500, 600, 700], fallbacks: ['Arial', 'Segoe UI', 'Roboto'] },
     ],
     defaults: { subsets: ['latin', 'latin-ext'], styles: ['normal'] },
   },
@@ -60,6 +71,7 @@ export default defineNuxtConfig({
     turnstileSecretKey: '',
     adminEmails: '',
     e2eLogin: 'false',
+    trustedProxyHops: 1,
     public: {
       siteUrl: 'http://localhost:3000',
       siteName: 'Saint Seiya Revolution',
@@ -78,7 +90,6 @@ export default defineNuxtConfig({
     },
   },
   i18n: {
-    baseUrl: process.env.NUXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
     defaultLocale: DEFAULT_LOCALE,
     strategy: 'prefix_except_default',
     detectBrowserLanguage: false,
@@ -91,6 +102,7 @@ export default defineNuxtConfig({
     ],
   },
   routeRules: {
+    '/**': { headers: SECURITY_HEADERS },
     '/admin/**': { ssr: false },
     '/en/admin/**': { ssr: false },
     '/szukaj': { redirect: '/' },

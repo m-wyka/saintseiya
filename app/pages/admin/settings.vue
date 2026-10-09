@@ -17,6 +17,7 @@ const tabs = ref(await $fetch<NewsCenterTab[]>('/api/admin/settings/news-center'
 const openedIndex = ref<number | null>(null);
 const toasts = useToastStore();
 const { isBusy, errorMessage, run } = useApiAction();
+const { markSaved } = useUnsavedChanges(() => tabs.value);
 
 const addTab = () => {
   tabs.value = [...tabs.value, { title: t('ADMIN_SETTINGS.NEW_TAB_TITLE'), bodyHtml: '' }];
@@ -38,6 +39,7 @@ const save = async () => {
     apiRequest('/api/admin/settings/news-center', { method: 'PUT', body: { tabs: tabs.value } }),
   );
   if (wasSaved) {
+    markSaved();
     toasts.success(t('ADMIN_SETTINGS.SAVED'));
   }
 };

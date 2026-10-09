@@ -7,6 +7,13 @@ const localePath = useLocalePath();
 const { fetch: refreshSession } = useUserSession();
 const { isBusy, errorMessage, run } = useApiAction();
 
+// The form posts to an endpoint that exists only with NUXT_E2E_LOGIN; without it this page does not exist either.
+// Only the server knows the setting, so it decides while rendering and hands the answer over.
+const isTestLoginEnabled = useState('testLoginEnabled', () => String(useRuntimeConfig().e2eLogin) === 'true');
+if (!isTestLoginEnabled.value) {
+  throw createError({ statusCode: 404, statusMessage: t('ERROR_PAGE.NOT_FOUND_TITLE'), fatal: true });
+}
+
 const name = ref('Rycerz Testowy');
 const role = ref<UserRole>('admin');
 const roleOptions = computed(() => USER_ROLES.map((value) => ({ value, label: t(userRoleLabelKey(value)) })));

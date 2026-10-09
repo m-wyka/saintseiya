@@ -30,12 +30,13 @@ useSeoMeta({ robots: 'noindex, nofollow' });
 
 <template>
   <div class="flex min-h-dvh flex-col bg-abyss-950 lg:flex-row">
-    <header class="flex items-center justify-between gap-3 cosmo-bar px-4 py-2 lg:hidden">
+    <header class="sticky top-0 z-40 flex h-13 items-center justify-between gap-3 cosmo-bar px-4 lg:hidden">
       <p class="heading-display text-lg text-abyss-950">{{ t('ADMIN_NAV.PANEL_NAME') }}</p>
       <button
         type="button"
         class="cursor-pointer rounded-full p-2 text-abyss-950 hover:bg-black/15"
         :aria-label="t('ADMIN_NAV.PANEL_MENU')"
+        :aria-expanded="isMenuOpen"
         @click="isMenuOpen = !isMenuOpen"
       >
         <AppIcon :name="isMenuOpen ? 'close' : 'menu'" class="text-xl" />
@@ -43,7 +44,7 @@ useSeoMeta({ robots: 'noindex, nofollow' });
     </header>
 
     <aside
-      class="w-full shrink-0 flex-col gap-5 border-aqua-500/15 bg-abyss-900 p-4 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-64 lg:overflow-y-auto lg:border-r"
+      class="w-full shrink-0 flex-col gap-5 border-aqua-500/15 bg-abyss-900 p-4 max-lg:fixed max-lg:inset-x-0 max-lg:top-13 max-lg:bottom-0 max-lg:z-30 max-lg:overflow-y-auto max-lg:overscroll-contain lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-64 lg:overflow-y-auto lg:border-r"
       :class="isMenuOpen ? 'flex' : 'hidden'"
     >
       <NuxtLinkLocale
@@ -56,7 +57,7 @@ useSeoMeta({ robots: 'noindex, nofollow' });
       <p class="px-2 heading-display text-xl text-gold-300 max-lg:hidden">{{ t('ADMIN_NAV.PANEL_NAME') }}</p>
       <nav class="flex flex-col gap-4" :aria-label="t('ADMIN_NAV.ADMIN_PANEL')">
         <div v-for="group in visibleGroups" :key="group.titleKey">
-          <p class="mb-1 px-2 text-[0.65rem] font-semibold tracking-widest text-aqua-500 uppercase">
+          <p class="mb-1 px-2 text-[0.7rem] font-semibold tracking-widest text-aqua-500 uppercase">
             {{ t(group.titleKey) }}
           </p>
           <ul>

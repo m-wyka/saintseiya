@@ -549,6 +549,24 @@ describe('photo administration', () => {
     expect(useDb().select().from(schema.photos).all()).toHaveLength(0);
   });
 
+  it('rejects a picture with more pixels than the server should unpack', async () => {
+    const uploader = createAccount({ role: 'admin' });
+    const album = createAlbum();
+    const hugePicture: MultiPartData = {
+      name: 'file',
+      filename: 'plakat.png',
+      type: 'image/png',
+      data: await sharp({ create: { width: 9000, height: 6000, channels: 3, background: '#0a6c74' } })
+        .png()
+        .toBuffer(),
+    };
+
+    await expect(uploadPhotos(event, album.id, [hugePicture], uploader)).rejects.toThrowError(
+      'ERRORS.IMAGE_DIMENSIONS_TOO_LARGE',
+    );
+    expect(useDb().select().from(schema.photos).all()).toHaveLength(0);
+  });
+
   it('edits the title and description of a photo', () => {
     const album = createAlbum();
     const photo = createPhoto(album.id);

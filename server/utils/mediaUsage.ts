@@ -15,6 +15,7 @@ export const isMediaImageUsed = (image: string): boolean => {
     isFoundIn(schema.news, or(like(schema.news.excerptHtml, mentioned), like(schema.news.bodyHtml, mentioned))) ||
     isFoundIn(schema.pages, like(schema.pages.bodyHtml, mentioned)) ||
     isFoundIn(schema.mapAreas, like(schema.mapAreas.contentHtml, mentioned)) ||
+    isFoundIn(schema.faqItems, like(schema.faqItems.descriptionHtml, mentioned)) ||
     isFoundIn(schema.settings, like(schema.settings.value, mentioned)) ||
     isFoundIn(schema.posts, like(schema.posts.bodyHtml, mentioned)) ||
     isFoundIn(schema.comments, like(schema.comments.bodyHtml, mentioned))

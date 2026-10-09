@@ -69,7 +69,7 @@ const summary = computed(() =>
     </table>
 
     <div v-else class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2">
-      <div class="relative h-40 w-8 text-right text-[0.65rem] text-aqua-500 tabular-nums" aria-hidden="true">
+      <div class="relative h-40 w-8 text-right text-[0.7rem] text-aqua-500 tabular-nums" aria-hidden="true">
         <span
           v-for="share in GRIDLINE_SHARES"
           :key="share"
@@ -108,7 +108,7 @@ const summary = computed(() =>
         </ul>
       </div>
       <span aria-hidden="true" />
-      <ul class="flex gap-0.5 pt-1 text-[0.65rem] text-aqua-500 tabular-nums" aria-hidden="true">
+      <ul class="flex gap-0.5 pt-1 text-[0.7rem] text-aqua-500 tabular-nums" aria-hidden="true">
         <li v-for="(point, index) in points" :key="point.year" class="min-w-0 flex-1 text-center">
           {{ showsLabel(index) ? String(point.year).slice(2) : '' }}
         </li>

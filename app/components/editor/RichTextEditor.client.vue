@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { Selection } from '@tiptap/pm/state';
+import type { Transaction } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import { routes } from '#shared/utils/routes';
+import { editableHtml } from '~/utils/editorContent';
 import { editorExtensions, TEXT_ALIGNMENTS, TEXT_COLORS, TOOLBAR_HEADING_LEVELS } from '~/utils/editorExtensions';
 import type { IconName } from '~/utils/icons';
 
@@ -37,7 +40,7 @@ const ALIGNMENT_ACTIONS: Record<TextAlignment, { titleKey: string; icon: IconNam
 const NEW_TABLE_SIZE = { rows: 3, cols: 3, withHeaderRow: false };
 
 const editor = useEditor({
-  content: model.value,
+  content: editableHtml(model.value),
   extensions: editorExtensions(props.extended),
   editorProps: {
     attributes: {
@@ -56,7 +59,7 @@ watch(model, (html) => {
   if (!instance || html === instance.getHTML() || (html === '' && instance.isEmpty)) {
     return;
   }
-  instance.commands.setContent(html, { emitUpdate: false });
+  instance.commands.setContent(editableHtml(html), { emitUpdate: false });
 });
 
 const command = () => editor.value!.chain().focus();
@@ -65,6 +68,7 @@ const isActive = (name: string | Record<string, unknown>, attributes?: Record<st
 
 const pendingInsert = ref<InsertKind | null>(null);
 const insertUrl = ref('');
+const insertError = ref('');
 
 const insertLabel = computed(() => (pendingInsert.value ? t(INSERT_LABEL_KEYS[pendingInsert.value]) : ''));
 
@@ -73,19 +77,42 @@ const startInsert = (kind: InsertKind) => {
   insertUrl.value = kind === 'link' ? (editor.value?.getAttributes('link').href ?? '') : '';
 };
 
+watch([pendingInsert, insertUrl], () => (insertError.value = ''));
+
+// A node put in by a command stays selected; typing would then replace the picture or film just inserted.
+const moveCursorPastSelection = ({ tr }: { tr: Transaction }) => {
+  const end = tr.selection.to;
+  const textPlaceAfter = () => Selection.findFrom(tr.doc.resolve(end), 1, true);
+  if (!textPlaceAfter()) {
+    tr.insert(end, tr.doc.type.schema.nodes.paragraph!.create());
+  }
+  const cursor = textPlaceAfter();
+  if (cursor) {
+    tr.setSelection(cursor);
+  }
+  return true;
+};
+
 const INSERTERS: Record<InsertKind, (url: string) => void> = {
   link: (url) =>
     (url
       ? command().extendMarkRange('link').setLink({ href: url })
       : command().extendMarkRange('link').unsetLink()
     ).run(),
-  image: (url) => url && command().setImage({ src: url }).run(),
-  video: (url) => url && command().setYoutubeVideo({ src: url }).run(),
+  image: (url) => url && command().setImage({ src: url }).command(moveCursorPastSelection).run(),
+  video: (url) => url && command().setYoutubeVideo({ src: url }).command(moveCursorPastSelection).run(),
 };
 
+const isForeignVideoUrl = (url: string): boolean => Boolean(url) && !editor.value?.can().setYoutubeVideo({ src: url });
+
 const confirmInsert = () => {
+  const url = insertUrl.value.trim();
+  if (pendingInsert.value === 'video' && isForeignVideoUrl(url)) {
+    insertError.value = t('EDITOR.VIDEO_URL_INVALID');
+    return;
+  }
   if (pendingInsert.value) {
-    INSERTERS[pendingInsert.value](insertUrl.value.trim());
+    INSERTERS[pendingInsert.value](url);
   }
   pendingInsert.value = null;
 };
@@ -105,6 +132,7 @@ const uploadImage = async (event: Event) => {
     if (stored) {
       command()
         .setImage({ src: routes.media(stored.image) })
+        .command(moveCursorPastSelection)
         .run();
     }
   });
@@ -250,7 +278,7 @@ const isColorActive = (color: string) => editor.value?.isActive('textStyle', { c
     class="overflow-clip rounded-xl border border-aqua-500/30 bg-black/40 transition duration-200 focus-within:border-cosmo-500 focus-within:shadow-aura"
   >
     <div
-      class="flex flex-wrap items-center gap-1 border-b border-aqua-500/20 bg-abyss-950 px-2 py-1.5"
+      class="carousel-strip flex flex-wrap items-center gap-1 border-b border-aqua-500/20 bg-abyss-950 px-2 py-1.5 max-sm:scroll-hint-end max-sm:flex-nowrap max-sm:contain-inline-size max-sm:*:shrink-0"
       :class="{ 'sticky top-0 z-10': extended }"
       role="toolbar"
       :aria-label="t('EDITOR.TOOLBAR', { label })"
@@ -278,7 +306,7 @@ const isColorActive = (color: string) => editor.value?.isActive('textStyle', { c
           v-for="color in TEXT_COLORS"
           :key="color.value"
           type="button"
-          class="size-6 cursor-pointer rounded-full border-2 transition duration-150 hover:scale-110"
+          class="size-6 cursor-pointer rounded-full border-2 transition duration-150 hover:scale-110 pointer-coarse:size-8"
           :class="isColorActive(color.value) ? 'border-white' : 'border-transparent'"
           :style="{ backgroundColor: color.value }"
           :title="t('EDITOR.TEXT_COLOR', { color: t(color.labelKey) })"
@@ -321,6 +349,7 @@ const isColorActive = (color: string) => editor.value?.isActive('textStyle', { c
         class="flex-1"
         type="url"
         :label="insertLabel"
+        :error="insertError"
         placeholder="https://"
         @keydown.enter.prevent="confirmInsert"
       />

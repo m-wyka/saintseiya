@@ -2,6 +2,7 @@
   "name": "saintseiya",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@12.9.1",
   "engines": {
     "node": ">=22.19"
   },
@@ -15,6 +16,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "legacy:import": "tsx scripts/legacy/importLegacy.ts",
+    "legacy:corrections": "tsx scripts/legacy/applyCorrections.ts",
     "images:check": "tsx scripts/images/checkExternalImages.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",

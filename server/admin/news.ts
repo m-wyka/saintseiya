@@ -1,4 +1,4 @@
-import { and, count, desc, eq, like, ne, sql } from 'drizzle-orm';
+import { and, count, desc, eq, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { CONTENT_STATUSES } from '#shared/utils/content';
 
@@ -61,7 +61,7 @@ export const newsResource = defineAdminResource({
   list: ({ page, search, filter }) => {
     const db = useDb();
     const where = and(
-      search ? like(schema.news.title, `%${search}%`) : undefined,
+      search ? containsText(schema.news.title, search) : undefined,
       filter === 'draft' || filter === 'published' ? eq(schema.news.status, filter) : undefined,
     );
     const items = db

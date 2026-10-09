@@ -1,4 +1,4 @@
-import { and, asc, count, eq, inArray, isNull, like, max, ne, notLike, sql } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, isNull, max, ne, notLike, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { CONTENT_STATUSES, PAGE_KINDS } from '#shared/utils/content';
 import { RESERVED_ROOT_SEGMENTS } from '#shared/utils/routes';
@@ -203,7 +203,7 @@ export const pagesResource = defineAdminResource({
   },
   list: ({ page, search }) => {
     const db = useDb();
-    const where = search ? like(schema.pages.title, `%${search}%`) : undefined;
+    const where = search ? containsText(schema.pages.title, search) : undefined;
     const items = db
       .select(pageRowColumns)
       .from(schema.pages)
@@ -274,7 +274,7 @@ export const findParentCandidates = (search: string, movedPageId: number | null)
   useDb()
     .select({ id: schema.pages.id, title: schema.pages.title, path: schema.pages.path })
     .from(schema.pages)
-    .where(and(like(schema.pages.title, `%${search}%`), outsideSubtreeOf(movedPageId)))
+    .where(and(containsText(schema.pages.title, search), outsideSubtreeOf(movedPageId)))
     .orderBy(asc(schema.pages.path))
     .limit(PARENT_CANDIDATE_COUNT)
     .all();

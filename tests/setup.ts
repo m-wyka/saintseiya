@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   createError,
+  getRequestHeader,
   getRequestIP,
   getRouterParam,
   getValidatedQuery,
@@ -20,6 +21,7 @@ export const testRuntimeConfig = {
   turnstileSecretKey: '',
   adminEmails: 'admin@example.com',
   e2eLogin: 'false',
+  trustedProxyHops: 1,
   public: { siteUrl: 'http://localhost:3000', siteName: 'Saint Seiya Revolution', turnstileSiteKey: '' },
 };
 
@@ -38,8 +40,11 @@ const SERVER_UTILITY_MODULES = [
   '../server/utils/contentLocale',
   '../server/utils/translations',
   '../server/utils/missingImages',
+  '../server/utils/layoutHints',
   '../server/utils/viewer',
   '../server/utils/rateLimit',
+  '../server/utils/clientAddress',
+  '../server/utils/contentSecurityPolicy',
   '../server/utils/captcha',
   '../server/utils/userContent',
   '../server/utils/accounts',
@@ -77,6 +82,7 @@ const expose = (values: Record<string, unknown>) => {
 
 expose({
   createError,
+  getRequestHeader,
   getRequestIP,
   getRouterParam,
   getValidatedQuery,

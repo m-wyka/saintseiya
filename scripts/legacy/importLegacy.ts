@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { createDb } from '../../server/db';
 import { createAssetRegistry } from './assets';
+import { applyContentCorrections } from './corrections';
 import { planImport } from './plan';
 import { readLegacyData } from './read';
 import { createLegacyRewriter } from './rewriter';
@@ -55,8 +56,11 @@ const run = async () => {
   const rewriter = createLegacyRewriter(plan.lookups, assets);
   const db = createDb(dbPath);
   const report = await writeImport(db, uploadsDir, data, plan, rewriter, assets);
+  const corrections = applyContentCorrections(db);
   db.$client.close();
   printReport(report);
+  console.log('Poprawki redakcyjne:');
+  console.table({ ...corrections, unknownPagePaths: corrections.unknownPagePaths.length });
 };
 
 await run();

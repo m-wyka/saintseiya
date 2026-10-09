@@ -60,7 +60,7 @@ export const findPublishedPage = (path: string, locale: ContentLocale = DEFAULT_
   }
   return {
     ...page,
-    bodyHtml: markMissingImages(page.bodyHtml),
+    bodyHtml: markMissingImages(markLayoutHints(page.bodyHtml)),
     breadcrumbs: breadcrumbsOf(page.path, locale),
     children: publishedChildrenOf(page.id, locale),
   };

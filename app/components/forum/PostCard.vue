@@ -58,7 +58,7 @@ const removePost = async () => {
         <p class="truncate font-semibold" :class="post.author.isGhost ? 'text-aqua-300' : 'text-gold-300'">
           {{ post.author.name }}
         </p>
-        <p v-if="post.author.isGhost" class="text-[0.65rem] tracking-wide text-aqua-500 uppercase">
+        <p v-if="post.author.isGhost" class="text-[0.7rem] tracking-wide text-aqua-500 uppercase">
           {{ t('GENERAL.INACTIVE_ACCOUNT') }}
         </p>
         <p class="text-xs text-aqua-500">

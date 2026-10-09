@@ -20,6 +20,7 @@ useSeoMeta({ title: () => t('NEWS.CATEGORY_SEO_TITLE', { name: category.value?.n
       :title="category.name"
       :subtitle="t('NEWS.NEWS_COUNT', { count: formatNumber(category.newsCount) }, category.newsCount)"
     />
+    <NewsCategoryBar v-if="categories" :categories="categories" :active-slug="category.slug" />
     <NewsListing :category-slug="category.slug" />
   </div>
 </template>

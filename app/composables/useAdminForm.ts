@@ -14,6 +14,8 @@ export const useAdminForm = async <Input extends Record<string, unknown>>(option
   const { t } = useI18n();
   const localePath = useLocalePath();
   const { isBusy, errorMessage, run } = useApiAction();
+  const mayCreate = useCreationLocaleGuard();
+  const { markSaved } = useUnsavedChanges(() => input.value);
 
   if (!isNew) {
     const stored = await $fetch<Record<string, unknown>>(`/api/admin/${options.resource}/${options.recordId}`).catch(
@@ -26,15 +28,20 @@ export const useAdminForm = async <Input extends Record<string, unknown>>(option
     input.value = Object.fromEntries(
       knownKeys.map((key) => [key, stored[key as string] ?? options.emptyInput[key]]),
     ) as Input;
+    markSaved();
   }
 
   const save = async () => {
+    if (!(await mayCreate(isNew))) {
+      return;
+    }
     const wasSaved = await run(() =>
       isNew
         ? apiRequest(`/api/admin/${options.resource}`, { method: 'POST', body: input.value })
         : apiRequest(`/api/admin/${options.resource}/${options.recordId}`, { method: 'PUT', body: input.value }),
     );
     if (wasSaved) {
+      markSaved();
       toasts.success(t('GENERAL.SAVED'));
       const listPath = typeof options.listPath === 'function' ? options.listPath(input.value) : options.listPath;
       await navigateTo(localePath(listPath));

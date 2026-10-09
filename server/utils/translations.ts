@@ -101,7 +101,8 @@ export const storeTranslations = (
   for (const [property, kind] of Object.entries(source.fields)) {
     const field = columnNameOf(source, property);
     const value = translationValue(input[property], kind);
-    if (!value || value === base[property]) {
+    const isSameAsOriginal = value === base[property] || value === translationValue(base[property], kind);
+    if (!value || isSameAsOriginal) {
       db.delete(schema.translations)
         .where(
           and(

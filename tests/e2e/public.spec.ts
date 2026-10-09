@@ -90,6 +90,9 @@ test.describe('public site', () => {
   test('news can be browsed by category and by tag', async ({ page }) => {
     await visit(page, '/newsy/kategoria/manga');
     await expect(page.getByRole('heading', { level: 1, name: 'Manga' })).toBeVisible();
+    const categories = page.getByRole('navigation', { name: 'Kategorie newsów' });
+    await expect(categories.getByRole('link', { name: /^Manga/ })).toHaveAttribute('aria-current', 'page');
+    await expect(categories.getByRole('link', { name: 'Wszystkie newsy' })).toHaveAttribute('href', '/newsy');
     await expect(page.getByRole('heading', { name: 'Saint Seiya Revolution powraca!' })).toBeVisible();
 
     await visit(page, '/tagi/lost-canvas');
@@ -255,6 +258,33 @@ test.describe('public site', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await expect.poll(async () => (await starrySky(page)).liveWidth).toBe(0);
     expect(await paintedPixels()).toBeGreaterThan(1000);
+  });
+
+  test('pages come with security headers and full addresses for search engines', async ({ page, baseURL }) => {
+    const blockedByPolicy: string[] = [];
+    page.on('console', (message) => {
+      if (message.text().includes('Content Security Policy')) {
+        blockedByPolicy.push(message.text());
+      }
+    });
+
+    const response = await visit(page, '/newsy');
+    const headers = response!.headers();
+    expect(headers['x-frame-options']).toBe('DENY');
+    expect(headers['x-content-type-options']).toBe('nosniff');
+    expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+    // The dev server leaves the policy out, because Vite injects scripts of its own.
+    if (process.env.E2E_SERVER === 'build') {
+      expect(headers['content-security-policy']).toMatch(/script-src 'self' [^;]*'sha256-/);
+    }
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${baseURL}/newsy`);
+    await expect(page.locator('link[hreflang="en"]')).toHaveAttribute('href', `${baseURL}/en/news`);
+
+    await visit(page, '/newsy/saint-seiya-revolution-powraca');
+    await visit(page, '/');
+    await page.getByRole('button', { name: 'Szukaj', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: 'Szukaj' })).toBeVisible();
+    expect(blockedByPolicy).toEqual([]);
   });
 
   test('visitors cannot open the administration panel', async ({ page }) => {

@@ -42,6 +42,18 @@ const storedNews = (id: number) => useDb().select().from(schema.news).where(eq(s
 describe('translating content in the panel', () => {
   beforeEach(resetDatabase);
 
+  it('does not keep legacy markup as a translation when only the title was translated', () => {
+    const editor = createAccount({ role: 'admin' });
+    const { id } = newsResource.create(newsInput, editor);
+    const legacyBody = '<p class="MsoNormal">Treść  ze starej strony</p><center>środek</center>';
+    useDb().update(schema.news).set({ bodyHtml: legacyBody }).where(eq(schema.news.id, id)).run();
+    const polish = newsResource.find(id) as Record<string, unknown>;
+
+    newsResource.update(id, { ...polish, title: 'New manga chapter' }, editor, 'en');
+
+    expect(storedTranslations().map((translation) => translation.field)).toEqual(['title']);
+  });
+
   it('stores only the changed texts as a translation and leaves the Polish version alone', () => {
     const editor = createAccount({ role: 'admin' });
     const { id } = newsResource.create(newsInput, editor);
@@ -67,6 +79,33 @@ describe('translating content in the panel', () => {
 
     newsResource.update(id, { ...polish, bodyHtml: '' }, editor, 'en');
     expect(storedTranslations()).toEqual([]);
+  });
+
+  it('takes an emptied title of a translation as a wish to use the Polish one', () => {
+    const editor = createAccount({ role: 'admin' });
+    const { id } = newsResource.create(newsInput, editor);
+    const polish = newsResource.find(id) as Record<string, unknown>;
+    newsResource.update(id, { ...polish, title: 'New manga chapter' }, editor, 'en');
+
+    newsResource.update(id, { ...polish, title: '  ' }, editor, 'en');
+
+    expect(storedTranslations()).toEqual([]);
+    expect(newsResource.find(id, 'en')).toMatchObject({ title: newsInput.title });
+    expect(() => newsResource.update(id, { ...polish, title: '' }, editor)).toThrowError();
+    expect(storedNews(id).title).toBe(newsInput.title);
+  });
+
+  it('falls back to the Polish label of a map area whose translation was emptied', () => {
+    const editor = createAccount({ role: 'admin' });
+    const { id } = mapsResource.create(mapInput, editor);
+    const polish = mapsResource.find(id) as StoredRecord;
+    const [area] = polish.areas;
+    mapsResource.update(id, { ...polish, areas: [{ ...area, label: 'Pegasus' }] }, editor, 'en');
+
+    mapsResource.update(id, { ...polish, areas: [{ ...area, label: '' }] }, editor, 'en');
+
+    expect(storedTranslations()).toEqual([]);
+    expect((mapsResource.find(id, 'en') as StoredRecord).areas[0]).toMatchObject({ label: 'Pegaz' });
   });
 
   it('translates map texts, its image and its areas, keeping area translations across edits', () => {

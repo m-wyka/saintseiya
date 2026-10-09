@@ -16,6 +16,9 @@ const isSlugTaken = (slug: string, exceptId?: number): boolean =>
       .get(),
   );
 
+const hasNews = (categoryId: number): boolean =>
+  Boolean(useDb().select({ id: schema.news.id }).from(schema.news).where(eq(schema.news.categoryId, categoryId)).get());
+
 export const newsCategoriesResource = defineAdminResource({
   access: 'news',
   inputSchema,
@@ -60,6 +63,9 @@ export const newsCategoriesResource = defineAdminResource({
       .run();
   },
   remove: (id) => {
+    if (hasNews(id)) {
+      throw conflict('ERRORS.NEWS_CATEGORY_HAS_NEWS');
+    }
     useDb().delete(schema.newsCategories).where(eq(schema.newsCategories.id, id)).run();
   },
 });

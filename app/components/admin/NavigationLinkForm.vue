@@ -17,7 +17,9 @@ const input = ref({
   url: props.link.url,
 });
 const { isBusy, errorMessage, save } = useAdminSave('navigation-links');
+const contentLocale = useContentLocaleStore();
 const { t } = useI18n();
+useUnsavedChanges(() => input.value);
 
 const submit = async () => {
   const wasSaved = await save(props.link.id, input.value);
@@ -30,7 +32,12 @@ const submit = async () => {
 <template>
   <form class="flex flex-col gap-4" @submit.prevent="submit">
     <div class="grid gap-4 md:grid-cols-2">
-      <BaseInput v-model="input.label" :label="t('ADMIN_FORMS.NAV_LINK_LABEL')" :maxlength="80" required />
+      <BaseInput
+        v-model="input.label"
+        :label="t('ADMIN_FORMS.NAV_LINK_LABEL')"
+        :maxlength="80"
+        :required="!contentLocale.isTranslating"
+      />
       <BaseInput
         v-model="input.url"
         :label="t('GENERAL.ADDRESS')"

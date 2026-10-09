@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { openAccountMenu, signIn, visit } from './helpers';
+import { confirmRemoval, openAccountMenu, signIn, visit } from './helpers';
 
 test.describe('administration panel', () => {
   test('the dashboard shows statistics and charts', async ({ page }) => {
@@ -74,6 +74,7 @@ test.describe('administration panel', () => {
       .getByRole('row', { name: /Mitologia/ })
       .getByRole('link', { name: 'Podstrony' })
       .click();
+    await expect(page.getByText(/^\d+ stron(a|y)? na tym poziomie$/)).toBeVisible();
     await page.getByRole('link', { name: 'Dodaj stronę' }).click();
     await page.getByLabel('Tytuł').fill('Rzymska');
     await page.getByRole('textbox', { name: 'Treść' }).click();
@@ -84,6 +85,131 @@ test.describe('administration panel', () => {
     await visit(page, '/mitologia/rzymska');
     await expect(page.getByRole('heading', { level: 1, name: 'Rzymska' })).toBeVisible();
     await expect(page.getByText('Bogowie Rzymu i ich greckie odpowiedniki.')).toBeVisible();
+  });
+
+  test('editing a legacy page keeps the centring and colour of its blocks', async ({ page }) => {
+    await signIn(page, { name: 'Admin Edytora', role: 'admin' });
+    const created = await page.request.post('/api/admin/pages', {
+      data: {
+        title: 'Kroniki Sanktuarium',
+        slug: '',
+        parentId: null,
+        kind: 'article',
+        bodyHtml: [
+          '<div style="text-align:center"><img src="/media/photos/tapeta.png" alt="Baner" /></div>',
+          '<div style="color:#9b8424">Złoty wstęp<sup>1</sup> i <small>drobny druk</small></div>',
+          '<ol> </ol>',
+          '<p>Zwykły akapit.</p>',
+        ].join(''),
+        status: 'published',
+        commentsEnabled: true,
+        tagIds: [],
+      },
+    });
+    const { id } = (await created.json()) as { id: number };
+
+    await visit(page, `/admin/strony/${id}`);
+    await page.getByRole('textbox', { name: 'Treść' }).focus();
+    await page.keyboard.press('Control+End');
+    await page.keyboard.type(' Dopisek.');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page).toHaveURL('/admin/strony');
+
+    const stored = (await (await page.request.get(`/api/admin/pages/${id}`)).json()) as { bodyHtml: string };
+    expect(stored.bodyHtml).toMatch(/<p style="text-align:center"><img src="\/media\/photos\/tapeta\.png"/);
+    expect(stored.bodyHtml).toMatch(/color:#9b8424[^>]*>Złoty wstęp/);
+    expect(stored.bodyHtml).toMatch(/<sup>(<span[^>]*>)?1/);
+    expect(stored.bodyHtml).toMatch(/<small>(<span[^>]*>)?drobny druk/);
+    expect(stored.bodyHtml).not.toContain('<li>');
+    expect(stored.bodyHtml).toContain('Zwykły akapit. Dopisek.');
+  });
+
+  test('the editor says why an address from outside YouTube is not inserted as a film', async ({ page }) => {
+    await signIn(page, { name: 'Admin Filmów', role: 'admin' });
+    await visit(page, '/admin/strony/nowy');
+    const editor = page.getByRole('textbox', { name: 'Treść' });
+    await editor.click();
+
+    await page.getByRole('button', { name: 'Film z YouTube' }).click();
+    await page.getByLabel('Adres filmu na YouTube').fill('https://vimeo.com/76979871');
+    await page.getByRole('button', { name: 'Wstaw', exact: true }).click();
+    await expect(page.getByText('To nie jest adres filmu z YouTube.')).toBeVisible();
+    await expect(editor.locator('iframe')).toHaveCount(0);
+
+    await page.getByLabel('Adres filmu na YouTube').fill('https://www.youtube.com/watch?v=dEY9fXqqaFE');
+    await expect(page.getByText('To nie jest adres filmu z YouTube.')).toBeHidden();
+    await page.getByRole('button', { name: 'Wstaw', exact: true }).click();
+    await expect(editor.locator('iframe')).toHaveCount(1);
+  });
+
+  test('the panel guards translations against lost and misplaced work', async ({ page }) => {
+    await signIn(page, { name: 'Admin Przekładu', role: 'admin' });
+    const created = await page.request.post('/api/admin/news', {
+      data: {
+        title: 'Zbroja Strzelca',
+        slug: '',
+        categoryId: null,
+        tagIds: [],
+        excerptHtml: '',
+        bodyHtml: '',
+        status: 'published',
+        commentsEnabled: true,
+        publishedAt: null,
+      },
+    });
+    const { id } = (await created.json()) as { id: number };
+    const contentLanguage = page.getByRole('group', { name: 'Język treści' });
+    const confirmation = page.getByRole('dialog', { name: 'Potwierdzenie' });
+
+    await visit(page, `/admin/newsy/${id}`);
+    await page.getByLabel('Tytuł').fill('Zmieniony tytuł');
+    await contentLanguage.getByRole('button', { name: 'en' }).click();
+    await expect(confirmation.getByText('niezapisane zmiany przepadną')).toBeVisible();
+    await confirmation.getByRole('button', { name: 'Anuluj' }).click();
+    await expect(page.getByLabel('Tytuł')).toHaveValue('Zmieniony tytuł');
+    await expect(contentLanguage.getByRole('button', { name: 'pl' })).toHaveAttribute('aria-pressed', 'true');
+
+    await contentLanguage.getByRole('button', { name: 'en' }).click();
+    await confirmation.getByRole('button', { name: 'Tak' }).click();
+    await expect(page.getByText('Edytujesz wersję angielską.')).toBeVisible();
+    await expect(page.getByLabel('Tytuł')).toHaveValue('Zbroja Strzelca');
+    await page.getByLabel('Tytuł').fill('Sagittarius Cloth');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page).toHaveURL('/admin/newsy');
+    await visit(page, '/en/news/zbroja-strzelca');
+    await expect(page.getByRole('heading', { level: 1, name: 'Sagittarius Cloth' })).toBeVisible();
+
+    await visit(page, `/admin/newsy/${id}`);
+    await contentLanguage.getByRole('button', { name: 'en' }).click();
+    await expect(page.getByLabel('Tytuł')).toHaveValue('Sagittarius Cloth');
+    await page.getByLabel('Tytuł').fill('');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page).toHaveURL('/admin/newsy');
+
+    await page.getByRole('link', { name: 'Tagi', exact: true }).click();
+    await page.getByRole('button', { name: 'Dodaj tag' }).click();
+    await page.getByLabel('Nazwa').fill('Asgard');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(confirmation.getByText('nowa pozycja zawsze zapisuje się jako polska')).toBeVisible();
+    await confirmation.getByRole('button', { name: 'Tak' }).click();
+    await expect(page.getByRole('cell', { name: 'asgard', exact: true })).toBeVisible();
+
+    await visit(page, '/en/news/zbroja-strzelca');
+    await expect(page.getByRole('heading', { level: 1, name: 'Zbroja Strzelca' })).toBeVisible();
+  });
+
+  test('the panel refuses to remove a category with news and to add a tag that exists', async ({ page }) => {
+    await signIn(page, { name: 'Admin Porządków', role: 'admin' });
+    await visit(page, '/admin/kategorie');
+    await confirmRemoval(page.getByRole('row', { name: /Manga/ }), 'tę kategorię');
+    await expect(page.getByText('W tej kategorii są newsy.')).toBeVisible();
+    await expect(page.getByRole('row', { name: /Manga/ })).toBeVisible();
+
+    await visit(page, '/admin/tagi');
+    await page.getByRole('button', { name: 'Dodaj tag' }).click();
+    await page.getByLabel('Nazwa').fill('lost canvas');
+    await page.getByRole('button', { name: 'Zapisz' }).click();
+    await expect(page.getByRole('alert').filter({ hasText: 'Tag o tej nazwie już istnieje.' })).toBeVisible();
   });
 
   test('an administrator draws a map area that leads to an address', async ({ page }) => {

@@ -10,6 +10,7 @@ Przepisanie portalu fanowskiego o anime Saint Seiya (Rycerze Zodiaku) ze starego
 | `legacy/wwyka_saintseiya_1791133520.sql` | Zrzut bazy MySQL — jedyne źródło treści do migracji. |
 | `legacy/themes/saintseiya-g-angeltheme3/` | Aktywny motyw — baza nowego wyglądu. Pozostałe katalogi w `themes/` ignoruję. |
 | `STATUS.md` | Aktualny stan prac, rzeczy niesprawdzone, otwarte decyzje i następne kroki. Czytać na początku sesji, aktualizować na końcu. |
+| `docs/historia-sesji.md` | Zapis wcześniejszych sesji, wyjęty ze `STATUS.md`. Czytać tylko wtedy, gdy trzeba sprawdzić, skąd wzięła się dawna decyzja; po sesji przenosić tam jej opis ze `STATUS.md`. |
 | `docs/legacy.md` | Wyniki analizy legacy: tabele, liczby, kodowanie, mapa plików, paleta, stare adresy. Czytać przed pracą nad migracją lub wyglądem. |
 | `/Users/mwyka/Work/dot-sport-shop/` | Wzorzec reguł Prettier i ESLint oraz układu testów. Kopiować reguły, nie logikę sklepu. |
 | Bieżąca dokumentacja Nuxt, Nitro, Tailwind, Pinia | Wersje i API sprawdzać w aktualnych źródłach, nie z pamięci. |
@@ -46,7 +47,7 @@ Przepisanie portalu fanowskiego o anime Saint Seiya (Rycerze Zodiaku) ze starego
 **Backend**
 - Nitro (wbudowany w Nuxt), bez osobnego serwera API
 - SQLite (`better-sqlite3`) + Drizzle ORM
-- Hosting: VPS lub Render z trwałym dyskiem; baza i wgrane pliki leżą na dysku serwera
+- Hosting: VPS z trwałym dyskiem; baza i wgrane pliki leżą na dysku serwera
 - Sesja i Google OAuth przez `nuxt-auth-utils`
 
 **Jakość**
@@ -60,13 +61,16 @@ Przepisanie portalu fanowskiego o anime Saint Seiya (Rycerze Zodiaku) ze starego
 - `pnpm check` — lint, format, typy, testy Vitest. Musi przejść przed uznaniem zmiany za gotową.
 - `pnpm test:e2e` — testy Playwright; same stawiają serwer i bazę w `.data/e2e`.
 - `pnpm db:generate` — po każdej zmianie `server/db/schema.ts`.
+- `pnpm legacy:corrections` — nakłada poprawki redakcyjne z `scripts/legacy/corrections.ts` (miejsca i adresy podstron w drzewie, tytuły podstron, FAQ, nazwa kategorii) na istniejącą bazę; importer robi to sam na końcu.
 - `pnpm legacy:import --force`, potem `pnpm images:check` — odtworzenie bazy z legacy (wymaga pomocniczego MySQL, patrz `docs/legacy.md`). Nigdy na bazie z treściami nowych użytkowników ani z wpisanymi tłumaczeniami — import kasuje też tabelę `translations`.
 - Node 22: przed komendami ustawić `PATH` na Node 22 z nvm (domyślny w powłoce to 18).
 
 ## Wzorce w kodzie
 
-- **Odczyt publiczny**: funkcja w `server/utils/<obszar>.ts`, cienki handler w `server/api/`. Treść HTML wychodząca na stronę przechodzi przez `markMissingImages`.
+- **Odczyt publiczny**: funkcja w `server/utils/<obszar>.ts`, cienki handler w `server/api/`. Treść HTML wychodząca na stronę przechodzi przez `markMissingImages`, a treść podstron i newsów także przez `markLayoutHints` (klasy dla nagłówków z pogrubień i tabel z samych grafik — baza trzyma HTML bez klas).
 - **Zapis od użytkownika**: `requireAccount`, limit `assertWithinRateLimit`, `verifyCaptcha`, czyszczenie przez `cleanUserHtml`.
+- **Adres odwiedzającego**: tylko przez `clientAddressOf(event)` — sam wybiera właściwą pozycję z `X-Forwarded-For` według `NUXT_TRUSTED_PROXY_HOPS`.
+- **Nagłówki bezpieczeństwa**: stałe w `routeRules` w `nuxt.config.ts`, `Content-Security-Policy` w `server/plugins/contentSecurityPolicy.ts` (tylko w buildzie; skrypty inline Nuxta dopuszcza po skrócie). Nowe zewnętrzne źródło skryptu, ramki lub połączenia trzeba dopisać w `server/utils/contentSecurityPolicy.ts`.
 - **Panel administratora**: zasób = plik w `server/admin/` zbudowany przez `defineAdminResource` (walidacja Zod, `list/find/create/update/remove`), zarejestrowany w `server/admin/index.ts` lub `server/admin/groups/*`. Obsługują go wspólne handlery `server/api/admin/[resource]/`. Strony panelu używają `useAdminList`, `useAdminForm`, `SimpleCrud`, `AdminTable`.
 - **Dziennik zmian**: każdy zapis w panelu, moderacji i na koncie trafia do `audit_logs` — handler owija zmianę w `audited({ actor, table, id, locale }, () => zmiana)` albo woła `recordAudit` (oba w `server/utils/auditLog.ts`). Nowy endpoint zapisujący = wpis w dzienniku; nowa tabela = pozycja w `AUDIT_ENTITIES` (`shared/utils/audit.ts`) i klucz `AUDIT.ENTITY_*`. E-maile, identyfikatory Google i adresy IP do dziennika nie trafiają.
 - **Uprawnienia**: `canAccess` / `hasPermission` z `shared/utils/roles.ts`; serwer zawsze sprawdza je sam (`requireAdminAccess`), front tylko ukrywa elementy.
@@ -76,7 +80,8 @@ Przepisanie portalu fanowskiego o anime Saint Seiya (Rycerze Zodiaku) ze starego
 - **Odnośniki i nawigacja**: `routes.*` zwraca polskie ścieżki; na język przekłada je `<NuxtLinkLocale>` (także w `BaseButton`), a w kodzie `navigateTo(localePath(...))`. Porównania z bieżącym adresem przez `useCurrentSitePath()`, parametry trasy przez `useRouteParam()`.
 - **Komunikaty z serwera**: serwer nie tłumaczy — w `statusMessage` i komunikatach Zod zwraca klucz (`ERRORS.*`, `VALIDATION.*`), z parametrami przez `messageKey()` z `shared/utils/messages.ts`. Front tłumaczy je w `apiErrorMessage` / `translateMessage`.
 - **Treści w dwóch językach**: tabele trzymają wersję polską, tłumaczenia leżą w tabeli `translations` (`entity` = nazwa tabeli SQL, `entity_id`, `field` = nazwa kolumny SQL, `locale`, `value`). Odczyt publiczny bierze `locale` jako ostatni parametr (handler podaje `contentLocaleOf(event)`) i owija tłumaczalne kolumny w `localized(kolumna, locale)` — brak tłumaczenia daje treść polską. W obiektach z `LEFT JOIN` pierwsze pole musi zostać zwykłą kolumną. Slugi i adresy nie są tłumaczone.
-- **Tłumaczenia w panelu**: zasób deklaruje `translatable: { table, fields, children? }` w `defineAdminResource`; wspólne handlery zapisują wtedy wersję EN do `translations`, a pola nietłumaczalne do rekordu. Język edycji wybiera `ContentLocaleSwitch` (stan w `useContentLocaleStore`), a `app/plugins/contentLocale.client.ts` dokleja go do żądań nagłówkiem `x-content-locale`. Grafika per język to zwykłe pole tekstowe ze ścieżką (`image: 'text'`).
+- **Tłumaczenia w panelu**: zasób deklaruje `translatable: { table, fields, children? }` w `defineAdminResource`; wspólne handlery zapisują wtedy wersję EN do `translations`, a pola nietłumaczalne do rekordu. Język edycji wybiera `ContentLocaleSwitch` (stan w `useContentLocaleStore`), a `app/plugins/contentLocale.client.ts` dokleja go do żądań nagłówkiem `x-content-locale`. Grafika per język to zwykłe pole tekstowe ze ścieżką (`image: 'text'`). Puste pole tłumaczenia znaczy „użyj polskiego”, więc pola tłumaczalne nie są w trybie EN wymagane. Nowy formularz panelu zgłasza niezapisane zmiany przez `useUnsavedChanges`, a tworzenie rekordu poza `useAdminForm` / `useAdminSave` przechodzi przez `useCreationLocaleGuard` (nowy rekord jest zawsze polski).
+- **Edytor treści**: stary HTML trafia do edytora przez `editableHtml` (`app/utils/editorContent.ts`), które przenosi na akapity i tekst to, co edytor zgubiłby razem z nieznanym mu znacznikiem. Znacznik bez węzła lub znaku w `app/utils/editorExtensions.ts` znika przy pierwszej edycji, nawet jeśli serwer go dopuszcza.
 - **Podzapytania skorelowane w Drizzle**: kolumny przez `qualified()` z `server/utils/sqlHelpers.ts`, inaczej nazwa tabeli znika i warunek porównuje kolumnę samą ze sobą.
 - **Testy**: logika serwera w `tests/integration` na tymczasowej bazie (`tests/setup.ts`, `fixtures.ts`); nowy plik w `server/utils/` dopisać do listy w `tests/setup.ts`. Ścieżki użytkownika w `tests/e2e`, strony otwierać przez `visit()`.
 
