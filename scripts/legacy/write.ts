@@ -23,6 +23,8 @@ const PUBLIC_VISIBILITY_LEVELS = new Set([0, 101]);
 const STAFF_ACCESS_LEVEL = 102;
 const YOUTUBE_ID_PATTERN = /^[\w-]{11}$/;
 const NEWS_CENTER_TABS_SETTING = 'newsCenterTabs';
+// The 2013 contest sheets and the VIP account rules: removed from the portal on the owner's decision.
+const RETIRED_DOWNLOAD_IDS = new Set([1, 2, 3]);
 
 const COMMENT_TARGET_BY_LEGACY_TYPE: Record<string, CommentTarget> = { N: 'news', C: 'page', P: 'photo', V: 'video' };
 
@@ -95,6 +97,9 @@ const preparePhotos = async (context: WriteContext, uploadsDir: string): Promise
 const prepareDownloads = async (context: WriteContext): Promise<PreparedDownload[]> => {
   const prepared: PreparedDownload[] = [];
   for (const download of context.data.downloads) {
+    if (RETIRED_DOWNLOAD_IDS.has(download.id)) {
+      continue;
+    }
     const legacyPath = `downloads/${download.file}`;
     if (!(await context.assets.exists(legacyPath))) {
       context.report.missingFiles.push(legacyPath);

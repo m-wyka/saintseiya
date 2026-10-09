@@ -46,7 +46,7 @@ pnpm legacy:import --force   # .data/saintseiya.db + .data/uploads od zera, ok. 
 pnpm images:check            # sprawdza zewnętrzne obrazki, ok. 4 min, wymaga sieci
 ```
 
-Wynik importu z 2026-10-05: 339 kont archiwalnych, 379 newsów, 807 podstron (w tym 73 węzły grupujące), 4 mapy ze 166 obszarami, 348 tematów, 11 258 postów, 2 259 komentarzy, 319 zdjęć, 74 filmy, 3 680 wpisów shoutboxa, 80 ankiet, 58 linków, 6 plików. Pominięte: 74 puste podstrony, 5 postów bez tematu, 41 zdjęć bez pliku, 44 komentarze do treści, których nie ma.
+Wynik importu z 2026-10-05: 339 kont archiwalnych, 379 newsów, 807 podstron (w tym 73 węzły grupujące), 4 mapy ze 166 obszarami, 348 tematów, 11 258 postów, 2 259 komentarzy, 319 zdjęć, 74 filmy, 3 680 wpisów shoutboxa, 80 ankiet, 58 linków, 6 plików (od 2026-10-09 importer pomija trzy z nich: dwie karty konkursu z 2013 r. i regulamin konta VIP). Pominięte: 74 puste podstrony, 5 postów bez tematu, 41 zdjęć bez pliku, 44 komentarze do treści, których nie ma.
 
 Obrazki zewnętrzne: 2 553 adresy, z czego 1 701 odpowiada, a 852 jest martwych (najwięcej z Photobucket, ImageShack i Dropbox). Martwe wyświetlają się jako zaślepka „Nie znaleziono zdjęcia” z odnośnikiem do oryginalnego adresu. Photobucket może zwracać obrazek ze znakiem wodnym zamiast oryginału — tego sprawdzanie nie odróżnia.
 

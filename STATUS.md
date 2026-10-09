@@ -14,11 +14,11 @@ Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportow
 | CI (`.github/workflows/ci.yml`) | nie uruchomione | te same kroki przeszły lokalnie; na GitHubie ruszy po wypchnięciu |
 
 - **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**). Cały kod jest na gałęzi `staging`. `main` ma tylko początkowy commit z pustym README i na razie go nie ruszamy; `staging` wyrasta z niego, więc da się je później scalić. `legacy/`, `.data/`, `.env` są ignorowane.
-- **Niezacommitowane**: zmiany z sesji 2026-10-09 (lista w „Zrobione w ostatniej sesji”) leżą w katalogu roboczym na `staging` — czekają na decyzję Mateusza o commicie. Wszystko wcześniejsze jest w repozytorium i wypchnięte (`staging` równe z `origin/staging`, ostatni commit `86ccab0`).
+- **Commity**: praca z sesji 2026-10-09 jest w commicie `5d876ce` na `staging` (Mateusz), **jeszcze niewypchniętym** — `staging` jest o jeden commit przed `origin/staging`. Niezacommitowane zostają tylko zmiany zrobione po nim: wyjątek w importerze dla usuniętych plików (`scripts/legacy/write.ts`), `docs/legacy.md` i ten plik.
 - **Dostęp do GitHuba**: na pierwszym komputerze `origin` używa aliasu SSH `git@github-m-wyka:m-wyka/saintseiya.git` (jak `dot-sport-shop`), bo domyślne dane GitHuba należą tam do innego konta, bez prawa zapisu. Na drugim komputerze do wypychania potrzebny jest dostęp konta `m-wyka`; nie ma tu `gh`.
 - **Procesy**: z tej sesji nic nie zostało w tle. W jej trakcie na porcie 3000 działał `pnpm dev` uruchomiony przez Mateusza — nie mój, zostawiłem go. Po moich równoległych serwerach może odpowiadać `504 Outdated Optimize Dep` na stronach z edytorem; pomaga restart (patrz „Kilka serwerów naraz”).
-- **Baza**: `.data/saintseiya.db` z importu 2026-10-05 (migracje 0000–0004), obrazki zewnętrzne sprawdzone. Ta sesja jej nie zmieniła. Ma 339 kont archiwalnych i 3 konta testowe (id 340–342, dwa z rolą administratora) — do usunięcia przed wdrożeniem; tłumaczeń nie ma żadnych. Na tym komputerze są baza i `.data/uploads`; nie ma `legacy/` ani pomocniczego MySQL.
-- **Baza na pierwszym komputerze (macOS)**: 2026-10-05 podmieniona na eksport z Windows, pobrany z Dysku Google (`saintseiya/saintseiya-export-2026-10-05/`: `saintseiya.db` + `uploads.zip`) — ta sama co tutaj. Poprzednie dane leżą tam w `.data/backup-before-import-2026-10-05/` (190 MB) — można usunąć, gdy niepotrzebne.
+- **Baza**: `.data/saintseiya.db` z importu 2026-10-05 (migracje 0000–0004), obrazki zewnętrzne sprawdzone. 2026-10-09 zmieniona na polecenie Mateusza: usunięte trzy pliki do pobrania i rozpakowane puste odnośniki (opis w „Zrobione w ostatniej sesji”); kopia sprzed zmian leży w `.data/backup-2026-10-09/` (baza i trzy usunięte pliki, 25 MB) — można usunąć, gdy niepotrzebna. Ma 339 kont archiwalnych i 3 konta testowe (id 340–342, dwa z rolą administratora) — do usunięcia przed wdrożeniem; tłumaczeń nie ma żadnych. Na tym komputerze są baza i `.data/uploads`; nie ma `legacy/` ani pomocniczego MySQL.
+- **Baza na pierwszym komputerze (macOS)**: eksport z Windows z 2026-10-05 — **starszy niż baza tutaj** (nie ma porządków z 2026-10-09). Przed dalszą pracą na Macu przenieść stąd świeży eksport bazy i `.data/uploads`. Poprzednie dane leżą tam w `.data/backup-before-import-2026-10-05/` (190 MB) — można usunąć, gdy niepotrzebne.
 - **Kopia do przeglądu**: `.data/review/saintseiya.db` (kopia bazy z 2026-10-09 z dwoma dodatkowymi kontami „Recenzent …”) i obok skrypty pomocnicze do zrzutów i audytów — opis w „Jak wznowić pracę”. Poza repozytorium, można usunąć w całości.
 - **`.env` na tym komputerze**: ma wszystkie zmienne z `.env.example` (wartości nie sprawdzałem) oraz `NUXT_E2E_LOGIN`.
 
@@ -54,7 +54,14 @@ Na drugim komputerze:
 
 ## Zrobione w ostatniej sesji
 
-Sesja 2026-10-09 na Windows; wszystko niżej jest niezacommitowane.
+Sesja 2026-10-09 na Windows. Wszystko niżej jest w commicie `5d876ce`, poza sekcją „Porządki w bazie”, która powstała po nim.
+
+**Porządki w bazie** (po commicie, na polecenie Mateusza; baza zmieniona bezpośrednio, bez wpisów w dzienniku zmian):
+
+- Z „Plików do pobrania” usunięte „Karta zadań”, „Karta odpowiedzi” (konkurs z 2013 r., z adresem e-mail w opisach) i „Regulamin konta VIP” — wiersze w bazie i pliki z `.data/uploads/legacy/downloads/`. Zostały trzy pliki: oba tomy Gigantomachii i napisy do „Legend of Sanctuary”. Importer pomija te trzy pozycje (`RETIRED_DOWNLOAD_IDS` w `scripts/legacy/write.ts`), więc ponowny import ich nie przywróci.
+- Puste odnośniki: 113 odnośników bez tekstu i obrazka w 55 wierszach (63 w podstronach, 34 w treści newsów, 16 w zajawkach) zostało rozpakowanych — znacznik `<a>` zniknął, to, co miał w środku (spacja, `<br>`), zostało. W postach, komentarzach, shoutboksie, mapach, FAQ i tłumaczeniach nie było żadnego.
+- Sprawdzone na działającej stronie: `/api/downloads` zwraca trzy pliki, stary adres pliku i pobranie nr 1 dają 404, w wyrenderowanej `/redakcja` nie ma pustych odnośników, `PRAGMA integrity_check` zwraca `ok`. Wyjątek w importerze sprawdzony tylko typami — importu nie da się tu uruchomić.
+- Skrypt jednorazowy: `.data/review/cleanup.mjs` (bez `--apply` tylko liczy). Na Macu nie trzeba go powtarzać, jeśli baza zostanie przeniesiona stąd.
 
 **Brakujące scenariusze e2e** (nowy plik `tests/e2e/structure.spec.ts`; pomocnik `confirmRemoval` przeniesiony do `helpers.ts`, `signIn` zwraca konto):
 
@@ -103,7 +110,7 @@ Sesja 2026-10-09 na Windows; wszystko niżej jest niezacommitowane.
 **Dostępność** (axe-core na 21 stronach publicznych, 15 stronach panelu i formularzy oraz 5 stronach przy 390 px):
 
 - Poprawione: brak `h1` na stronie głównej, przeskok z `h1` na `h3` na listach newsów i video, `role="tabpanel"` na `<article>`, powtórzone opisy obrazków map, drugi nieopisany `<aside>` w formularzach panelu.
-- Po poprawkach axe nie zgłasza nic na stronach głównej, newsów, video i map. Zostają puste odnośniki w treści z legacy (patrz „Uwagi z przeglądu”).
+- Po poprawkach axe nie zgłasza nic na stronach głównej, newsów, video i map. Puste odnośniki w treści z legacy zostały potem usunięte z bazy (patrz „Porządki w bazie”).
 - Lighthouse: dostępność 100 na stronie głównej, newsie, temacie forum i podstronie z tabelami (lista newsów miała 98 przed poprawką nagłówków; po niej nie mierzona), SEO 100.
 
 **Wydajność** (Lighthouse na buildzie produkcyjnym z zaimportowaną bazą). Liczby są zaniżone z dwóch powodów: komputer był w tym czasie obciążony, a przeglądarka dostawała tu pliki statyczne bez kompresji (patrz „Kilka serwerów naraz” na końcu pliku).
@@ -370,18 +377,16 @@ Uwagi z trzech przeglądów z 2026-10-09, których nie poprawiałem — część
 
 ## Decyzje dla Mateusza
 
-1. **Commit zmian z sesji 2026-10-09** — leżą w katalogu roboczym na `staging`. Po wypchnięciu pierwszy raz ruszy CI na GitHubie.
+1. **Wypchnięcie commita `5d876ce`** — po nim pierwszy raz ruszy CI na GitHubie. Z tego komputera potrzebny jest do tego dostęp konta `m-wyka`.
 2. **Repozytorium na GitHubie jest publiczne** — zostaje publiczne czy przełączyć na prywatne? W `docs/legacy.md` są wymienione nazwy prywatnych plików z `legacy/` (same nazwy, bez treści). Z tego komputera nie da się tego przełączyć (brak `gh` i dostępu konta `m-wyka`); na GitHubie: Settings → General → Danger Zone → Change repository visibility.
-3. **Stare pliki konkursowe** w „Plikach do pobrania”: „Karta zadań” i „Karta odpowiedzi” z konkursu z 2013 r. (w opisach adres e-mail konkursu) oraz „Regulamin konta VIP”. Zostają publicznie, znikają w całości, czy zostają bez adresu e-mail w opisie? Da się to zrobić w panelu (Pliki), zmiana dotyczy tylko bazy.
-4. **Pobranie działających obrazków zewnętrznych na własny serwer** (1701 adresów). Chroni przed ich zniknięciem i przed blokowaniem obrazków `http://` na stronie `https://` (Lighthouse zgłasza je jako niezabezpieczone żądania). Nie robiłem bez zgody.
-5. **Sekcja Multimedia** (odcinki, skany, soundtracki). Strony są publiczne zgodnie z decyzją, ale nie ma ich w menu — w legacy te odnośniki widział tylko właściciel. Dodać do menu czy zostawić?
-6. **Hosting**: VPS czy Render, domena, kopie zapasowe. Pomiary i zalecane parametry VPS w sekcji „Wymagania serwera” niżej.
-7. **Klucze**: Google OAuth, Cloudflare Turnstile, `NUXT_ADMIN_EMAILS`.
-8. **Statystyki portalu** — nie są nigdzie pokazywane (`SiteStatistics.vue` czeka na miejsce). Gdzie mają wrócić (stopka, strona główna?) i czy „Rycerzy” ukrywać przy zerze, czy liczyć też konta archiwalne (339)?
-9. **Nagłówek** — gość ma język schowany w menu „Zaloguj” (dwa kliknięcia do EN); alternatywa to przełącznik PL/EN na wierzchu paska. Rozmiar odnośników (`text-xs`) do oceny — przy 1024 px zmieściłby się też poprzedni `text-sm`.
-10. **Usunięte filmy** — 36 z 74 filmów nie istnieje już na YouTube, w tym cztery najnowsze, które trafiają na stronę główną. Do wyboru: sprawdzać filmy skryptem (jak `pnpm images:check` dla obrazków) i pomijać usunięte na stronie głównej, usunąć je z bazy w panelu albo podmienić adresy na działające kopie. Do tego czasu strona główna i `/video` pokazują zaślepki.
-11. **Puste odnośniki w treści z legacy** — 102 odnośniki bez tekstu i obrazka (56 w podstronach, 46 w newsach; m.in. 8 na `/redakcja`) zostały po obrazkach, których już nie ma. Nowe zapisy i ponowny import usuwają je same; istniejącą bazę trzeba by przeczyścić jednorazowo. Nie ruszałem bazy bez zgody.
-12. **Wygląd** — uwagi z przeglądu są w „Uwagi z przeglądu (niepoprawione)”. Grafiki z legacy czekają na wersje w lepszej jakości.
+3. **Pobranie działających obrazków zewnętrznych na własny serwer** (1701 adresów). Chroni przed ich zniknięciem i przed blokowaniem obrazków `http://` na stronie `https://` (Lighthouse zgłasza je jako niezabezpieczone żądania). Nie robiłem bez zgody.
+4. **Sekcja Multimedia** (odcinki, skany, soundtracki). Strony są publiczne zgodnie z decyzją, ale nie ma ich w menu — w legacy te odnośniki widział tylko właściciel. Dodać do menu czy zostawić?
+5. **Hosting**: VPS czy Render, domena, kopie zapasowe. Pomiary i zalecane parametry VPS w sekcji „Wymagania serwera” niżej.
+6. **Klucze**: Google OAuth, Cloudflare Turnstile, `NUXT_ADMIN_EMAILS`.
+7. **Statystyki portalu** — nie są nigdzie pokazywane (`SiteStatistics.vue` czeka na miejsce). Gdzie mają wrócić (stopka, strona główna?) i czy „Rycerzy” ukrywać przy zerze, czy liczyć też konta archiwalne (339)?
+8. **Nagłówek** — gość ma język schowany w menu „Zaloguj” (dwa kliknięcia do EN); alternatywa to przełącznik PL/EN na wierzchu paska. Rozmiar odnośników (`text-xs`) do oceny — przy 1024 px zmieściłby się też poprzedni `text-sm`.
+9. **Usunięte filmy** — 36 z 74 filmów nie istnieje już na YouTube, w tym cztery najnowsze, które trafiają na stronę główną. Do wyboru: sprawdzać filmy skryptem (jak `pnpm images:check` dla obrazków) i pomijać usunięte na stronie głównej, usunąć je z bazy w panelu albo podmienić adresy na działające kopie. Do tego czasu strona główna i `/video` pokazują zaślepki.
+10. **Wygląd** — uwagi z przeglądu są w „Uwagi z przeglądu (niepoprawione)”. Grafiki z legacy czekają na wersje w lepszej jakości.
 
 ## Wymagania serwera
 
@@ -423,9 +428,9 @@ Pomiar z 2026-10-05 na kopii projektu poza repozytorium (macOS, M2 Max, Node 22.
 
 ## Następne kroki
 
-1. Commit zmian z 2026-10-09 na `staging` (po zgodzie Mateusza) i wypchnięcie — sprawdzić pierwszy przebieg CI na GitHubie.
+1. Wypchnięcie `staging` (commit `5d876ce` i późniejsze) — sprawdzić pierwszy przebieg CI na GitHubie.
 2. Na Macu: obejrzeć stronę w prawdziwym Safari i na iPhonie (lista w „Zrobione w ostatniej sesji”) oraz usunąć `legacy/php-cgi53.core` (653 MB zrzutu pamięci; decyzja Mateusza z 2026-10-09: usunąć — na tym komputerze nie ma katalogu `legacy/`).
-3. Decyzje 2 i 3 (repozytorium, pliki konkursowe), potem pozostałe z listy.
+3. Decyzja 2 (repozytorium publiczne czy prywatne), potem pozostałe z listy.
 4. Klucze Google i Turnstile, test prawdziwego logowania.
 5. Hosting i wdrożenie: reverse proxy z kompresją HTML i nagłówkiem `X-Forwarded-For`, `NUXT_PUBLIC_SITE_URL` ustawione już przy `pnpm build` (inaczej `hreflang`, mapa strony i RSS wskażą `localhost`), usunięcie kont testowych z bazy.
 6. Scalenie `staging` do `main`, gdy Mateusz zdecyduje. Do tego czasu commity tylko na `staging`.
