@@ -4,17 +4,17 @@ Stan na 2026-10-09, koniec sesji na drugim komputerze (Windows, `E:\work\saintse
 
 ## Gdzie jesteśmy
 
-Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportowanych danych. Panel i moderacja mają scenariusze e2e, wygląd był przeglądany na telefonie, w silnikach Firefoksa i Safari oraz na komputerze, są mapa strony, RSS i workflow CI. Nie ma podpiętego prawdziwego logowania Google ani hostingu, a CI nie ruszyło jeszcze na GitHubie.
+Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportowanych danych. Panel i moderacja mają scenariusze e2e, wygląd był przeglądany na telefonie, w silnikach Firefoksa i Safari oraz na komputerze, są mapa strony, RSS i workflow CI. Nie ma podpiętego prawdziwego logowania Google ani hostingu. CI przeszło na GitHubie pierwszy raz 2026-10-09.
 
 | Kontrola | Wynik | Kiedy |
 |---|---|---|
 | `pnpm check` (lint, format, typy, Vitest) | zielone, 345 testów w 32 plikach | 2026-10-09, Windows, w katalogu projektu i w czystej kopii |
 | `pnpm build` | przechodzi | 2026-10-09, Windows, w czystej kopii projektu (w katalogu projektu nie puszczać obok działającego `pnpm dev`) |
 | `pnpm test:e2e` (Playwright) | zielone, 50 testów | 2026-10-09, Windows, na buildzie produkcyjnym (`E2E_SERVER=build`) w czystej kopii; w trybie dev pełnego przebiegu po ostatnich zmianach nie było |
-| CI (`.github/workflows/ci.yml`) | nie uruchomione | te same kroki przeszły lokalnie; na GitHubie ruszy po wypchnięciu |
+| CI (`.github/workflows/ci.yml`) | zielone | 2026-10-09, pierwszy przebieg na GitHubie, `main`, commit `7292250`: `pnpm check`, `pnpm build` i Playwright na buildzie, razem ok. 3 min. Osobnego przebiegu dla `staging` na liście nie ma |
 
-- **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**). Cały kod jest na gałęzi `staging`. `main` ma tylko początkowy commit z pustym README i na razie go nie ruszamy; `staging` wyrasta z niego, więc da się je później scalić. `legacy/`, `.data/`, `.env` są ignorowane.
-- **Commity**: praca z sesji 2026-10-09 jest w commicie `5d876ce` na `staging` (Mateusz), **jeszcze niewypchniętym** — `staging` jest o jeden commit przed `origin/staging`. Niezacommitowane zostają tylko zmiany zrobione po nim: wyjątek w importerze dla usuniętych plików (`scripts/legacy/write.ts`), `docs/legacy.md` i ten plik.
+- **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**). `staging` i `main` wskazują na ten sam commit `7292250`, lokalnie i na `origin` (sprawdzone 2026-10-09 po `git fetch`); gałąź robocza to `staging`. `legacy/`, `.data/`, `.env` są ignorowane.
+- **Commity**: praca z sesji 2026-10-09 jest w commitach `5d876ce` i `7292250` (Mateusz), oba wypchnięte. Niezacommitowane zostają tylko późniejsze poprawki tego pliku (stan gita, wynik CI, podatności w zależnościach).
 - **Dostęp do GitHuba**: na pierwszym komputerze `origin` używa aliasu SSH `git@github-m-wyka:m-wyka/saintseiya.git` (jak `dot-sport-shop`), bo domyślne dane GitHuba należą tam do innego konta, bez prawa zapisu. Na drugim komputerze do wypychania potrzebny jest dostęp konta `m-wyka`; nie ma tu `gh`.
 - **Procesy**: z tej sesji nic nie zostało w tle. W jej trakcie na porcie 3000 działał `pnpm dev` uruchomiony przez Mateusza — nie mój, zostawiłem go. Po moich równoległych serwerach może odpowiadać `504 Outdated Optimize Dep` na stronach z edytorem; pomaga restart (patrz „Kilka serwerów naraz”).
 - **Baza**: `.data/saintseiya.db` z importu 2026-10-05 (migracje 0000–0004), obrazki zewnętrzne sprawdzone. 2026-10-09 zmieniona na polecenie Mateusza: usunięte trzy pliki do pobrania i rozpakowane puste odnośniki (opis w „Zrobione w ostatniej sesji”); kopia sprzed zmian leży w `.data/backup-2026-10-09/` (baza i trzy usunięte pliki, 25 MB) — można usunąć, gdy niepotrzebna. Ma 339 kont archiwalnych i 3 konta testowe (id 340–342, dwa z rolą administratora) — do usunięcia przed wdrożeniem; tłumaczeń nie ma żadnych. Na tym komputerze są baza i `.data/uploads`; nie ma `legacy/` ani pomocniczego MySQL.
@@ -54,7 +54,7 @@ Na drugim komputerze:
 
 ## Zrobione w ostatniej sesji
 
-Sesja 2026-10-09 na Windows. Wszystko niżej jest w commicie `5d876ce`, poza sekcją „Porządki w bazie”, która powstała po nim.
+Sesja 2026-10-09 na Windows. Wszystko niżej jest w commicie `5d876ce`, poza sekcją „Porządki w bazie”, która powstała po nim (commit `7292250`).
 
 **Porządki w bazie** (po commicie, na polecenie Mateusza; baza zmieniona bezpośrednio, bez wpisów w dzienniku zmian):
 
@@ -85,7 +85,7 @@ Sesja 2026-10-09 na Windows. Wszystko niżej jest w commicie `5d876ce`, poza sek
 - `/sitemap.xml` (`server/utils/feeds.ts`): strony stałe, opublikowane newsy i podstrony, kategorie, tagi, publiczne działy i tematy forum, albumy, zdjęcia, kategorie video, mapy — w obu językach, z `hreflang`. Na zaimportowanej bazie ok. 1950 adresów × 2 języki, 1,2 MB.
 - `/rss.xml` i `/en/rss.xml`: 20 najnowszych newsów; odnośnik w `<head>` i w stopce.
 - `/robots.txt`: wskazuje mapę strony, zamyka panel i API.
-- `.github/workflows/ci.yml`: `pnpm check` oraz osobno `pnpm build` i Playwright na buildzie (`E2E_SERVER=build`), dla `staging`, `main` i pull requestów. **Na GitHubie jeszcze nie uruchomiony** — ruszy po wypchnięciu. Te same kroki przeszły lokalnie w czystej kopii projektu (instalacja z zamrożonym lockfile, pnpm 12).
+- `.github/workflows/ci.yml`: `pnpm check` oraz osobno `pnpm build` i Playwright na buildzie (`E2E_SERVER=build`), dla `staging`, `main` i pull requestów. Pierwszy przebieg na GitHubie (2026-10-09, `main`, commit `7292250`) jest zielony. Wcześniej te same kroki przeszły lokalnie w czystej kopii projektu (instalacja z zamrożonym lockfile, pnpm 12).
 
 **Strona główna i strona newsa**:
 
@@ -125,7 +125,6 @@ Sesja 2026-10-09 na Windows. Wszystko niżej jest w commicie `5d876ce`, poza sek
 
 - Prawdziwe Safari (macOS, iPhone) i prawdziwy Firefox — WebKit z Playwrighta na Windows to nie Safari (m.in. rysuje fonty zmienne zawsze w zwykłej grubości). Do obejrzenia na Macu: nagłówki z polskimi znakami, rozmycie pod przyklejonym paskiem menu, płynność gwiezdnego tła (w przeglądarkach testowych bez karty graficznej Firefox i WebKit miały 22–41 kl./s przy animowanym niebie).
 - Prawdziwy telefon; edytor map sprawdzony tylko syntetycznymi zdarzeniami dotyku i testem właściwości CSS.
-- CI na GitHubie.
 - Captcha i logowanie Google — bez zmian, brak kluczy.
 
 ## Wcześniejsze sesje
@@ -146,7 +145,7 @@ Wszystko z tej sekcji jest w repozytorium (ostatnie commity: `805f5b6`, `86ccab0
 - **Najnowsze grafiki** (`LatestPhotos`): skośne pasy (`roster` w `main.css`). Gdzie jest mysz i co najmniej 576 px szerokości sceny, osiem pasów wypełnia rząd, a najechany lub wybrany klawiaturą rozsuwa się i pokazuje tytuł z albumem; ostatnio otwarty zostaje otwarty. Na ekranach dotykowych i w wąskiej kolumnie ten sam rząd jest przewijanym paskiem scroll-snap z podpisem na każdym pasie.
 - **Najnowsze video** (`LatestVideos`): duży ekran i playlista czterech filmów. Kliknięcie w pozycję playlisty albo w ekran odtwarza film na miejscu (ramka `youtube-nocookie`), wcześniej kafle prowadziły tylko na `/video`.
 - **Filmy usunięte z YouTube**: YouTube zamiast błędu odsyła szarą miniaturę 120×90 — `VideoPoster` rozpoznaje ją po rozmiarze (`isRemovedVideoPoster` w `app/utils/youtube.ts`). Taki film dostaje zaślepkę z gwiazdami, podpis „Niedostępny” i komunikat „Tego filmu nie ma już na YouTube.” zamiast przycisku odtwarzania; ekran sam ustawia się na najnowszym filmie, który jeszcze istnieje.
-- **Stan danych**: z 74 filmów w bazie 36 nie ma już miniatury na YouTube (sprawdzone 2026-10-05 zapytaniami o `mqdefault.jpg`), w tym wszystkie cztery najnowsze — sekcja video na stronie głównej pokazuje więc teraz cztery zaślepki. Patrz „Decyzje dla Mateusza”, punkt 12.
+- **Stan danych**: z 74 filmów w bazie 36 nie ma już miniatury na YouTube (sprawdzone 2026-10-05 zapytaniami o `mqdefault.jpg`), w tym wszystkie cztery najnowsze — sekcja video na stronie głównej pokazuje więc teraz cztery zaślepki. Patrz „Decyzje dla Mateusza”, punkt 9.
 - Cytat komentarza jest ucinany na granicy słowa z wielokropkiem (wcześniej twardo po 160 znakach, co ukrywało obcinanie CSS w karuzeli). Ucinanie wyszło z `news.ts` do `truncateAtWord` w `server/utils/html.ts`; zajawki newsów działają jak dotąd.
 - Usunięte: `LatestMedia.vue`, narzędzie `carousel-arrows` w `main.css` (używała go tylko stara karuzela komentarzy) oraz zmienne `--carousel-*-label` w `NewsCenter` i klucze `HOME_PANELS.CAROUSEL_PREVIOUS` / `CAROUSEL_NEXT`, które służyły wyłącznie temu narzędziu. `VideoCard` bierze adresy z `app/utils/youtube.ts`, bez zmiany działania.
 - Testy: `tests/unit/youtube.test.ts`, test cytatu w `translatedContent.test.ts`, dwa scenariusze e2e w `public.spec.ts` (przełączanie komentarzy myszą i strzałkami, przejście do grafiki, odtworzenie filmu; film usunięty z YouTube — miniatura podstawiona w teście). Dane e2e mają drugi komentarz, pod zdjęciem „Złota zbroja”.
@@ -326,7 +325,6 @@ Wszystko z tej sekcji jest w repozytorium (ostatnie commity: `805f5b6`, `86ccab0
 
 - **Prawdziwe Safari i Firefox** — wygląd porównany tylko w silnikach z Playwrighta (Firefox, WebKit na Windows). Lista rzeczy do obejrzenia na Macu i iPhonie jest w „Zrobione w ostatniej sesji”.
 - **Prawdziwy telefon** — wszystko przy 390 i 360 px w emulacji Chrome; edytor map dotykiem tylko zdarzeniami syntetycznymi.
-- **CI na GitHubie** — workflow przeszedł lokalnie w czystej kopii, na GitHubie ruszy dopiero po wypchnięciu.
 - **Panel: Forum (struktura)** — zmiana kolejności działów i kategorii (pole „Kolejność”) tylko w testach integracyjnych.
 - **Scenariusze e2e działają na skromnych danych testowych**, nie na zaimportowanej bazie. Przegląd wyglądu z tej sesji był na kopii prawdziwych danych, ale klikanie w panelu — nie.
 - **Prawdziwe logowanie Google i prawdziwa captcha** — brak kluczy, testowane tylko logowanie testowe.
@@ -377,11 +375,11 @@ Uwagi z trzech przeglądów z 2026-10-09, których nie poprawiałem — część
 
 ## Decyzje dla Mateusza
 
-1. **Wypchnięcie commita `5d876ce`** — po nim pierwszy raz ruszy CI na GitHubie. Z tego komputera potrzebny jest do tego dostęp konta `m-wyka`.
+1. **Podatności w zależnościach** — `pnpm audit` z 2026-10-09 zgłasza 8 pozycji (2 krytyczne, 4 wysokie, 1 średnia, 1 niska): `simple-git` i `@simple-git/argv-parser` (przez `@nuxt/devtools`), `esbuild` (przez `drizzle-kit` i `@nuxt/fonts`), `node-forge` (przez `listhen`), `braces` (przez `nitropack`). Według ścieżek zależności to narzędzia deweloperskie i budujące; `node-forge` i `braces` nie mają jeszcze poprawionej wersji. Trzy automatyczne aktualizacje Dependabota (`simple-git`, `esbuild`, `@simple-git/argv-parser`) padły na GitHubie — przyczyny nie znam, logi wymagają zalogowania. Do decyzji: podnieść wersje (nadpisanie wersji w pnpm albo aktualizacja `@nuxt/devtools`, `drizzle-kit`, `@nuxt/fonts`) czy zostawić.
 2. **Repozytorium na GitHubie jest publiczne** — zostaje publiczne czy przełączyć na prywatne? W `docs/legacy.md` są wymienione nazwy prywatnych plików z `legacy/` (same nazwy, bez treści). Z tego komputera nie da się tego przełączyć (brak `gh` i dostępu konta `m-wyka`); na GitHubie: Settings → General → Danger Zone → Change repository visibility.
 3. **Pobranie działających obrazków zewnętrznych na własny serwer** (1701 adresów). Chroni przed ich zniknięciem i przed blokowaniem obrazków `http://` na stronie `https://` (Lighthouse zgłasza je jako niezabezpieczone żądania). Nie robiłem bez zgody.
 4. **Sekcja Multimedia** (odcinki, skany, soundtracki). Strony są publiczne zgodnie z decyzją, ale nie ma ich w menu — w legacy te odnośniki widział tylko właściciel. Dodać do menu czy zostawić?
-5. **Hosting**: VPS czy Render, domena, kopie zapasowe. Pomiary i zalecane parametry VPS w sekcji „Wymagania serwera” niżej.
+5. **Hosting**: VPS czy Render, domena, kopie zapasowe. Pomiary i zalecane parametry VPS w sekcji „Wymagania serwera” niżej. Mateusz próbował Rendera 2026-10-09 — deploy padł na domyślnych komendach (`yarn`, `yarn start`: brak builda i brak skryptu `start`). W repo są od tego dnia `render.yaml`, skrypt `start` i opis w `README.md` („Render”). Komendy z `render.yaml` sprawdzone lokalnie w czystej kopii (Windows): instalacja, build i start na pustym katalogu danych, strony odpowiadają 200. Na samym Renderze niesprawdzone — do ustawienia przez Mateusza w panelu: komendy, płatna instancja z dyskiem (na darmowej baza znika), zmienne, wgranie bazy i `uploads`.
 6. **Klucze**: Google OAuth, Cloudflare Turnstile, `NUXT_ADMIN_EMAILS`.
 7. **Statystyki portalu** — nie są nigdzie pokazywane (`SiteStatistics.vue` czeka na miejsce). Gdzie mają wrócić (stopka, strona główna?) i czy „Rycerzy” ukrywać przy zerze, czy liczyć też konta archiwalne (339)?
 8. **Nagłówek** — gość ma język schowany w menu „Zaloguj” (dwa kliknięcia do EN); alternatywa to przełącznik PL/EN na wierzchu paska. Rozmiar odnośników (`text-xs`) do oceny — przy 1024 px zmieściłby się też poprzedni `text-sm`.
@@ -428,12 +426,12 @@ Pomiar z 2026-10-05 na kopii projektu poza repozytorium (macOS, M2 Max, Node 22.
 
 ## Następne kroki
 
-1. Wypchnięcie `staging` (commit `5d876ce` i późniejsze) — sprawdzić pierwszy przebieg CI na GitHubie.
-2. Na Macu: obejrzeć stronę w prawdziwym Safari i na iPhonie (lista w „Zrobione w ostatniej sesji”) oraz usunąć `legacy/php-cgi53.core` (653 MB zrzutu pamięci; decyzja Mateusza z 2026-10-09: usunąć — na tym komputerze nie ma katalogu `legacy/`).
-3. Decyzja 2 (repozytorium publiczne czy prywatne), potem pozostałe z listy.
-4. Klucze Google i Turnstile, test prawdziwego logowania.
-5. Hosting i wdrożenie: reverse proxy z kompresją HTML i nagłówkiem `X-Forwarded-For`, `NUXT_PUBLIC_SITE_URL` ustawione już przy `pnpm build` (inaczej `hreflang`, mapa strony i RSS wskażą `localhost`), usunięcie kont testowych z bazy.
-6. Scalenie `staging` do `main`, gdy Mateusz zdecyduje. Do tego czasu commity tylko na `staging`.
+1. Na Macu: obejrzeć stronę w prawdziwym Safari i na iPhonie (lista w „Zrobione w ostatniej sesji”) oraz usunąć `legacy/php-cgi53.core` (653 MB zrzutu pamięci; decyzja Mateusza z 2026-10-09: usunąć — na tym komputerze nie ma katalogu `legacy/`).
+2. Decyzja 2 (repozytorium publiczne czy prywatne), potem pozostałe z listy.
+3. Klucze Google i Turnstile, test prawdziwego logowania (w `.env` na tym komputerze klucze Google, Turnstile i `NUXT_ADMIN_EMAILS` są puste).
+4. Hosting i wdrożenie: reverse proxy z kompresją HTML i nagłówkiem `X-Forwarded-For`, `NUXT_PUBLIC_SITE_URL` ustawione już przy `pnpm build` (inaczej `hreflang`, mapa strony i RSS wskażą `localhost`), usunięcie kont testowych z bazy.
+
+Wypchnięcie `staging` i zrównanie `main` ze `staging` są zrobione (2026-10-09).
 
 **Zaplanowane na później — tłumaczenie treści przez AI** (polecenie Mateusza z 2026-10-09: zapisać, nie robić teraz):
 

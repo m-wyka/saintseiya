@@ -85,5 +85,22 @@ Import jest powtarzalny: `--force` zastępuje bazę, więc uruchamiać go tylko 
 ## Wdrożenie
 
 - Serwer z trwałym dyskiem (VPS lub Render). `NUXT_DB_PATH` i `NUXT_UPLOADS_DIR` muszą wskazywać na ten dysk.
-- `pnpm build`, potem `node .output/server/index.mjs` ze zmiennymi środowiskowymi z tabeli wyżej.
+- `pnpm build`, potem `pnpm start` (`node .output/server/index.mjs`) ze zmiennymi środowiskowymi z tabeli wyżej. `NUXT_PUBLIC_SITE_URL` musi być ustawione już przy `pnpm build`.
 - Kopia zapasowa to plik bazy i katalog wgranych plików.
+
+### Render
+
+Ustawienia usługi są w `render.yaml` (Blueprint): komendy, dysk pod `/var/data` i lista zmiennych. Usługa utworzona ręcznie w panelu Rendera tego pliku nie czyta — te same wartości wpisać wtedy w jej ustawieniach (Settings):
+
+| Pole | Wartość |
+|---|---|
+| Build Command | `corepack pnpm@12.9.1 install --frozen-lockfile && corepack pnpm@12.9.1 build` |
+| Start Command | `node --max-old-space-size=256 .output/server/index.mjs` |
+| Health Check Path | `/robots.txt` |
+
+- Domyślne komendy Rendera (`yarn` i `yarn start`) nie budują aplikacji i pomijają `pnpm-lock.yaml`.
+- Trwały dysk jest tylko na płatnej instancji. Na darmowej baza i wgrane pliki znikają przy każdym restarcie i uśpieniu usługi.
+- Pierwszy start na pustym dysku tworzy pustą bazę. Treści wgrać osobno przez `scp` (po dodaniu klucza SSH w panelu Rendera):
+  1. Lokalnie zatrzymać serwer i scalić dziennik WAL z plikiem bazy: `node -e "const db = require('better-sqlite3')('.data/saintseiya.db'); db.pragma('wal_checkpoint(TRUNCATE)'); db.close()"`.
+  2. Wgrać `.data/uploads` jako `/var/data/uploads`, a bazę jako `/var/data/saintseiya.db.new` — działający serwer trzyma otwarty plik `saintseiya.db`.
+  3. W konsoli usługi: `cd /var/data && rm -f saintseiya.db-wal saintseiya.db-shm && mv saintseiya.db.new saintseiya.db`, potem restart usługi.

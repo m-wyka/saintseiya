@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: saintseiya
+    runtime: node
+    region: frankfurt
+    plan: 0.5c-512mb
+    # Wersja pnpm jak w CI; Render sam domyślnie instaluje zależności yarnem.
+    buildCommand: corepack pnpm@12.9.1 install --frozen-lockfile && corepack pnpm@12.9.1 build
+    # Limit sterty pod instancję 512 MB — bez niego proces pod obciążeniem przekracza 600 MB.
+    startCommand: node --max-old-space-size=256 .output/server/index.mjs
+    healthCheckPath: /robots.txt
+    disk:
+      name: saintseiya-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: NUXT_DB_PATH
+        value: /var/data/saintseiya.db
+      - key: NUXT_UPLOADS_DIR
+        value: /var/data/uploads
+      - key: NUXT_SESSION_PASSWORD
+        generateValue: true
+      - key: NUXT_PUBLIC_SITE_URL
+        sync: false
+      - key: NUXT_OAUTH_GOOGLE_CLIENT_ID
+        sync: false
+      - key: NUXT_OAUTH_GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: NUXT_ADMIN_EMAILS
+        sync: false
+      - key: NUXT_PUBLIC_TURNSTILE_SITE_KEY
+        sync: false
+      - key: NUXT_TURNSTILE_SECRET_KEY
+        sync: false
