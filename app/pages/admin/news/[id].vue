@@ -88,7 +88,7 @@ useSeoMeta({ title: pageTitle });
         </div>
       </div>
 
-      <aside class="flex flex-col gap-5 self-start panel p-5">
+      <div class="flex flex-col gap-5 self-start panel p-5">
         <BaseSelect v-model="input.status" :label="t('GENERAL.STATUS')" :options="statusOptions" />
         <BaseSelect v-model="selectedCategory" :label="t('GENERAL.CATEGORY')" :options="categoryOptions" />
         <BaseInput v-model="input.slug" :label="t('ADMIN_NEWS.SLUG')" :hint="t('ADMIN_NEWS.SLUG_HINT')" />
@@ -125,7 +125,7 @@ useSeoMeta({ title: pageTitle });
           </p>
         </fieldset>
         <FormActions :cancel-to="LIST_PATH" :is-busy="isBusy" :error-message="errorMessage" />
-      </aside>
+      </div>
     </div>
   </form>
 </template>

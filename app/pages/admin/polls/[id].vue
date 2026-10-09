@@ -106,14 +106,14 @@ useSeoMeta({ title: pageTitle });
         </fieldset>
       </div>
 
-      <aside class="flex flex-col gap-5 self-start panel p-5">
+      <div class="flex flex-col gap-5 self-start panel p-5">
         <BaseCheckbox
           v-model="input.isClosed"
           :label="t('ADMIN_POLLS.IS_CLOSED')"
           :hint="t('ADMIN_POLLS.IS_CLOSED_HINT')"
         />
         <FormActions :cancel-to="LIST_PATH" :is-busy="isBusy" :error-message="errorMessage" />
-      </aside>
+      </div>
     </div>
   </form>
 </template>

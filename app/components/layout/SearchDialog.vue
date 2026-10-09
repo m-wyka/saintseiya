@@ -18,6 +18,7 @@ const isPhraseTooShort = computed(() => phrase.value.length < MINIMUM_SEARCH_LEN
 const {
   data: results,
   status,
+  error,
   execute: fetchResults,
 } = useFetch('/api/search', {
   query: { q: searchedPhrase },
@@ -106,6 +107,9 @@ onBeforeUnmount(() => {
       </nav>
       <p v-else-if="isPhraseTooShort" class="py-6 text-center text-sm text-aqua-300">
         {{ t('SEARCH.PHRASE_TOO_SHORT', { count: MINIMUM_SEARCH_LENGTH }) }}
+      </p>
+      <p v-else-if="error && !isSearching" class="py-6 text-center text-sm text-danger" role="alert">
+        {{ apiErrorMessage(error) }}
       </p>
       <p v-else-if="isSearching && !sections.length" class="py-6 text-center text-sm text-aqua-300">
         {{ t('GENERAL.LOADING') }}

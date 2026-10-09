@@ -38,8 +38,8 @@ useSeoMeta({ title: () => profile.value?.name ?? '', robots: 'noindex' });
       >
         {{ initial }}
       </span>
-      <div class="min-w-0 flex-1">
-        <h1 class="heading-display text-3xl" :class="profile.isGhost ? 'text-aqua-300' : 'text-gold-300'">
+      <div class="min-w-48 flex-1">
+        <h1 class="heading-display text-3xl wrap-anywhere" :class="profile.isGhost ? 'text-aqua-300' : 'text-gold-300'">
           {{ profile.name }}
         </h1>
         <p class="text-sm text-aqua-500">

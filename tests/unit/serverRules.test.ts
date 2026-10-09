@@ -1,7 +1,12 @@
 import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { mediaContentType, resolveMediaFile } from '../../server/utils/media';
-import { assertWithinRateLimit, resetRateLimits } from '../../server/utils/rateLimit';
+import {
+  assertWithinRateLimit,
+  resetRateLimits,
+  SEARCH_RATE_LIMIT,
+  trackedRateLimitKeys,
+} from '../../server/utils/rateLimit';
 import { cleanUserHtml, shoutToHtml } from '../../server/utils/userContent';
 import { canAccess, hasPermission, isStaff } from '../../shared/utils/roles';
 import { slugify, uniqueSlug } from '../../shared/utils/slug';
@@ -42,6 +47,29 @@ describe('rate limit', () => {
     expect(() => assertWithinRateLimit('user:2', limit, start + 2000)).not.toThrow();
     expect(() => assertWithinRateLimit('user:1', limit, start + 11_000)).not.toThrow();
   });
+
+  it('names the search limit in its own message', () => {
+    const start = 1_000_000;
+    for (let attempt = 0; attempt < SEARCH_RATE_LIMIT.attempts; attempt += 1) {
+      assertWithinRateLimit('search:10.0.0.1', SEARCH_RATE_LIMIT, start + attempt);
+    }
+
+    expect(() => assertWithinRateLimit('search:10.0.0.1', SEARCH_RATE_LIMIT, start + 1000)).toThrowError(
+      'ERRORS.SEARCH_RATE_LIMITED',
+    );
+    expect(() => assertWithinRateLimit('search:10.0.0.2', SEARCH_RATE_LIMIT, start + 1000)).not.toThrow();
+  });
+
+  it('forgets addresses that went quiet once many are tracked', () => {
+    const start = 1_000_000;
+    for (let visitor = 0; visitor < 5000; visitor += 1) {
+      assertWithinRateLimit(`search:${visitor}`, SEARCH_RATE_LIMIT, start);
+    }
+    expect(trackedRateLimitKeys()).toBe(5000);
+
+    assertWithinRateLimit('search:late', SEARCH_RATE_LIMIT, start + 120_000);
+    expect(trackedRateLimitKeys()).toBe(1);
+  });
 });
 
 describe('user content', () => {
@@ -64,6 +92,21 @@ describe('user content', () => {
 
   it('escapes shoutbox messages', () => {
     expect(shoutToHtml('a < b & "c"\r\nd')).toBe('a &lt; b &amp; &quot;c&quot;<br />d');
+  });
+
+  it('turns text smileys into emoji in posts and shouts', () => {
+    expect(cleanUserHtml('<p>Super :) i <strong>tak</strong> ;) :D</p>')).toBe(
+      '<p>Super 🙂 i <strong>tak</strong> 😉 😀</p>',
+    );
+    expect(shoutToHtml('Witajcie :D "rycerze" ;)')).toBe('Witajcie 😀 &quot;rycerze&quot; 😉');
+  });
+
+  it('leaves code, addresses, quoted brackets and list markers as they were typed', () => {
+    expect(cleanUserHtml('<pre><code>if (a) :) b</code></pre>')).toBe('<pre><code>if (a) :) b</code></pre>');
+    expect(cleanUserHtml('<p><a href="https://example.com/:d">godz. 12:00 ("cytat")</a></p>')).toBe(
+      '<p><a href="https://example.com/:d" target="_blank" rel="noopener nofollow">godz. 12:00 ("cytat")</a></p>',
+    );
+    expect(cleanUserHtml('<p>a) Seiya</p><p>b) Shiryu</p>')).toBe('<p>a) Seiya</p><p>b) Shiryu</p>');
   });
 });
 

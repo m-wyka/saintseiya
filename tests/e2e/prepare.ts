@@ -9,6 +9,8 @@ const SQLITE_SIDE_FILES = ['', '-wal', '-shm'];
 const MAP_IMAGE = { path: 'maps/mapa-nieba.png', width: 800, height: 600 };
 const PHOTO_IMAGE = { path: 'photos/tapeta.png', thumbnail: 'thumbnails/photos/tapeta.webp', width: 640, height: 400 };
 const DEAD_IMAGE_URL = 'http://dead.example/zaginiony.jpg';
+// A title that does not fit a phone screen: truncated lists once pushed the home page off the screen.
+const LONG_THREAD_TITLE = 'Saint Seiya: Legend of Sanctuary — wrażenia po seansie i porównanie filmu z mangą';
 
 const writeSolidImage = async (storedPath: string, width: number, height: number, color: string) => {
   const file = join(resolve(E2E_UPLOADS_DIR), storedPath);
@@ -130,8 +132,8 @@ const seed = async () => {
       slug: 'postacie',
       name: 'Postacie',
       description: 'Dyskusje o bohaterach.',
-      threadCount: 1,
-      postCount: 2,
+      threadCount: 2,
+      postCount: 3,
       legacyId: 20,
     })
     .returning()
@@ -177,6 +179,28 @@ const seed = async () => {
         createdAt: new Date('2019-07-19T10:00:00Z'),
       },
     ])
+    .run();
+
+  const longTitledThread = db
+    .insert(schema.threads)
+    .values({
+      forumId: forum.id,
+      title: LONG_THREAD_TITLE,
+      authorId: ghost.id,
+      postCount: 1,
+      lastPostAt: new Date('2019-06-01T10:00:00Z'),
+      lastPostAuthorId: ghost.id,
+      createdAt: new Date('2019-06-01T10:00:00Z'),
+    })
+    .returning()
+    .get();
+  db.insert(schema.posts)
+    .values({
+      threadId: longTitledThread.id,
+      authorId: ghost.id,
+      bodyHtml: '<p>Film CGI podzielił fanów.</p>',
+      createdAt: new Date('2019-06-01T10:00:00Z'),
+    })
     .run();
 
   const album = db
@@ -300,7 +324,10 @@ const seed = async () => {
   db.insert(schema.settings)
     .values({
       key: 'newsCenterTabs',
-      value: [{ title: 'Gorący news', bodyHtml: '<p>Nowy rozdział mangi już dostępny.</p>' }],
+      value: [
+        { title: 'Gorący news', bodyHtml: '<p>Nowy rozdział mangi już dostępny.</p>' },
+        { title: 'Anime', bodyHtml: '<p>Początek emisji zaplanowano na godzinę 17:00.</p>' },
+      ],
     })
     .run();
 

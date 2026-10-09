@@ -74,6 +74,24 @@ describe('news reading', () => {
     expect(findPublishedNews('tajny-szkic')).toBeNull();
     expect(findPublishedNews('nie-ma')).toBeNull();
   });
+
+  it('leaves the excerpt out when the body already opens with it', () => {
+    const author = createAccount();
+    const lead = 'Postanowiliśmy wyjść naprzeciw wszystkim poszukującym ciekawostek o rycerzach.';
+    createNews(author.id, {
+      slug: 'powtorzona-zajawka',
+      excerptHtml: `<p><strong>${lead}</strong></p>`,
+      bodyHtml: `<p>${lead}</p><p>Dalszy ciąg newsa.</p>`,
+    });
+    createNews(author.id, {
+      slug: 'osobna-zajawka',
+      excerptHtml: '<p>Krótka zapowiedź.</p>',
+      bodyHtml: '<p>Pełna treść o czymś innym.</p>',
+    });
+
+    expect(findPublishedNews('powtorzona-zajawka')).toMatchObject({ excerptHtml: '' });
+    expect(findPublishedNews('osobna-zajawka')).toMatchObject({ excerptHtml: '<p>Krótka zapowiedź.</p>' });
+  });
 });
 
 describe('page reading', () => {

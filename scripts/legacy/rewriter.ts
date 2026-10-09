@@ -44,6 +44,8 @@ export const createLegacyRewriter = (lookups: LegacyLookups, assets: AssetRegist
         return routes.home();
       case 'page':
         return found(lookups.pagePaths, target.legacyId, routes.page, routes.home());
+      case 'faq':
+        return routes.faq();
       case 'news':
         return found(lookups.newsSlugs, target.legacyId, routes.news, routes.newsList());
       case 'newsList':

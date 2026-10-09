@@ -9,9 +9,16 @@ import { localized } from './translations';
 
 const NEWS_PAGE_SIZE = 9;
 const TEASER_LENGTH = 260;
+const REPEATED_LEAD_LENGTH = 60;
 
 const teaserOf = (excerptHtml: string, bodyHtml: string): string =>
   truncateAtWord(htmlToPlainText(excerptHtml) || htmlToPlainText(bodyHtml), TEASER_LENGTH);
+
+// Legacy news repeat the excerpt at the top of the body; shown together it would read twice.
+const isExcerptRepeatedInBody = (excerptHtml: string, bodyHtml: string): boolean => {
+  const lead = htmlToPlainText(excerptHtml).slice(0, REPEATED_LEAD_LENGTH);
+  return lead !== '' && htmlToPlainText(bodyHtml).includes(lead);
+};
 
 interface NewsFilters {
   page: number;
@@ -119,7 +126,7 @@ export const findPublishedNews = (slug: string, locale: ContentLocale = DEFAULT_
   }
   return {
     ...news,
-    excerptHtml: markMissingImages(news.excerptHtml),
+    excerptHtml: isExcerptRepeatedInBody(news.excerptHtml, news.bodyHtml) ? '' : markMissingImages(news.excerptHtml),
     bodyHtml: markMissingImages(news.bodyHtml),
     tags: tagsOfNews(news.id, locale),
   };

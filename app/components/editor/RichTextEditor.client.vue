@@ -247,10 +247,11 @@ const isColorActive = (color: string) => editor.value?.isActive('textStyle', { c
 
 <template>
   <div
-    class="overflow-hidden rounded-xl border border-aqua-500/30 bg-black/40 transition duration-200 focus-within:border-cosmo-500 focus-within:shadow-aura"
+    class="overflow-clip rounded-xl border border-aqua-500/30 bg-black/40 transition duration-200 focus-within:border-cosmo-500 focus-within:shadow-aura"
   >
     <div
-      class="flex flex-wrap items-center gap-1 border-b border-aqua-500/20 bg-black/40 px-2 py-1.5"
+      class="flex flex-wrap items-center gap-1 border-b border-aqua-500/20 bg-abyss-950 px-2 py-1.5"
+      :class="{ 'sticky top-0 z-10': extended }"
       role="toolbar"
       :aria-label="t('EDITOR.TOOLBAR', { label })"
       @mousedown.prevent

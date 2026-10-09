@@ -30,6 +30,7 @@ const SERVER_UTILITY_MODULES = [
   '../server/utils/pagination',
   '../server/utils/params',
   '../server/utils/html',
+  '../server/utils/smileys',
   '../server/utils/imageProcessing',
   '../server/utils/media',
   '../server/utils/authors',
@@ -67,6 +68,7 @@ const SERVER_UTILITY_MODULES = [
   '../server/utils/legacyRedirects',
   '../server/utils/search',
   '../server/utils/profiles',
+  '../server/utils/feeds',
 ];
 
 const expose = (values: Record<string, unknown>) => {

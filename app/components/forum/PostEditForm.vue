@@ -24,7 +24,7 @@ const save = async () => {
 
 <template>
   <form class="flex flex-1 flex-col gap-3 px-5 py-4" @submit.prevent="save">
-    <RichTextEditor v-if="editedHtml !== undefined" v-model="editedHtml" :label="t('POSTS.BODY_LABEL')" />
+    <LazyRichTextEditor v-if="editedHtml !== undefined" v-model="editedHtml" :label="t('POSTS.BODY_LABEL')" />
     <div v-else class="h-48 animate-pulse rounded-xl border border-aqua-500/20 bg-black/30" />
     <p v-if="errorMessage" class="flex items-center gap-2 text-sm text-danger" role="alert">
       <AppIcon name="warning" />

@@ -26,7 +26,7 @@ const submit = async () => {
   <form class="flex flex-col gap-3" @submit.prevent="submit">
     <slot />
     <ClientOnly>
-      <RichTextEditor v-model="bodyHtml" :label="label" />
+      <LazyRichTextEditor v-model="bodyHtml" :label="label" />
       <template #fallback>
         <div class="h-48 animate-pulse rounded-xl border border-aqua-500/20 bg-black/30" />
       </template>

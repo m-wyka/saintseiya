@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { withLocalePrefix } from '#shared/utils/locales';
 import { routes } from '#shared/utils/routes';
 
 const PARTNERS = [
@@ -15,7 +16,7 @@ const PARTNERS = [
 ];
 const FOUNDING_YEAR = 2006;
 const layout = useLayoutStore();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const currentYear = new Date().getFullYear();
 </script>
 
@@ -35,7 +36,7 @@ const currentYear = new Date().getFullYear();
               <img
                 v-if="map.teaserImage"
                 :src="routes.media(map.teaserImage)"
-                :alt="map.title"
+                alt=""
                 loading="lazy"
                 class="h-24 w-auto opacity-60 grayscale transition duration-500 ease-cosmo group-hover:opacity-100 group-hover:grayscale-0"
               />
@@ -66,6 +67,13 @@ const currentYear = new Date().getFullYear();
         <p>
           © <strong class="text-aqua-200">Saint Seiya Revolution</strong> {{ FOUNDING_YEAR }}–{{ currentYear }}.
           {{ t('FOOTER.TAGLINE') }}
+          <a
+            :href="withLocalePrefix(routes.newsFeed(), locale)"
+            class="ml-2 inline-flex items-center gap-1 text-aqua-300 transition duration-200 hover:text-gold-300"
+          >
+            <AppIcon name="rss" />
+            {{ t('FOOTER.NEWS_FEED') }}
+          </a>
         </p>
         <p>Saint Seiya © Masami Kurumada, Shueisha, Toei Animation.</p>
       </div>

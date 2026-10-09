@@ -11,7 +11,7 @@ useSeoMeta({ title: () => t('LINKS.TITLE') });
     <div class="flex flex-col gap-8">
       <section v-for="category in categories" :key="category.id">
         <SectionHeading :title="category.name" />
-        <ul class="grid gap-3 md:grid-cols-2">
+        <ul class="grid grid-cols-1 gap-3 md:grid-cols-2">
           <li v-for="link in category.links" :key="link.id" class="reveal">
             <a
               :href="link.url"

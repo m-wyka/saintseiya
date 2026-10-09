@@ -29,7 +29,7 @@ const rowLabel = (row: Row): string => {
             v-for="column in columns"
             :key="column.key"
             scope="col"
-            class="px-4 py-2.5 font-semibold"
+            class="px-4 py-2.5 font-semibold first:max-md:sticky first:max-md:left-0 first:max-md:z-10 first:max-md:max-w-44 first:max-md:min-w-36 first:max-md:bg-abyss-950"
             :class="{ 'text-right': column.alignsRight }"
           >
             {{ column.label }}
@@ -42,7 +42,7 @@ const rowLabel = (row: Row): string => {
           <td
             v-for="column in columns"
             :key="column.key"
-            class="px-4 py-2.5 align-middle text-aqua-200"
+            class="px-4 py-2.5 align-middle text-aqua-200 first:max-md:sticky first:max-md:left-0 first:max-md:z-10 first:max-md:max-w-44 first:max-md:min-w-36 first:max-md:bg-abyss-900 first:max-md:wrap-break-word"
             :class="{ 'text-right tabular-nums': column.alignsRight }"
           >
             <slot :name="`cell-${column.key}`" :row="row">{{ cellText(row, column.key) }}</slot>

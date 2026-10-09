@@ -4,12 +4,15 @@ import type { Attributes, IOptions, Tag } from 'sanitize-html';
 const YOUTUBE_EMBED_BASE_URL = 'https://www.youtube-nocookie.com/embed';
 const YOUTUBE_ID_PATTERN = /(?:youtube(?:-nocookie)?\.com\/(?:embed\/|v\/|watch\?(?:.*&)?v=)|youtu\.be\/)([\w-]{11})/i;
 const HEX_COLOR_PATTERN = /^#(?:[0-9a-f]{3}){1,2}$/i;
-const VISIBLE_HEX_COLOR_PATTERN = /^#(?!f{3}(?:f{3})?$)(?:[0-9a-f]{3}){1,2}$/i;
+// White and near-black were chosen for the old white page; on the dark theme they are noise or invisible.
+const VISIBLE_HEX_COLOR_PATTERN = /^#(?!f{3}(?:f{3})?$|[0-3]{3}$|(?:[0-3][0-9a-f]){3}$)(?:[0-9a-f]{3}){1,2}$/i;
 const INTERNAL_URL_PATTERN = /^\/(?!\/)/;
+const VERBATIM_TEXT_TAGS = new Set(['pre', 'code']);
 
 export interface RichHtmlRewriter {
   link?: (href: string) => string | null;
   image?: (src: string) => string | null;
+  text?: (escapedText: string) => string;
 }
 
 const HTML_ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -134,6 +137,7 @@ const buildOptions = (rewriter: RichHtmlRewriter): IOptions => ({
   allowedSchemesByTag: { img: ['http', 'https'], iframe: ['https'] },
   allowProtocolRelative: false,
   allowedIframeHostnames: ['www.youtube-nocookie.com'],
+  exclusiveFilter: (frame) => frame.tag === 'a' && !frame.text.trim() && !frame.mediaChildren.length,
   transformTags: {
     a: linkTransformer(rewriter),
     img: imageTransformer(rewriter),
@@ -145,6 +149,8 @@ const buildOptions = (rewriter: RichHtmlRewriter): IOptions => ({
     strike: 's',
     h1: 'h2',
   },
+  textFilter: (escapedText, tagName) =>
+    rewriter.text && !VERBATIM_TEXT_TAGS.has(tagName) ? rewriter.text(escapedText) : escapedText,
 });
 
 const SPAN_TAG_PATTERN = /<span\b([^>]*)>|<\/span>/gi;

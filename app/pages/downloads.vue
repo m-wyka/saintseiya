@@ -17,7 +17,7 @@ useSeoMeta({ title: () => t('DOWNLOADS.TITLE') });
         <span class="grid size-10 shrink-0 place-items-center rounded-full bg-black/40 text-lg text-cosmo-500">
           <AppIcon name="download" />
         </span>
-        <div class="min-w-0 flex-1">
+        <div class="min-w-48 flex-1">
           <h2 class="font-semibold text-gold-300">{{ download.title }}</h2>
           <p v-if="download.description" class="text-xs text-aqua-300">{{ download.description }}</p>
           <p class="text-[0.7rem] text-aqua-500">
@@ -25,13 +25,10 @@ useSeoMeta({ title: () => t('DOWNLOADS.TITLE') });
             {{ t('DOWNLOADS.DOWNLOAD_COUNT', { count: formatNumber(download.downloadCount) }, download.downloadCount) }}
           </p>
         </div>
-        <a
-          :href="`/api/downloads/${download.id}`"
-          class="inline-flex items-center gap-2 rounded-full cosmo-bar px-4 py-2 text-sm font-semibold text-abyss-950 transition duration-200 hover:shadow-aura hover:brightness-110"
-        >
+        <BaseButton :href="`/api/downloads/${download.id}`">
           <AppIcon name="download" />
           {{ t('DOWNLOADS.DOWNLOAD') }}
-        </a>
+        </BaseButton>
       </li>
     </ul>
     <EmptyState v-else :message="t('DOWNLOADS.EMPTY')" />

@@ -111,7 +111,11 @@ useSeoMeta({ title: () => t('ADMIN_NAV.NAVIGATION') });
         />
         <div v-else class="flex flex-wrap items-center justify-between gap-2">
           <h2 class="heading-display text-lg text-gold-300">{{ section.title }}</h2>
-          <div class="flex flex-wrap items-center gap-1.5">
+          <div
+            class="flex flex-wrap items-center gap-1.5"
+            role="group"
+            :aria-label="t('ADMIN_UI.ROW_ACTIONS', { name: section.title })"
+          >
             <MoveButtons
               :item-label="section.title"
               :is-first="sectionIndex === 0"
@@ -145,7 +149,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.NAVIGATION') });
             v-else
             class="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 transition duration-150 hover:bg-white/5"
           >
-            <div class="min-w-0 flex-1 text-sm">
+            <div class="min-w-40 flex-1 text-sm">
               <p class="text-aqua-200">
                 <span
                   v-if="link.groupTitle"
@@ -157,7 +161,11 @@ useSeoMeta({ title: () => t('ADMIN_NAV.NAVIGATION') });
               </p>
               <p class="truncate text-xs text-aqua-500">{{ link.url }}</p>
             </div>
-            <div class="flex items-center gap-1.5">
+            <div
+              class="flex items-center gap-1.5"
+              role="group"
+              :aria-label="t('ADMIN_UI.ROW_ACTIONS', { name: link.label })"
+            >
               <MoveButtons
                 :item-label="link.label"
                 :is-first="linkIndex === 0"

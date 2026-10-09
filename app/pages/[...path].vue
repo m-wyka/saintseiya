@@ -28,7 +28,7 @@ useSeoMeta({ title: seoTitle });
 
 <template>
   <article v-if="page">
-    <BreadcrumbTrail :items="breadcrumbs" />
+    <BreadcrumbTrail v-if="breadcrumbs.length" :items="breadcrumbs" />
     <PageHeading :title="page.title" />
     <div v-if="page.bodyHtml" class="panel p-6 sm:p-8">
       <RichContent :html="page.bodyHtml" />

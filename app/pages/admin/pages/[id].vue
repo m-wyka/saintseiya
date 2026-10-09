@@ -75,7 +75,7 @@ useSeoMeta({ title: pageTitle });
         </div>
       </div>
 
-      <aside class="flex flex-col gap-5 self-start panel p-5">
+      <div class="flex flex-col gap-5 self-start panel p-5">
         <BaseSelect v-model="input.status" :label="t('GENERAL.STATUS')" :options="statusOptions" />
         <BaseSelect
           v-model="input.kind"
@@ -118,7 +118,7 @@ useSeoMeta({ title: pageTitle });
           </p>
         </fieldset>
         <FormActions :cancel-to="adminPageLevelPath(input.parentId)" :is-busy="isBusy" :error-message="errorMessage" />
-      </aside>
+      </div>
     </div>
   </form>
 </template>

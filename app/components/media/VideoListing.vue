@@ -21,6 +21,10 @@ if (error.value) {
 await redirectPastLastPage(data.value?.videos);
 
 const currentCategory = computed(() => data.value?.categories.find((category) => category.slug === props.categorySlug));
+const listedCategories = computed(
+  () =>
+    data.value?.categories.filter((category) => category.videoCount > 0 || category.slug === props.categorySlug) ?? [],
+);
 
 if (props.categorySlug && !currentCategory.value) {
   throw createError({ statusCode: 404, statusMessage: t('VIDEO_LIST.CATEGORY_NOT_FOUND'), fatal: true });
@@ -55,7 +59,7 @@ useSeoMeta({
           {{ t('GENERAL.ALL') }}
         </NuxtLinkLocale>
       </li>
-      <li v-for="category in data.categories" :key="category.slug">
+      <li v-for="category in listedCategories" :key="category.slug">
         <NuxtLinkLocale
           :to="routes.videoCategory(category.slug)"
           class="flex items-center gap-2 rounded-full border px-3 py-1 text-xs transition duration-200"

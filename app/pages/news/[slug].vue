@@ -26,26 +26,19 @@ useSeoMeta({ title: () => news.value?.title ?? '', ogType: 'article' });
         <AppIcon name="user" class="text-cosmo-500" />
         <AuthorName :author="news.author" />
       </span>
-      <time v-if="news.publishedAt" :datetime="news.publishedAt" class="flex items-center gap-1.5">
-        <AppIcon name="calendar" class="text-cosmo-500" />
-        {{ formatLongDate(news.publishedAt) }}
-      </time>
       <span class="flex items-center gap-1.5">
         <AppIcon name="eye" class="text-cosmo-500" />
         {{ t('NEWS.VIEW_COUNT', { count: formatNumber(news.viewCount) }, news.viewCount) }}
       </span>
     </p>
-    <div class="panel p-6 sm:p-8">
-      <img
-        v-if="news.category?.image"
-        :src="routes.media(news.category.image)"
-        :alt="news.category.name"
-        width="150"
-        height="200"
-        class="float-right mb-4 ml-6 h-40 w-30 rounded-lg border border-gold-300/40 object-cover shadow-panel max-sm:hidden"
-      />
-      <RichContent :html="news.excerptHtml" />
-      <RichContent v-if="news.bodyHtml" :html="news.bodyHtml" class="mt-4" />
+    <div class="overflow-hidden panel">
+      <div class="group @container">
+        <NewsSky :published-at="news.publishedAt" :category-image="news.category?.image" featured />
+      </div>
+      <div class="p-6 sm:p-8">
+        <RichContent v-if="news.excerptHtml" :html="news.excerptHtml" />
+        <RichContent v-if="news.bodyHtml" :html="news.bodyHtml" :class="{ 'mt-4': news.excerptHtml }" />
+      </div>
     </div>
     <ul v-if="news.tags.length" class="mt-4 flex flex-wrap gap-2">
       <li v-for="tag in news.tags" :key="tag.slug">

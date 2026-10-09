@@ -95,7 +95,7 @@ export default defineNuxtConfig({
     '/en/admin/**': { ssr: false },
     '/szukaj': { redirect: '/' },
     '/en/search': { redirect: '/en' },
-    '/legacy/**': { headers: { 'cache-control': STATIC_IMAGE_CACHE } },
+    '/theme/**': { headers: { 'cache-control': STATIC_IMAGE_CACHE } },
   },
   typescript: { strict: true },
 });

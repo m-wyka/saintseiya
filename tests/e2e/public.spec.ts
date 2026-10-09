@@ -17,6 +17,19 @@ test.describe('public site', () => {
     await expect(page.getByText('Konto nieaktywne').first()).toBeVisible();
   });
 
+  test('the News Center switches between its tabs', async ({ page }) => {
+    await visit(page, '/');
+    const newsCenter = page.getByRole('region', { name: 'News Center' });
+    const animeTab = newsCenter.getByRole('button', { name: 'Anime' });
+    await expect(newsCenter.getByText('Nowy rozdział mangi już dostępny.')).toBeInViewport();
+    await expect(newsCenter.getByText('Początek emisji zaplanowano na godzinę 17:00.')).not.toBeInViewport();
+
+    await animeTab.click();
+    await expect(newsCenter.getByText('Początek emisji zaplanowano na godzinę 17:00.')).toBeInViewport();
+    await expect(newsCenter.getByText('Nowy rozdział mangi już dostępny.')).not.toBeInViewport();
+    await expect(animeTab).toHaveAttribute('aria-current', 'true');
+  });
+
   test('home page switches between comments, opens an artwork and plays a video in place', async ({ page }) => {
     await page.route(/ytimg\.com|youtube-nocookie\.com/, (route) => route.abort());
     await visit(page, '/');

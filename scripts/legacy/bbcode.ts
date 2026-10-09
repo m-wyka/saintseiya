@@ -1,4 +1,5 @@
 import { escapeHtml } from '../../server/utils/html';
+import { replaceSmileys } from '../../server/utils/smileys';
 import { decodeTextEntities } from './text';
 
 const TAG_PATTERN = /\[(\/?)([a-z]+)(?:=([^\]\r\n]*))?\]/gi;
@@ -8,19 +9,6 @@ const SAFE_LINK_PATTERN = /^(?:https?:\/\/|ftp:\/\/)/i;
 const HEX_COLOR_PATTERN = /^#(?:[0-9a-f]{3}){1,2}$/i;
 const EMAIL_PATTERN = /^[^\s@<>"']+@[^\s@<>"']+\.[a-z]{2,}$/i;
 
-const SMILEYS: Record<string, string> = {
-  ':)': '🙂',
-  ';)': '😉',
-  ':(': '🙁',
-  ':|': '😐',
-  ':o': '😮',
-  ':p': '😛',
-  'b)': '😎',
-  ':d': '😀',
-  ':@': '😠',
-};
-const SMILEY_PATTERN = /(^|[\s(>])(:\)|;\)|:\(|:\||:o|:p|b\)|:d|:@)(?=$|[\s.,!?<)])/gi;
-
 interface BbElement {
   tag: string;
   argument: string | null;
@@ -28,18 +16,6 @@ interface BbElement {
   children: BbNode[];
 }
 type BbNode = string | BbElement;
-
-const closesOpenParenthesis = (textBefore: string): boolean => {
-  const line = textBefore.slice(textBefore.lastIndexOf('\n') + 1);
-  return (line.match(/\(/g)?.length ?? 0) > (line.match(/\)/g)?.length ?? 0);
-};
-
-const replaceSmileys = (text: string): string =>
-  text.replace(SMILEY_PATTERN, (match, lead: string, code: string, offset: number) => {
-    const isClosingParenthesis =
-      code.toLowerCase() === 'b)' && closesOpenParenthesis(text.slice(0, offset + lead.length));
-    return isClosingParenthesis ? match : `${lead}${SMILEYS[code.toLowerCase()]}`;
-  });
 
 const escapeAngleBrackets = (text: string): string => text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 

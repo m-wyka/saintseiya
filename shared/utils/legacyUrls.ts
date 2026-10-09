@@ -2,6 +2,9 @@ const LEGACY_HOST_PATTERN = /^(?:https?:)?\/\/(?:www\.)?saintseiya\.netserwer\.p
 const ABSOLUTE_URL_PATTERN = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
 const LEGACY_ASSET_PATTERN = /^(?:img|images|downloads|newscenter|mapa|kr|an|slides|thumbs)\/.+\.[a-z0-9]{2,5}$/i;
 
+// The old FAQ sub-page became a module of its own, so no page carries this identifier.
+const LEGACY_FAQ_PAGE_ID = 761;
+
 export const LEGACY_MAP_SLUGS = {
   sky: 'mapa-nieba',
   underworld: 'krolestwo-umarlych',
@@ -12,6 +15,7 @@ export const LEGACY_MAP_SLUGS = {
 export type LegacyTarget =
   | { kind: 'home' }
   | { kind: 'page'; legacyId: number }
+  | { kind: 'faq' }
   | { kind: 'news'; legacyId: number }
   | { kind: 'newsList' }
   | { kind: 'newsCategory'; legacyId: number }
@@ -43,7 +47,10 @@ const SCRIPT_TARGETS: Record<string, (query: URLSearchParams) => LegacyTarget> =
   'index.php': () => ({ kind: 'home' }),
   'news.php': (query) => withId('news', numericParam(query, 'readmore'), { kind: 'home' }),
   'news_cats.php': (query) => withId('newsCategory', numericParam(query, 'cat_id'), { kind: 'newsList' }),
-  'viewpage.php': (query) => withId('page', numericParam(query, 'page_id'), { kind: 'home' }),
+  'viewpage.php': (query) => {
+    const pageId = numericParam(query, 'page_id');
+    return pageId === LEGACY_FAQ_PAGE_ID ? { kind: 'faq' } : withId('page', pageId, { kind: 'home' });
+  },
   forum: () => ({ kind: 'forumIndex' }),
   'forum/index.php': () => ({ kind: 'forumIndex' }),
   'forum/viewforum.php': (query) => withId('forum', numericParam(query, 'forum_id'), { kind: 'forumIndex' }),

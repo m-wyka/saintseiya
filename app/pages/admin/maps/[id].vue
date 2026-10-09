@@ -2,7 +2,7 @@
 import { MAP_AREA_TARGETS } from '#shared/utils/content';
 import type { ContentStatus } from '#shared/utils/content';
 import { routes } from '#shared/utils/routes';
-import { MAP_AREA_TARGET_LABEL_KEYS } from '~/utils/mapAreas';
+import { MAP_AREA_TARGET_LABEL_KEYS, newMapArea } from '~/utils/mapAreas';
 import type { EditableMapArea } from '~/utils/mapAreas';
 
 definePageMeta({ layout: 'admin' });
@@ -21,6 +21,7 @@ interface MapInput extends Record<string, unknown> {
 }
 
 const LIST_PATH = '/admin/mapy';
+const NEW_AREA_FRAME = { leftPercent: 40, topPercent: 40, widthPercent: 20, heightPercent: 20 };
 
 const { t } = useI18n();
 
@@ -77,6 +78,11 @@ const uploadMapImage = async (event: Event) => {
   });
 };
 
+const addArea = () => {
+  input.value.areas = [...input.value.areas, newMapArea(NEW_AREA_FRAME, t('ADMIN_FORMS.NEW_MAP_AREA'))];
+  selectedIndex.value = input.value.areas.length - 1;
+};
+
 const removeSelectedArea = () => {
   input.value.areas = input.value.areas.filter((_, index) => index !== selectedIndex.value);
   selectedIndex.value = null;
@@ -129,6 +135,10 @@ useSeoMeta({ title: pageTitle });
           <BaseButton variant="secondary" :busy="imageUpload.isBusy.value" @click="imageInput?.click()">
             <AppIcon name="image" />
             {{ input.image ? t('ADMIN_MAPS.CHANGE_IMAGE') : t('ADMIN_MAPS.UPLOAD_IMAGE') }}
+          </BaseButton>
+          <BaseButton v-if="input.image" variant="secondary" @click="addArea">
+            <AppIcon name="plus" />
+            {{ t('ADMIN_MAPS.ADD_AREA') }}
           </BaseButton>
           <p class="text-xs text-aqua-500">
             {{
@@ -201,7 +211,7 @@ useSeoMeta({ title: pageTitle });
         </section>
       </div>
 
-      <aside class="flex flex-col gap-5 self-start panel p-5">
+      <div class="flex flex-col gap-5 self-start panel p-5">
         <BaseInput v-model="input.title" :label="t('GENERAL.TITLE')" :maxlength="120" required />
         <BaseInput v-model="input.slug" :label="t('ADMIN_MAPS.SLUG')" :hint="t('ADMIN_MAPS.SLUG_HINT')" />
         <BaseTextarea v-model="input.description" :label="t('GENERAL.DESCRIPTION')" :rows="3" :maxlength="600" />
@@ -232,7 +242,7 @@ useSeoMeta({ title: pageTitle });
           </ul>
         </div>
         <FormActions :cancel-to="LIST_PATH" :is-busy="isBusy" :error-message="errorMessage" />
-      </aside>
+      </div>
     </div>
   </form>
 </template>

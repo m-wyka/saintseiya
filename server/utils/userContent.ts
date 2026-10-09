@@ -16,7 +16,7 @@ const userContentRewriter = {
 };
 
 export const cleanUserHtml = (html: string): string => {
-  const cleaned = sanitizeRichHtml(html, userContentRewriter);
+  const cleaned = sanitizeRichHtml(html, { ...userContentRewriter, text: replaceSmileys });
   if (!htmlToPlainText(cleaned) && !EMBEDDED_MEDIA_PATTERN.test(cleaned)) {
     throw createError({ statusCode: 400, statusMessage: 'ERRORS.CONTENT_EMPTY' });
   }
@@ -25,4 +25,5 @@ export const cleanUserHtml = (html: string): string => {
 
 export const cleanEditorHtml = (html: string): string => sanitizeRichHtml(html, userContentRewriter);
 
-export const shoutToHtml = (message: string): string => escapeHtml(message).replace(/\r\n|\r|\n/g, '<br />');
+export const shoutToHtml = (message: string): string =>
+  replaceSmileys(escapeHtml(message)).replace(/\r\n|\r|\n/g, '<br />');

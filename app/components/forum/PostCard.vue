@@ -79,7 +79,7 @@ const removePost = async () => {
           <ConfirmButton v-if="canDelete" :question="t('CONFIRM.DELETE_POST')" @confirm="removePost" />
           <a
             :href="withLocalePrefix(routes.post(post.id), locale)"
-            class="ml-1.5 font-semibold text-cosmo-400 hover:text-gold-300"
+            class="-my-1.5 ml-1 px-2 py-1.5 font-semibold text-cosmo-400 hover:text-gold-300"
             :aria-label="t('POSTS.PERMALINK', { position })"
           >
             #{{ position }}

@@ -41,7 +41,11 @@ const startGesture = (event: PointerEvent, next: Gesture) => {
   gesture.value = next;
 };
 
+// A finger on the image scrolls it; areas are added with the button next to the editor instead.
 const startDrawing = (event: PointerEvent) => {
+  if (event.pointerType === 'touch') {
+    return;
+  }
   const { x, y } = pointerPercent(event);
   startGesture(event, { kind: 'draw', startX: x, startY: y });
 };
@@ -120,7 +124,7 @@ const highlightedIndex = computed(() => {
       ref="canvas"
       role="group"
       :aria-label="t('ADMIN_FORMS.MAP_AREAS')"
-      class="relative mx-auto min-w-2xl touch-none select-none"
+      class="relative mx-auto min-w-2xl touch-pan-x touch-pan-y select-none"
       :style="{ maxWidth: `${imageWidth}px` }"
       @pointerdown.self="startDrawing"
       @pointermove="continueGesture"
@@ -139,7 +143,7 @@ const highlightedIndex = computed(() => {
         v-for="(area, index) in areas"
         :key="index"
         type="button"
-        class="absolute cursor-move rounded-sm border text-left transition-colors duration-150"
+        class="absolute cursor-move touch-none rounded-sm border text-left transition-colors duration-150"
         :class="
           index === highlightedIndex
             ? 'z-10 border-gold-300 bg-cosmo-500/35 shadow-aura'
@@ -158,7 +162,7 @@ const highlightedIndex = computed(() => {
         </span>
         <span
           v-if="index === selectedIndex"
-          class="absolute -right-1.5 -bottom-1.5 size-3 cursor-nwse-resize rounded-sm border border-abyss-950 bg-gold-300"
+          class="absolute -right-1.5 -bottom-1.5 size-3 cursor-nwse-resize rounded-sm border border-abyss-950 bg-gold-300 pointer-coarse:-right-3 pointer-coarse:-bottom-3 pointer-coarse:size-6"
           aria-hidden="true"
           @pointerdown.stop="startResizing($event, index)"
         />

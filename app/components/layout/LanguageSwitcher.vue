@@ -13,7 +13,7 @@ const pathWithoutHash = (path: string) => path.split('#')[0];
       :to="pathWithoutHash(switchLocalePath(option.code))"
       :lang="option.code"
       :title="option.name"
-      class="rounded-full px-2 py-1 font-semibold uppercase transition duration-150"
+      class="rounded-full px-3 py-1.5 font-semibold uppercase transition duration-150"
       :class="
         option.code === locale ? 'bg-white/10 text-gold-300' : 'text-aqua-300 hover:bg-white/5 hover:text-gold-300'
       "

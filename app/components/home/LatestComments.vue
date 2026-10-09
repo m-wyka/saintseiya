@@ -119,7 +119,7 @@ const moveWithKeyboard = (event: KeyboardEvent) => {
       <div
         class="grid min-w-0 flex-1 rounded-b-xl border border-aqua-500/25 bg-abyss-600 @xl:rounded-tr-xl @xl:rounded-bl-none"
       >
-        <article
+        <div
           v-for="({ comment, sign, figure }, index) in voices"
           v-show="index === activeIndex"
           :id="panelId(index)"
@@ -187,7 +187,7 @@ const moveWithKeyboard = (event: KeyboardEvent) => {
             </span>
             <AppIcon name="chevronRight" class="transition duration-200 group-hover:translate-x-0.5" />
           </NuxtLinkLocale>
-        </article>
+        </div>
       </div>
     </div>
   </section>

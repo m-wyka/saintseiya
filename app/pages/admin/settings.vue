@@ -70,18 +70,24 @@ useSeoMeta({ title: () => t('ADMIN_NAV.SETTINGS') });
             class="grid size-7 shrink-0 place-items-center rounded-full bg-black/40 text-xs font-semibold text-cosmo-400"
             >{{ index + 1 }}</span
           >
-          <p class="min-w-0 flex-1 truncate font-semibold text-gold-300">{{ tab.title }}</p>
-          <MoveButtons
-            :item-label="tab.title"
-            :is-first="index === 0"
-            :is-last="index === tabs.length - 1"
-            @move="moveTab(index, $event)"
-          />
-          <BaseButton variant="ghost" size="sm" @click="openedIndex = openedIndex === index ? null : index">
-            <AppIcon name="edit" />
-            {{ openedIndex === index ? t('ADMIN_SETTINGS.COLLAPSE') : t('GENERAL.EDIT') }}
-          </BaseButton>
-          <ConfirmButton :question="t('CONFIRM.DELETE_TAB')" @confirm="removeTab(index)" />
+          <p class="min-w-40 flex-1 truncate font-semibold text-gold-300">{{ tab.title }}</p>
+          <div
+            class="flex flex-wrap items-center gap-2"
+            role="group"
+            :aria-label="t('ADMIN_UI.ROW_ACTIONS', { name: tab.title })"
+          >
+            <MoveButtons
+              :item-label="tab.title"
+              :is-first="index === 0"
+              :is-last="index === tabs.length - 1"
+              @move="moveTab(index, $event)"
+            />
+            <BaseButton variant="ghost" size="sm" @click="openedIndex = openedIndex === index ? null : index">
+              <AppIcon name="edit" />
+              {{ openedIndex === index ? t('ADMIN_SETTINGS.COLLAPSE') : t('GENERAL.EDIT') }}
+            </BaseButton>
+            <ConfirmButton :question="t('CONFIRM.DELETE_TAB')" @confirm="removeTab(index)" />
+          </div>
         </div>
         <div v-if="openedIndex === index" class="flex flex-col gap-4 border-t border-aqua-500/15 p-4">
           <BaseInput v-model="tab.title" :label="t('ADMIN_SETTINGS.TAB_TITLE')" :maxlength="40" required />

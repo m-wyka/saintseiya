@@ -174,7 +174,11 @@ useSeoMeta({ title: () => t('ADMIN_GALLERY.SEO_TITLE', { title: data.value?.albu
             {{ photo.title || t('ADMIN_GALLERY.UNTITLED') }}
           </p>
           <p v-if="photo.description" class="line-clamp-2 text-xs text-aqua-500">{{ photo.description }}</p>
-          <div class="mt-auto flex flex-wrap gap-1.5">
+          <div
+            class="mt-auto flex flex-wrap gap-1.5"
+            role="group"
+            :aria-label="t('ADMIN_UI.ROW_ACTIONS', { name: photoNameOf(photo) })"
+          >
             <BaseButton
               variant="ghost"
               size="sm"

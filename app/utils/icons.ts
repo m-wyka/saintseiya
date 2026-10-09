@@ -31,6 +31,7 @@ export const ICON_PATHS = {
   chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
   tag: 'M3 12V4h8l10 10-8 8zM7.5 8.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',
   home: 'M4 11l8-7 8 7v9h-5v-6H9v6H4z',
+  rss: 'M5 19h.01M5 12a7 7 0 0 1 7 7M5 5a14 14 0 0 1 14 14',
   list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
   numberedList: 'M10 6h10M10 12h10M10 18h10M4 5h1.5v4M4 15h2l-2 3h2',
   quote: 'M6 17c-1.5-1-2-3-2-5 0-3 2-5 4-5v2c-1 0-2 1-2 3h2v5zM16 17c-1.5-1-2-3-2-5 0-3 2-5 4-5v2c-1 0-2 1-2 3h2v5z',

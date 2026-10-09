@@ -19,7 +19,7 @@ useSeoMeta({ title: () => t('MAPS.TITLE') });
           <div class="aspect-video overflow-hidden bg-black">
             <img
               :src="routes.media(map.image)"
-              :alt="map.title"
+              alt=""
               loading="lazy"
               class="size-full object-cover opacity-70 transition duration-700 ease-cosmo group-hover:scale-105 group-hover:opacity-100"
             />

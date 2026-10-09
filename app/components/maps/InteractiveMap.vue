@@ -44,7 +44,10 @@ const uniqueAreas = computed(() => {
 <template>
   <div class="flex flex-col gap-5">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <p class="text-sm text-aqua-300">{{ t('MAP_VIEW.HINT') }}</p>
+      <p class="text-sm text-aqua-300">
+        {{ t('MAP_VIEW.HINT') }}
+        <span class="block text-xs text-aqua-500 md:hidden">{{ t('MAP_VIEW.SCROLL_HINT') }}</span>
+      </p>
       <BaseButton variant="secondary" size="sm" :aria-pressed="showsAllAreas" @click="showsAllAreas = !showsAllAreas">
         <AppIcon name="eye" />
         {{ showsAllAreas ? t('MAP_VIEW.HIDE_AREAS') : t('MAP_VIEW.SHOW_ALL_AREAS') }}
@@ -52,7 +55,7 @@ const uniqueAreas = computed(() => {
     </div>
 
     <div class="overflow-x-auto panel bg-black p-2">
-      <div class="relative mx-auto min-w-3xl" :style="{ maxWidth: `${map.imageWidth}px` }">
+      <div class="relative mx-auto max-md:min-w-3xl" :style="{ maxWidth: `${map.imageWidth}px` }">
         <img
           :src="routes.media(map.image)"
           :alt="map.title"
@@ -96,7 +99,7 @@ const uniqueAreas = computed(() => {
           <button
             v-if="area.contentHtml"
             type="button"
-            class="cursor-pointer rounded-full border border-aqua-500/30 px-3 py-1 text-xs text-aqua-200 transition duration-200 hover:border-cosmo-500 hover:text-gold-300"
+            class="cursor-pointer rounded-full border border-aqua-500/30 px-3 py-1.5 text-xs text-aqua-200 transition duration-200 hover:border-cosmo-500 hover:text-gold-300"
             @click="openedArea = area"
           >
             {{ area.label }}
@@ -104,7 +107,7 @@ const uniqueAreas = computed(() => {
           <NuxtLinkLocale
             v-else-if="area.link"
             :to="area.link"
-            class="block rounded-full border border-aqua-500/30 px-3 py-1 text-xs text-aqua-200 transition duration-200 hover:border-cosmo-500 hover:text-gold-300"
+            class="block rounded-full border border-aqua-500/30 px-3 py-1.5 text-xs text-aqua-200 transition duration-200 hover:border-cosmo-500 hover:text-gold-300"
           >
             {{ area.label }}
           </NuxtLinkLocale>

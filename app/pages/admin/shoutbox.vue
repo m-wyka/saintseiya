@@ -65,7 +65,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.SHOUTBOX') });
         <AuthorName :author="row.author" />
       </template>
       <template #cell-bodyHtml="{ row }">
-        <RichContent :html="row.bodyHtml" class="max-w-xl text-sm" />
+        <RichContent :html="row.bodyHtml" class="max-w-xl min-w-64 text-sm" />
       </template>
       <template #cell-createdAt="{ row }">
         <time :datetime="row.createdAt" class="whitespace-nowrap">{{ formatDateTime(row.createdAt) }}</time>

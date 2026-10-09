@@ -64,7 +64,7 @@ const markRemoved = (video: VideoSummary) => {
             class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 p-6 text-center"
           >
             <p class="heading-display text-xl/tight text-gold-200">{{ selected.title }}</p>
-            <p class="text-sm text-aqua-300">{{ t('HOME_PANELS.VIDEO_REMOVED') }}</p>
+            <p class="text-sm text-aqua-300">{{ t('VIDEO_LIST.REMOVED') }}</p>
           </div>
           <button
             v-else
@@ -110,7 +110,7 @@ const markRemoved = (video: VideoSummary) => {
                   {{ video.title }}
                 </span>
                 <span v-if="isRemoved(video)" class="text-[0.7rem] text-aqua-500">
-                  {{ t('HOME_PANELS.VIDEO_REMOVED_TAG') }}
+                  {{ t('VIDEO_LIST.REMOVED_TAG') }}
                 </span>
                 <span v-else-if="isPlaying && video.id === selected.id" class="text-[0.7rem] text-cosmo-400">
                   {{ t('HOME_PANELS.NOW_PLAYING') }}

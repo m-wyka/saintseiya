@@ -1,17 +1,6 @@
 import { expect, test } from '@playwright/test';
-import type { Locator, Page } from '@playwright/test';
 import sharp from 'sharp';
-import { signIn, visit } from './helpers';
-
-const confirmRemoval = async (scope: Locator | Page, subject: string, label = 'Usuń') => {
-  const question = `Czy na pewno chcesz usunąć ${subject}?`;
-  const page = 'page' in scope ? scope.page() : scope;
-  const dialog = page.getByRole('dialog', { name: 'Potwierdzenie' });
-  await scope.getByRole('button', { name: label, exact: true }).click();
-  await expect(dialog.getByText(question)).toBeVisible();
-  await dialog.getByRole('button', { name: 'Tak' }).click();
-  await expect(dialog).toBeHidden();
-};
+import { confirmRemoval, signIn, visit } from './helpers';
 
 const solidPng = async (name: string, color: string) => ({
   name,

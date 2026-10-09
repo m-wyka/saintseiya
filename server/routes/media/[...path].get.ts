@@ -1,4 +1,5 @@
-import { readFile, stat } from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
+import { stat } from 'node:fs/promises';
 
 const MEDIA_CACHE_CONTROL = 'public, max-age=86400, stale-while-revalidate=604800';
 
@@ -10,7 +11,7 @@ export default defineEventHandler((event) => {
     indexNames: [],
     getContents: (requestPath) => {
       const file = fileOf(requestPath);
-      return file ? readFile(file) : undefined;
+      return file ? createReadStream(file) : undefined;
     },
     getMeta: async (requestPath) => {
       const file = fileOf(requestPath);

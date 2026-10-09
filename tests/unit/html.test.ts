@@ -19,6 +19,17 @@ describe('sanitizeRichHtml', () => {
     expect(sanitizeRichHtml('<span style="color: #ffffff;">A</span><span style="color: #fff;">B</span>')).toBe('AB');
   });
 
+  it('drops near-black text colour that the dark theme would hide', () => {
+    expect(sanitizeRichHtml('<span style="color: #000000;">A</span><span style="color: #333;">B</span>')).toBe('AB');
+    expect(sanitizeRichHtml('<span style="color: #8b4513;">C</span>')).toBe('<span style="color:#8b4513">C</span>');
+  });
+
+  it('removes links left with nothing to show', () => {
+    const html = '<p><a href="/uzytkownik/1"></a><a href="/forum"> &nbsp;</a><a href="/uzytkownik/1">Jamnik</a></p>';
+    expect(sanitizeRichHtml(html)).toBe('<p><a href="/uzytkownik/1">Jamnik</a></p>');
+    expect(sanitizeRichHtml('<a href="/galeria"><img src="/media/a.jpg" /></a>')).toContain('<img');
+  });
+
   it('marks external links and leaves internal ones plain', () => {
     expect(sanitizeRichHtml('<a href="https://example.com" onclick="x()">zewn.</a>')).toBe(
       '<a href="https://example.com" target="_blank" rel="noopener nofollow">zewn.</a>',

@@ -87,7 +87,7 @@ useSeoMeta({ title: () => t('ADMIN_NAV.COMMENTS') });
         <span v-else class="text-aqua-500">{{ t('ADMIN_COMMENTS.TARGET_UNAVAILABLE') }}</span>
       </template>
       <template #cell-excerpt="{ row }">
-        <span class="line-clamp-3 max-w-md">{{ row.excerpt }}</span>
+        <span class="line-clamp-3 max-w-md min-w-64">{{ row.excerpt }}</span>
       </template>
       <template #cell-createdAt="{ row }">
         <time :datetime="row.createdAt" class="whitespace-nowrap">{{ formatDateTime(row.createdAt) }}</time>

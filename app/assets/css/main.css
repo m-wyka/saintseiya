@@ -232,7 +232,6 @@
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: 0.04em;
-  font-variant-caps: small-caps;
 }
 
 @utility cosmo-bar {
@@ -486,59 +485,29 @@
     transform 0.2s var(--ease-cosmo);
 }
 
-@utility carousel-tabs {
+@utility carousel-slides {
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  scrollbar-width: thin;
-  scroll-marker-group: before;
+  scrollbar-width: none;
 
-  @supports (scroll-marker-group: before) {
-    scrollbar-width: none;
-  }
-
-  /* Browsers force `contain: size` on the marker group, so it needs an explicit height and a single row. */
-  &::scroll-marker-group {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    height: 2.75rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-    border-bottom: 1px solid rgb(81 141 163 / 0.18);
-    background-color: rgb(0 0 0 / 0.3);
-    padding: 0 0.75rem;
+  &::-webkit-scrollbar {
+    display: none;
   }
 
   & > * {
     flex: 0 0 100%;
     scroll-snap-align: start;
   }
+}
 
-  & > *::scroll-marker {
-    content: var(--slide-title, '');
-    flex: none;
-    cursor: pointer;
-    white-space: nowrap;
-    border-radius: var(--radius-md);
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-aqua-300);
-    text-decoration: none;
-    transition:
-      color 0.2s,
-      background-color 0.2s;
-  }
+@utility carousel-strip {
+  overflow-x: auto;
+  scrollbar-width: none;
 
-  & > *::scroll-marker:hover {
-    color: var(--color-gold-300);
-  }
-
-  & > *::scroll-marker:target-current {
-    background-color: var(--color-cosmo-500);
-    color: var(--color-abyss-950);
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -559,13 +528,25 @@
 }
 
 @utility rich-content {
+  --table-backdrop: rgb(8 27 35);
+
   font-size: 0.95rem;
   line-height: 1.75;
   color: var(--color-mist);
   overflow-wrap: anywhere;
 
-  & > * + * {
+  /* Firefox would apply the margin to a line break and stretch every blank line. */
+  & > * + :not(br) {
     margin-top: 0.85em;
+  }
+
+  /* Legacy text coloured for a white page would vanish on the dark theme. */
+  & :is([style*='color:#000000'], [style*='color:#333333']) {
+    color: inherit !important;
+  }
+
+  & [style*='color:#ff0000'] {
+    color: var(--color-danger) !important;
   }
 
   & :where(h2, h3, h4, h5, h6) {
@@ -653,11 +634,32 @@
     font-size: 0.85rem;
   }
 
+  /* Words stay whole and image columns keep a usable width, so a table too wide for the screen scrolls inside its own box. */
   & table {
     display: block;
     max-width: 100%;
     overflow-x: auto;
+    overflow-wrap: break-word;
     border-collapse: collapse;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 155 13 / 0.55) transparent;
+
+    /* A glow on the edge that still has columns to show; the two covers travel with the content and hide it at either end. */
+    background:
+      linear-gradient(90deg, var(--table-backdrop) 40%, transparent) left / 2.5rem 100% no-repeat local,
+      linear-gradient(270deg, var(--table-backdrop) 40%, transparent) right / 2.5rem 100% no-repeat local,
+      linear-gradient(90deg, rgb(255 155 13 / 0.4), transparent) left / 1rem 100% no-repeat scroll,
+      linear-gradient(270deg, rgb(255 155 13 / 0.4), transparent) right / 1rem 100% no-repeat scroll;
+  }
+
+  & :where(td, th):has(img) {
+    min-width: 4.5rem;
+  }
+
+  @media (width < 48rem) {
+    & :where(td, th) img {
+      max-width: 75vw;
+    }
   }
 
   & :where(td, th) {
@@ -683,7 +685,7 @@
     border: 1px solid rgb(81 141 163 / 0.22);
     border-left: 3px solid var(--color-cosmo-500);
     border-radius: var(--radius-xl);
-    background-color: rgb(0 0 0 / 0.28);
+    background: rgb(0 0 0 / 0.28);
     padding: 1.25rem;
 
     @media (width < 40rem) {
@@ -704,6 +706,7 @@
 
     & td {
       display: block;
+      min-width: 0;
       padding: 0;
       text-align: left;
     }
@@ -798,6 +801,7 @@
     display: table;
     width: 100%;
     table-layout: fixed;
+    background: none;
 
     & td {
       text-align: center;
@@ -938,5 +942,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     opacity: 0.7;
+  }
+
+  /* In a table the full address would stretch the column far beyond the image it stands for. */
+  :where(td, th) & {
+    max-width: 8rem;
   }
 }

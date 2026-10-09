@@ -1,27 +1,26 @@
 # Stan prac
 
-Stan na 2026-10-05, koniec trzeciej sesji tego dnia — pierwszej na drugim komputerze (Windows, `E:\work\saintseiya`). Plik do aktualizowania na koniec każdej sesji. Zasady projektu są w `CLAUDE.md`, opis starej strony i importu w `docs/legacy.md`, obsługa w `README.md`.
+Stan na 2026-10-09, koniec sesji na drugim komputerze (Windows, `E:\work\saintseiya`). Plik do aktualizowania na koniec każdej sesji. Zasady projektu są w `CLAUDE.md`, opis starej strony i importu w `docs/legacy.md`, obsługa w `README.md`.
 
 ## Gdzie jesteśmy
 
-Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportowanych danych. Przegląd działów panelu i moderacji jest prawie domknięty — w tej sesji scenariuszami e2e zamiast ręcznego klikania. Nie była jeszcze przeglądana przez Mateusza, nie ma podpiętego prawdziwego logowania Google ani hostingu.
+Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportowanych danych. Panel i moderacja mają scenariusze e2e, wygląd był przeglądany na telefonie, w silnikach Firefoksa i Safari oraz na komputerze, są mapa strony, RSS i workflow CI. Nie ma podpiętego prawdziwego logowania Google ani hostingu, a CI nie ruszyło jeszcze na GitHubie.
 
 | Kontrola | Wynik | Kiedy |
 |---|---|---|
-| `pnpm check` (lint, format, typy, Vitest) | zielone, 334 testy w 32 plikach | 2026-10-06, macOS, po usunięciu przycisku „Więcej newsów” i poprawce `BaseDialog` |
-| `pnpm test:e2e` (Playwright) | zielone, 43 testy | 2026-10-06, macOS, pełny przebieg po poprawce `BaseDialog`; testy wyszukiwarki dodatkowo 12 razy z rzędu |
-| `pnpm build` | nie ponawiany w tej sesji | ostatnio przechodził w poprzedniej sesji (macOS) |
+| `pnpm check` (lint, format, typy, Vitest) | zielone, 345 testów w 32 plikach | 2026-10-09, Windows, w katalogu projektu i w czystej kopii |
+| `pnpm build` | przechodzi | 2026-10-09, Windows, w czystej kopii projektu (w katalogu projektu nie puszczać obok działającego `pnpm dev`) |
+| `pnpm test:e2e` (Playwright) | zielone, 50 testów | 2026-10-09, Windows, na buildzie produkcyjnym (`E2E_SERVER=build`) w czystej kopii; w trybie dev pełnego przebiegu po ostatnich zmianach nie było |
+| CI (`.github/workflows/ci.yml`) | nie uruchomione | te same kroki przeszły lokalnie; na GitHubie ruszy po wypchnięciu |
 
 - **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**). Cały kod jest na gałęzi `staging`. `main` ma tylko początkowy commit z pustym README i na razie go nie ruszamy; `staging` wyrasta z niego, więc da się je później scalić. `legacy/`, `.data/`, `.env` są ignorowane.
-- **Niezacommitowane**: zmiany z tej sesji (lista w „Zrobione w ostatniej sesji”) leżą w katalogu roboczym na `staging` — czekają na decyzję Mateusza o commicie. Do tego nieśledzony `pnpm-workspace.yaml` (zgoda na skrypty instalacyjne `esbuild` i `unrs-resolver`, wymagana przez pnpm 12 na tym komputerze) — nie mój, do decyzji, czy trafia do repozytorium.
-- **Niezacommitowane na macOS (2026-10-05)**: przebudowa nagłówka (sekcja „Przebudowa nagłówka” niżej) — czeka na decyzję o commicie. W tym samym drzewie leżą zmiany gwiezdnego tła (`StarrySky.vue`, `app/utils/sky*.ts`, `starfield.ts`, `constellations.ts`, `main.css`, `layouts/default.vue`, `tests/unit/starfield.test.ts`, scenariusz w `public.spec.ts`) z równoległej sesji — opis w sekcji „Gwiezdne tło” niżej, też czekają na decyzję o commicie.
-- **Niezacommitowane na macOS, wieczór 2026-10-05**: siatka newsów i przebudowa sekcji strony głównej (obie opisane w „Zrobione w ostatniej sesji”) — czekają na decyzję o commicie.
-- **Dostęp do GitHuba**: na pierwszym komputerze `origin` używa aliasu SSH `git@github-m-wyka:m-wyka/saintseiya.git` (jak `dot-sport-shop`), bo domyślne dane GitHuba należą tam do innego konta, bez prawa zapisu. Na drugim komputerze do wypychania potrzebny jest dostęp konta `m-wyka`.
-- **Procesy**: nic z projektu nie działa w tle (serwer dev i pomocniczy MySQL na porcie 3399 zatrzymane).
-- **Baza**: `.data/saintseiya.db` z importu 2026-10-05, obrazki zewnętrzne sprawdzone. Przegląd jej nie dotknął — 339 kont archiwalnych, żadnych kont testowych. Na tym komputerze są baza i `.data/uploads`; nie ma `legacy/` ani pomocniczego MySQL.
-- **Baza na pierwszym komputerze (macOS)**: 2026-10-05 podmieniona na eksport z Windows, pobrany z Dysku Google (`saintseiya/saintseiya-export-2026-10-05/`: `saintseiya.db` + `uploads.zip`), z migracjami 0000–0004. Względem poprzedniej ma moduł FAQ (4 kategorie, 72 pytania; bez podstrony „Faq”), zmienione menu górne, poprawioną `/redakcja`, 10 wpisów dziennika i 3 konta nie-archiwalne (id 340–342, dwa z rolą administratora) — do usunięcia przed wdrożeniem. Wgrane pliki bez zmian (1677). Poprzednie dane leżą w `.data/backup-before-import-2026-10-05/` (190 MB) — można usunąć, gdy niepotrzebne.
-- **Kopia do przeglądu**: na tym komputerze jej nie ma (tymczasową usunąłem po zrzutach ekranu). Ta na pierwszym komputerze (`.data/review/`) jest jednorazowa — komendy odtworzenia na końcu pliku.
-- **`.env` na tym komputerze**: ma `NUXT_SESSION_PASSWORD` i `DATA_SYNC_DIR` (tej zmiennej kod nie używa), nie ma `NUXT_E2E_LOGIN=true` — do logowania testowego w `pnpm dev` trzeba ją dopisać albo podać w powłoce.
+- **Niezacommitowane**: zmiany z sesji 2026-10-09 (lista w „Zrobione w ostatniej sesji”) leżą w katalogu roboczym na `staging` — czekają na decyzję Mateusza o commicie. Wszystko wcześniejsze jest w repozytorium i wypchnięte (`staging` równe z `origin/staging`, ostatni commit `86ccab0`).
+- **Dostęp do GitHuba**: na pierwszym komputerze `origin` używa aliasu SSH `git@github-m-wyka:m-wyka/saintseiya.git` (jak `dot-sport-shop`), bo domyślne dane GitHuba należą tam do innego konta, bez prawa zapisu. Na drugim komputerze do wypychania potrzebny jest dostęp konta `m-wyka`; nie ma tu `gh`.
+- **Procesy**: z tej sesji nic nie zostało w tle. W jej trakcie na porcie 3000 działał `pnpm dev` uruchomiony przez Mateusza — nie mój, zostawiłem go. Po moich równoległych serwerach może odpowiadać `504 Outdated Optimize Dep` na stronach z edytorem; pomaga restart (patrz „Kilka serwerów naraz”).
+- **Baza**: `.data/saintseiya.db` z importu 2026-10-05 (migracje 0000–0004), obrazki zewnętrzne sprawdzone. Ta sesja jej nie zmieniła. Ma 339 kont archiwalnych i 3 konta testowe (id 340–342, dwa z rolą administratora) — do usunięcia przed wdrożeniem; tłumaczeń nie ma żadnych. Na tym komputerze są baza i `.data/uploads`; nie ma `legacy/` ani pomocniczego MySQL.
+- **Baza na pierwszym komputerze (macOS)**: 2026-10-05 podmieniona na eksport z Windows, pobrany z Dysku Google (`saintseiya/saintseiya-export-2026-10-05/`: `saintseiya.db` + `uploads.zip`) — ta sama co tutaj. Poprzednie dane leżą tam w `.data/backup-before-import-2026-10-05/` (190 MB) — można usunąć, gdy niepotrzebne.
+- **Kopia do przeglądu**: `.data/review/saintseiya.db` (kopia bazy z 2026-10-09 z dwoma dodatkowymi kontami „Recenzent …”) i obok skrypty pomocnicze do zrzutów i audytów — opis w „Jak wznowić pracę”. Poza repozytorium, można usunąć w całości.
+- **`.env` na tym komputerze**: ma wszystkie zmienne z `.env.example` (wartości nie sprawdzałem) oraz `NUXT_E2E_LOGIN`.
 
 ## Przeniesienie na inny komputer
 
@@ -55,14 +54,85 @@ Na drugim komputerze:
 
 ## Zrobione w ostatniej sesji
 
-**Animacja `reveal` na wysokich blokach** (macOS, 2026-10-06; niezacommitowane):
+Sesja 2026-10-09 na Windows; wszystko niżej jest niezacommitowane.
+
+**Brakujące scenariusze e2e** (nowy plik `tests/e2e/structure.spec.ts`; pomocnik `confirmRemoval` przeniesiony do `helpers.ts`, `signIn` zwraca konto):
+
+- Podstrony: dodanie huba i dwóch podstron, zmiana kolejności (widoczna też na stronie publicznej), zmiana rodzica przez wyszukiwarkę, przeniesienie na poziom główny, odmowa usunięcia strony z podstronami, usunięcie.
+- Struktura forum: kategoria i dział, widok publiczny, dział „tylko dla redakcji” (gość dostaje 404), odmowy usunięcia działu z tematami i kategorii z działami, zmiana nazwy, usunięcie.
+- Użytkownicy: odebranie roli moderatora (panel znika po przeładowaniu), odmowa zmiany własnej roli i blokady własnego konta (przyciski ukryte, serwer odpowiada 409), odmowa zmiany konta, które w międzyczasie zostało usunięte, odmowa blokady administratora przez moderatora.
+- „Ostatni administrator”: tej odmowy nie da się wywołać z panelu — zmieniać role może tylko administrator, a własnej roli sobie nie odbierze, więc administratorów jest zawsze co najmniej dwóch. Zostaje w testach integracyjnych.
+- Telefon (`mobile.spec.ts`): brak poziomego przewijania sprawdzany na 19 stronach publicznych, 4 formularzach zalogowanego użytkownika i 13 stronach panelu; edytor map (przycisk „Dodaj obszar”, przewijanie palcem).
+- Test regresji szerokości strony głównej: dane testowe mają temat z długim tytułem. Z przywróconym błędem test pada. Winne były obcinane tytuły w listach tematów, nie News Center, jak zapisałem wcześniej.
+
+**Drobne poprawki**:
+
+- Emotikony (`:)`, `;)`, `:D` itd.) zamieniają się na emoji także w nowych postach, komentarzach i wpisach shoutboksa (`server/utils/smileys.ts`, wspólne z importerem). W blokach kodu zostają tekstem. Małe `b)` nie jest już emotikoną ani tu, ani w importerze (to zwykle punkt wyliczenia); `B)` działa jak dotąd.
+- Wyszukiwarka: najwyżej 30 zapytań na minutę z jednego adresu (`SEARCH_RATE_LIMIT`), okno wyszukiwania pokazuje komunikat o limicie. Limiter zapomina adresy bez ruchu, więc mapa nie rośnie bez końca.
+- `viewpage.php?page_id=761` przekierowuje na `/faq`. Numer 761 pochodzi z poprzednich notatek — w bazie nie ma strony z tym identyfikatorem, ale ze zrzutem legacy tego nie porównałem (nie ma go na tym komputerze).
+- Lista `/video`: film usunięty z YouTube ma zaślepkę i podpis „Niedostępny” zamiast szarej miniatury i przycisku odtwarzania (ten sam `VideoPoster` co na stronie głównej; klucze przeniesione do `VIDEO_LIST.REMOVED*`).
+- Panel: przyciski w listach poza `AdminTable` (nawigacja, zdjęcia w albumie, zakładki ustawień) są w grupach „Akcje: <nazwa pozycji>”.
+
+**Mapa strony, RSS, robots, CI**:
+
+- `/sitemap.xml` (`server/utils/feeds.ts`): strony stałe, opublikowane newsy i podstrony, kategorie, tagi, publiczne działy i tematy forum, albumy, zdjęcia, kategorie video, mapy — w obu językach, z `hreflang`. Na zaimportowanej bazie ok. 1950 adresów × 2 języki, 1,2 MB.
+- `/rss.xml` i `/en/rss.xml`: 20 najnowszych newsów; odnośnik w `<head>` i w stopce.
+- `/robots.txt`: wskazuje mapę strony, zamyka panel i API.
+- `.github/workflows/ci.yml`: `pnpm check` oraz osobno `pnpm build` i Playwright na buildzie (`E2E_SERVER=build`), dla `staging`, `main` i pull requestów. **Na GitHubie jeszcze nie uruchomiony** — ruszy po wypchnięciu. Te same kroki przeszły lokalnie w czystej kopii projektu (instalacja z zamrożonym lockfile, pnpm 12).
+
+**Strona główna i strona newsa**:
+
+- News Center zajmuje całą szerokość kolumny treści, a „Najnowsze tematy” i „Najciekawsze tematy” stoją pod nim obok siebie — nie ma już pustej przestrzeni pod krótką zakładką.
+- Zakładki News Center to zwykłe przyciski nad przewijanym paskiem slajdów (wcześniej `::scroll-marker`, którego nie mają Firefox ani Safari — tam trzech z czterech zakładek nie dało się znaleźć).
+- Strona newsa ma na górze ten sam „wycinek nieba” co kafle (okładka kategorii, gwiazdozbiór znaku z dnia publikacji, data) zamiast okładki pływającej w treści. Wspólny komponent `NewsSky`.
+
+**Przegląd wyglądu** — trzy równoległe przeglądy na kopii zaimportowanej bazy (zrzuty Playwright; poprawki sprawdzałem sam na zrzutach albo pomiarem):
+
+- Telefon (390 i 360 px, Chrome): poprawione rzeczy opisane niżej; pozostałe w „Uwagi z przeglądu”.
+  - Tabele z legacy (96 podstron) ściskały kolumny do jednej litery i miniatur po kilka pikseli. Teraz słowa zostają całe, obrazki mają rozsądną szerokość, a za szeroka tabela przewija się we własnej ramce. Zmierzone na wszystkich 188 tabelach: przy 390 px ściśnięty tekst w 78 → 0, zmniejszone obrazki w 51 → 0; przy 1440 px przewija się tylko kilka najszerszych (np. zestawienie rycerzy z 11 kolumnami).
+  - Czarny i ciemnoszary tekst z legacy (415 miejsc) dziedziczy kolor motywu; sanitizer odrzuca takie kolory przy zapisie.
+  - Edytor map w panelu: palec przewija obraz, obszary da się przesuwać dotykiem, nowy obszar dodaje przycisk „Dodaj obszar” (rysowanie zostaje dla myszy).
+  - Tabele panelu: pierwsza kolumna jest przyklejona, więc przy przyciskach akcji widać, którego wiersza dotyczą.
+  - Ściśnięte wiersze w Ustawieniach i Nawigacji, nagłówek profilu użytkownika, lista plików, `/linki` przy 360 px (5 px poza ekran), rozmiar podpisu „Konto nieaktywne”, większe cele dotyku (numer posta, przełącznik języka, etykiety miejsc na mapie), podpowiedź o przesuwaniu mapy.
+- Firefox i WebKit (wersje z Playwrighta, 1440, 1024 i 390 px) wobec Chrome:
+  - Nagłówki: usunięte `font-variant-caps: small-caps`. Cinzel ma małe litery narysowane jako kapitaliki, a syntetyczne kapitaliki każda przeglądarka skalowała inaczej (Firefox o 13% większe), WebKit pokazywał w nich kwadraty zamiast „ł”, „ż”, „ę”. Teraz wszystkie trzy rysują to samo; w Chrome nagłówki są przez to odrobinę większe niż dotąd.
+  - Posty forum w Firefoksie były o ok. 15% wyższe (margines akapitu trafiał też na `<br>`) — poprawione.
+  - Bez różnic: niebo, kafle newsów, sekcje strony głównej, nagłówki paneli i sekcji, mapy, menu, okna dialogowe. W Firefoksie nie ma animacji przewijania (`animation-timeline`) i płynnego otwierania FAQ — treść jest od razu widoczna.
+- Komputer (1440, 1024, 768 px): poprawione: powtórzona zajawka (w 246 z 302 newsów z treścią treść z legacy zaczyna się od zajawki — strona newsa pokazuje ją wtedy raz), zaślepki martwych obrazków nie rozpychają już kolumn tabel, szerokie tabele mają cienki pasek przewijania i poświatę na krawędzi, za którą są jeszcze kolumny, mapa mieści się w kolumnie przy 1024 px (minimalna szerokość została tylko na telefonie), okruszek „Home” nie stoi już sam na stronach najwyższego poziomu, „Pobierz” i „Zaloguj przez Google” mają kształt pozostałych przycisków, czerwony tekst z legacy ma czerwień motywu, puste kategorie video nie pokazują się w pasku. Reszta w „Uwagi z przeglądu”.
+
+**Dostępność** (axe-core na 21 stronach publicznych, 15 stronach panelu i formularzy oraz 5 stronach przy 390 px):
+
+- Poprawione: brak `h1` na stronie głównej, przeskok z `h1` na `h3` na listach newsów i video, `role="tabpanel"` na `<article>`, powtórzone opisy obrazków map, drugi nieopisany `<aside>` w formularzach panelu.
+- Po poprawkach axe nie zgłasza nic na stronach głównej, newsów, video i map. Zostają puste odnośniki w treści z legacy (patrz „Uwagi z przeglądu”).
+- Lighthouse: dostępność 100 na stronie głównej, newsie, temacie forum i podstronie z tabelami (lista newsów miała 98 przed poprawką nagłówków; po niej nie mierzona), SEO 100.
+
+**Wydajność** (Lighthouse na buildzie produkcyjnym z zaimportowaną bazą). Liczby są zaniżone z dwóch powodów: komputer był w tym czasie obciążony, a przeglądarka dostawała tu pliki statyczne bez kompresji (patrz „Kilka serwerów naraz” na końcu pliku).
+
+- Wynik po poprawkach: telefon (symulowane wolne 4G) 55–61, komputer 89; odpowiedź serwera 160–370 ms, CLS 0–0,05 (lista newsów 0,115 — przeskok po doczytaniu fontów).
+- Poprawione: edytor TipTap (456 kB) ładował się gościom na stronach z komentarzami i w tematach forum — teraz doczytuje się dopiero z formularzem (`LazyRichTextEditor`); grafiki motywu (`/theme/**`) mają nagłówek cache; `/media` wysyła pliki strumieniem zamiast wczytywać je do pamięci.
+- Nie poprawione, do wdrożenia: HTML nie jest kompresowany (pliki statyczne są — gzip i brotli) — kompresję stron musi włączyć reverse proxy. Okładki kategorii newsów 150×200 ważą 60–80 kB przez metadane, baner 100 kB — do zrobienia przy podmianie grafik.
+
+**Sprawdzone**: `pnpm check` (345 testów), `pnpm build` i 50 testów e2e na buildzie — w czystej kopii projektu po ostatniej zmianie; kopia była identyczna z katalogiem roboczym poza tym plikiem. Poprawki wyglądu obejrzane na zrzutach z builda produkcyjnego na kopii zaimportowanej bazy albo potwierdzone pomiarem (tabele, wysokości stron w trzech silnikach, axe, Lighthouse).
+
+**Nie sprawdzone**:
+
+- Prawdziwe Safari (macOS, iPhone) i prawdziwy Firefox — WebKit z Playwrighta na Windows to nie Safari (m.in. rysuje fonty zmienne zawsze w zwykłej grubości). Do obejrzenia na Macu: nagłówki z polskimi znakami, rozmycie pod przyklejonym paskiem menu, płynność gwiezdnego tła (w przeglądarkach testowych bez karty graficznej Firefox i WebKit miały 22–41 kl./s przy animowanym niebie).
+- Prawdziwy telefon; edytor map sprawdzony tylko syntetycznymi zdarzeniami dotyku i testem właściwości CSS.
+- CI na GitHubie.
+- Captcha i logowanie Google — bez zmian, brak kluczy.
+
+## Wcześniejsze sesje
+
+Wszystko z tej sekcji jest w repozytorium (ostatnie commity: `805f5b6`, `86ccab0`).
+
+**Animacja `reveal` na wysokich blokach** (macOS, 2026-10-06):
 
 - Błąd: na stronie głównej przewiniętej do góry duży kafel newsa stał kilka pikseli niżej niż mały obok i był przygaszony. `reveal` kończył animację po wjechaniu 55% wysokości elementu, więc kafel 563 px potrzebował 310 px, a kafel 272 px tylko 150 px.
 - Poprawka w `main.css`: zasięg `entry min(55%, 8rem)` — najwyżej 128 px, niezależnie od wysokości. Dotyczy wszystkich użyć `reveal`, także długich postów na forum i sekcji `stage`, które wcześniej długo zostawały półprzezroczyste.
 - Sprawdzone: `pnpm check`; pomiar w Chrome przez Playwright przy 1456×1201, 1456×1100 i 2560×1300 — oba kafle mają teraz to samo przesunięcie i krycie.
 - Nie sprawdzone: `pnpm test:e2e`, Safari i Firefox, pozostałe strony z `reveal` na żywo.
 
-**Sekcje strony głównej: komentarze, grafiki, video** (macOS, 2026-10-05; niezacommitowane):
+**Sekcje strony głównej: komentarze, grafiki, video** (macOS, 2026-10-05):
 
 - Powód: „Rycerze komentują”, „Najnowsze grafiki” i „Najnowsze video” leżały wprost na gwiezdnym niebie i zlewały się z nim. Każda sekcja ma teraz własną nieprzezroczystą „scenę” (`stage` w `main.css`) razem z nagłówkiem. Grafiki i video nie stoją już obok siebie — każda sekcja zajmuje całą szerokość kolumny treści; strona główna jest przez to dłuższa o ok. 700 px na komputerze.
 - **Rycerze komentują** (`LatestComments`): zamiast karuzeli lista sześciu rycerzy (awatar z inicjałów, nick, tytuł komentowanej treści) i obok duży cytat. Głos przełącza najechanie myszą, kliknięcie i klawiatura (zakładki ARIA: strzałki, Home, End). Zaznaczenie przesuwa się pod aktywny wiersz (`sliding-thumb-x` / `sliding-thumb-y`), a przy cytacie rysuje się na złoto gwiazdozbiór znaku zodiaku z dnia komentarza, podpisany znakiem i datą — jak w kaflach newsów. Poniżej 576 px szerokości sceny lista zamienia się w rząd awatarów nad cytatem.
@@ -77,7 +147,7 @@ Na drugim komputerze:
 - Nie sprawdzone: Safari i Firefox (zapytania kontenerowe, `tan()` w CSS, przejście `flex-grow`), prawdziwy telefon, płynność animacji na żywo (widziałem stany końcowe i jedną klatkę w trakcie), odtwarzanie filmu w ramce YouTube (sprawdzony jest tylko adres ramki), czytnik ekranu.
 - Znane ograniczenia: miniatury grafik mają 480 px szerokości, więc rozsunięty pas (do ok. 410 px) jest na ekranie Retina lekko miękki, a panorama „12 Złotych Rycerzy” wyraźnie rozmyta — zniknie po podmianie grafik albo przy większych miniaturach. Lista filmów `/video` (`VideoCard`) nadal pokazuje szarą miniaturę YouTube przy usuniętych filmach.
 
-**Siatka newsów** (macOS, 2026-10-05; niezacommitowane):
+**Siatka newsów** (macOS, 2026-10-05):
 
 - Newsy to siatka zamiast szerokich kafli jeden pod drugim (`NewsGrid` — sam układ, bez pobierania danych). Liczba kolumn zależy od szerokości kolumny treści, nie okna (zapytania kontenerowe): 1 kolumna do 576 px, 2 do 896 px, 3 powyżej. Pierwszy news jest duży: 2×2 w trzech kolumnach; w dwóch zajmuje cały wiersz tylko wtedy, gdy pod nim zostaje parzysta liczba kafli, więc ostatni wiersz nigdy nie jest w połowie pusty.
 - Strona główna pokazuje 6 najnowszych newsów (`latestNews` w `/api/home`, `LATEST_NEWS_COUNT`) bez paginacji; do pełnej listy prowadzi odnośnik „Wszystkie newsy” w nagłówku sekcji (przycisk „Więcej newsów” pod siatką Mateusz uznał za zbędny — usunięty). Paginacja jest tylko na liście wszystkich newsów, w kategorii i w tagu (`NewsListing`, 9 na stronę — bez zmian).
@@ -94,7 +164,7 @@ Na drugim komputerze:
 - Nie sprawdzone: Safari i Firefox (rozmycie, maski, zapytania kontenerowe), prawdziwy telefon, płynność animacji na żywo (widziałem tylko stan końcowy), bardzo długie nazwy znaku lub daty po angielsku w wąskim kaflu.
 - Do decyzji: strona newsa (`/newsy/<slug>`) pokazuje okładkę kategorii po staremu, pływającą po prawej — nie ruszałem.
 
-**Przebudowa nagłówka** (macOS, 2026-10-05; niezacommitowane):
+**Przebudowa nagłówka** (macOS, 2026-10-05):
 
 - Pasek górny nad banerem zniknął. Statystyki (Rycerzy, postów, komentarzy) są zaparkowane w `app/components/layout/SiteStatistics.vue` — komponent nie jest nigdzie podpięty; `/api/layout` nadal je zwraca.
 - Menu konta siedzi po prawej stronie paska menu głównego (`UserMenu` na nowym `BaseDropdown`). Zalogowany: awatar z inicjałów (`initialsOf`, pierwsze dwa słowa nicku) + nick, w środku nick i rola, Profil, Twoje konto, Panel administratora (role inne niż `user`), język PL/EN, Wyloguj. Gość: przycisk „Zaloguj”, w środku język i „Zaloguj przez Google”. Poniżej `sm` w pasku zostaje sam awatar.
@@ -105,7 +175,7 @@ Na drugim komputerze:
 - Wyszukiwarka w pasku to teraz „pole” (`SearchTrigger.vue`): ikona, „Szukaj” i podpowiedź skrótu — `⌘K` na Apple, `Ctrl K` gdzie indziej (rozpoznanie po `user-agent`, wartość z serwera przez `useState`); na telefonie sama ikona w kółku. Okno otwiera też `/`, o ile fokus nie jest w polu tekstowym ani edytorze. Nowy scenariusz e2e „the search opens from the keyboard”.
 - Nie sprawdzone: animacja otwierania na żywo (tylko stan końcowy na zrzutach), Safari i Firefox, obsługa klawiaturą poza Escape w kodzie.
 
-**Nagłówki paneli** (macOS, 2026-10-05; niezacommitowane):
+**Nagłówki paneli** (macOS, 2026-10-05):
 
 - Nowy `PanelHeading` (`app/components/content/PanelHeading.vue`): tytuł na skośnej złotej płycie, obok pasek nocnego nieba z gwiazdozbiorem. Zastąpił płaski pomarańczowy pasek w menu bocznym (`NavigationSections`, więc także w menu mobilnym), w News Center i w kategoriach na `/forum`. Style w `main.css`: `star-banner`, `star-banner-plate`, `star-banner-sky` (dolna złota linia, gasnąca od stopy skosu ku gwiazdozbiorowi), `constellation-trace`; nowy kolor `gold-100`. Płyta i niebo mają tylko łagodne przejście w poziomie — pionowy gradient „jasna góra, ciemny dół” i wytłoczony cień tekstu Mateusz odrzucił jako staroświeckie.
 - Gwiazdozbiory pochodzą z `app/utils/constellations.ts` — pliku z równoległej pracy nad niebem gwiezdnym. `PanelHeading` od niego zależy, więc oba muszą trafić do repozytorium razem. Menu boczne dostaje po kolei Pegaza, Smoka, Łabędzia, Andromedę i Feniksa; News Center i forum idą zodiakiem od Barana.
@@ -114,7 +184,7 @@ Na drugim komputerze:
 - Sprawdzone: lint całości, format zmienionych plików, typy, Vitest (324 testy). Pełne `pnpm check` staje na formacie czterech plików nieba gwiezdnego (`StarrySky.vue`, `constellations.ts`, `skyPainter.ts`, `skyShow.ts`), których tu nie ruszałem. Obejrzane w Chrome (strona główna, forum) i na zrzutach Playwright (menu mobilne 390 px, ograniczony ruch).
 - Nie sprawdzone: `pnpm test:e2e`, Safari i Firefox, tytuł sekcji dłuższy niż dwie linie w menu bocznym (przy czterech liniach skos płyty dochodzi do gwiazdozbioru).
 
-**Nagłówki sekcji** (macOS, 2026-10-05; niezacommitowane):
+**Nagłówki sekcji** (macOS, 2026-10-05):
 
 - `SectionHeading` (`app/components/content/SectionHeading.vue`) jest wyraźniejszy: tytuł 24 px pogrubiony (było 20 px), wyrównany do lewej krawędzi treści, a pod nim na całą szerokość „meteor” — czteroramienna gwiazda z poświatą i zwężająca się, gasnąca w prawo złota smuga. Zastąpił mały pomarańczowy pasek przed tytułem. Odnośnik „Zobacz wszystko” zostaje po prawej, w wierszu tytułu. Propsy bez zmian, więc żadne z 11 użyć nie wymagało poprawek.
 - Style w `main.css`: `meteor-head`, `meteor-trail`. Smuga rysuje się od gwiazdy przy wjeżdżaniu nagłówka w ekran (`animation-timeline: view()`, jak `reveal`); bez wsparcia przeglądarki i przy `prefers-reduced-motion` jest od razu cała.
@@ -122,7 +192,7 @@ Na drugim komputerze:
 - Sprawdzone: `pnpm check`, `pnpm test:e2e`, zrzuty Playwright 1440 i 390 px (strona główna, `/linki`, `/faq`), przebieg animacji zmierzony przy przewijaniu w Chrome.
 - Nie sprawdzone: Safari i Firefox, pozostałe miejsca użycia na żywo (komentarze pod treścią, mapy, tagi, profil użytkownika) — ten sam komponent, ale nie oglądane.
 
-**Gwiezdne tło** (macOS, 2026-10-05, równolegle z przebudową nagłówka; niezacommitowane):
+**Gwiezdne tło** (macOS, 2026-10-05, równolegle z przebudową nagłówka):
 
 - Stare tło (`starfield`: osiem kropek w CSS migających razem) zastąpił komponent `StarrySky` (`app/components/layout/StarrySky.vue`) w `layouts/default.vue`. Panel administratora bez zmian. Z `main.css` wypadły `starfield`, `--animate-twinkle` i klatki `twinkle`.
 - Dwie warstwy canvas pod treścią. Nieruchoma: mgławica wzdłuż ukośnego pasa i gwiazdy (jedna na 700 px², najwyżej 6000; dużo słabych i niewiele jasnych, jak na prawdziwym niebie; sześć odcieni; poświata i krzyżowy błysk przy najjaśniejszych). Żywa: migotanie, gwiazdozbiory i meteory. Niebo jest za każdym razem takie samo (ziarno 1986).
@@ -137,7 +207,7 @@ Na drugim komputerze:
 - Obejrzane na zrzutach Playwright: 1440, 1512, 1920 i 2560 px, telefon 390 px, ograniczony ruch; przebieg rysowania gwiazdozbioru na serii klatek.
 - Nie sprawdzone: Safari i Firefox, prawdziwy telefon, zużycie GPU i baterii (mierzony był tylko główny wątek), `pnpm build`. Płynność oceniona z klatek i pomiaru, nie na żywo w oknie przeglądarki.
 
-Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claude in Chrome), więc przegląd szedł scenariuszami Playwright i zrzutami ekranu.
+**Pierwsza sesja na Windows** (2026-10-05). Bez sterowanej przeglądarki (brak rozszerzenia Claude in Chrome), więc przegląd szedł scenariuszami Playwright i zrzutami ekranu.
 
 **Uruchomienie na Windows** — `pnpm check` padało na dwóch testach, oba poprawione:
 
@@ -174,14 +244,14 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 
 **Angielska struktura plików** (czwarta sesja 2026-10-05) — pliki i katalogi w `app/pages` przemianowane na angielskie (`newsy/` → `news/`, `forum/dzial` → `forum/section`, `admin/uzytkownicy.vue` → `admin/users.vue` itd.). Polskie adresy URL zostały.
 
-**i18n, etap 1 — teksty statyczne** (ta sama sesja; niezacommitowane):
+**i18n, etap 1 — teksty statyczne** (ta sama sesja):
 
 - `@nuxtjs/i18n` 10: `pl` domyślny bez prefiksu, `en` pod `/en` z angielskimi adresami (`/en/news`, `/en/forum/thread/1`, `/en/admin/users`). Przełącznik PL/EN w pasku górnym, `lang` i `hreflang` w nagłówku strony. Bez automatycznego przekierowania według języka przeglądarki.
 - 736 kluczy w `i18n/locales/pl.json` i `en.json` (płaskie `SEKCJA.NAZWA`), wyniesione ze stron, komponentów, panelu administratora i komunikatów serwera (serwer zwraca klucze `ERRORS.*` / `VALIDATION.*`). Daty i liczby formatowane według języka.
 - Typowane trasy (`experimental.typedPages`) wyłączone — kłóciły się z trasami i18n; parametry trasy czyta `useRouteParam()`.
 - Angielskie tłumaczenia napisał Claude — do przejrzenia przez Mateusza.
 
-**i18n, etap 2 — treści z bazy i grafiki PL/EN** (ta sama sesja; niezacommitowane):
+**i18n, etap 2 — treści z bazy i grafiki PL/EN** (ta sama sesja):
 
 - Nowa tabela `translations` (migracja `0001_blue_bucky.sql`) — wersja polska zostaje w dotychczasowych tabelach, angielska jest nakładką z powrotem do polskiej, gdy tłumaczenia brak.
 - Tłumaczalne: newsy (tytuł, zajawka, treść), kategorie newsów (nazwa, obrazek), tagi, podstrony (tytuł, treść), mapy (tytuł, opis, obraz, zajawka graficzna) i ich obszary (etykieta, treść okienka), albumy (tytuł, opis, okładka), zdjęcia (tytuł, opis), kategorie video i filmy, kategorie i działy forum, ankiety i odpowiedzi, linki i ich kategorie, pliki (tytuł, opis), menu boczne, News Center.
@@ -200,7 +270,7 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 - Po logowaniu Google użytkownik wraca na polską stronę główną; tytuł `Film YouTube` w osadzonych filmach i domyślne komunikaty Zod nie są tłumaczone.
 - Ponowny `pnpm legacy:import --force` kasuje tłumaczenia razem z bazą.
 
-**Przegląd błędów w całym kodzie** (piąta sesja 2026-10-05; niezacommitowane) — trzy równoległe przeglądy (serwer publiczny, panel, front publiczny), każde zgłoszenie sprawdzone w kodzie przed poprawką:
+**Przegląd błędów w całym kodzie** (piąta sesja 2026-10-05) — trzy równoległe przeglądy (serwer publiczny, panel, front publiczny), każde zgłoszenie sprawdzone w kodzie przed poprawką:
 
 - Wyszukiwarka dopasowywała znaczniki HTML (`lazy`, `strong`, `href`) i nie znajdowała tekstu z `&`; teraz szuka w widocznym tekście (funkcja SQLite `searchable_text`).
 - Edycja posta zapisywała zaślepkę martwego obrazka zamiast oryginalnego `<img>` — formularz pobiera surową treść z `GET /api/forum/posts/:id`.
@@ -214,9 +284,9 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 
 - Po decyzjach Mateusza: Panel → Obrazki ostrzega przed usunięciem używanego obrazka (`isMediaImageUsed`); obrazy map mają własny adres wgrywania (`/api/admin/map-image`) i są usuwane z dysku przy podmianie i usunięciu mapy, a wgrane i nigdy niezapisane po 24 h (`cleaningUpMapImages`); okładkę albumu da się ustawić osobno dla EN; numer strony poza zakresem przekierowuje na ostatnią stronę; usunięte martwe kolumny `forums.last_post_at` i `media_images.alt` (migracja `0002_brief_revanche.sql`, zastosuje się przy starcie).
 
-**Wygląd podstrony `/redakcja`** (niezacommitowane) — tabele profili z legacy (nick, kontakt, awatar z `rowspan`, stanowisko, opis) są pokazywane jako karty, nagłówki grup jako nagłówki szeryfowe, a „Byli członkowie” jako równa siatka awatarów. Sam CSS w `rich-content` (`app/assets/css/main.css`), dopasowany do struktury tabeli — treść w bazie bez zmian; wzorzec pasuje tylko do tej strony. Obejrzane na zrzutach 1280 i 390 px. Decyzje Mateusza: prywatnych wiadomości na razie nie robimy, numer GG wylatuje, adresy e-mail redakcji zostają — odnośniki „Prywatna Wiadomość” i numer GG usunięte z treści strony w lokalnej bazie (`pages.id = 1`); ponowny import z legacy je przywróci, importer nie był zmieniany. Trzy awatary nie istnieją w plikach (zaślepka).
+**Wygląd podstrony `/redakcja`** — tabele profili z legacy (nick, kontakt, awatar z `rowspan`, stanowisko, opis) są pokazywane jako karty, nagłówki grup jako nagłówki szeryfowe, a „Byli członkowie” jako równa siatka awatarów. Sam CSS w `rich-content` (`app/assets/css/main.css`), dopasowany do struktury tabeli — treść w bazie bez zmian; wzorzec pasuje tylko do tej strony. Obejrzane na zrzutach 1280 i 390 px. Decyzje Mateusza: prywatnych wiadomości na razie nie robimy, numer GG wylatuje, adresy e-mail redakcji zostają — odnośniki „Prywatna Wiadomość” i numer GG usunięte z treści strony w lokalnej bazie (`pages.id = 1`); ponowny import z legacy je przywróci, importer nie był zmieniany. Trzy awatary nie istnieją w plikach (zaślepka).
 
-**Dziennik zmian** (szósta sesja 2026-10-05; niezacommitowane):
+**Dziennik zmian** (szósta sesja 2026-10-05):
 
 - Tabela `audit_logs` (migracja `0003_true_skaar.sql`, zastosuje się przy starcie): kto (id, nick i rola w chwili zdarzenia), kiedy, akcja (dodanie, zmiana, usunięcie, logowanie, rejestracja), dział, id i nazwa pozycji, język treści oraz lista pól „było → jest”. Długie teksty zapisują się jako wycinek 400 znaków wokół miejsca zmiany.
 - Logowane: wszystkie zasoby panelu (wspólne handlery), pliki, zdjęcia i okładki albumów, obrazki, kolejność (podstrony, zdjęcia, menu), ukrywanie i usuwanie komentarzy i wpisów shoutboksa, blokady i role użytkowników, News Center, moderacja forum (zamknięcie, przyklejenie, przeniesienie, usunięcie tematu, edycja i usunięcie posta — także edycja własnego posta przez autora), zmiana nicku, usunięcie konta, rejestracja, logowanie i rola nadana z `NUXT_ADMIN_EMAILS`.
@@ -247,38 +317,71 @@ Pierwsza sesja na Windows. Bez sterowanej przeglądarki (brak rozszerzenia Claud
 
 ## Czego nie sprawdziłem
 
-- **Panel: Podstrony** — w e2e tylko dodanie strony pod hubem; przenoszenie w drzewie, zmiana rodzica i usuwanie tylko w testach integracyjnych.
-- **Panel: Forum (struktura)** — działy i kategorie obejrzane po załadowaniu, akcje tylko w testach integracyjnych.
-- **Panel: Użytkownicy** — nadanie roli i blokada przeszły w e2e; odebranie roli i komunikaty odmowy (ostatni administrator, własne konto) tylko w testach integracyjnych.
-- **Nowe scenariusze e2e działają na skromnych danych testowych**, nie na zaimportowanej bazie — błąd szerokości strony głównej pokazał, że to robi różnicę. Działów panelu z tej sesji nikt nie oglądał na prawdziwych danych.
-- **Wygląd na telefonie** — widziałem cztery strony na zrzutach 390 px; panelu administratora, tematu forum, mapy i formularzy na telefonie nikt nie oglądał. Brak testu regresji dla błędu szerokości strony głównej (wymagałby szerszej treści w danych testowych).
-- **Zakładki News Center w przeglądarkach bez `::scroll-marker`** (Firefox, Safari) — tam zostaje samo przewijanie w poziomie z widocznym paskiem; nie sprawdzałem.
-- **`pnpm build` i start `.output`** — nie uruchamiane na Windows.
+- **Prawdziwe Safari i Firefox** — wygląd porównany tylko w silnikach z Playwrighta (Firefox, WebKit na Windows). Lista rzeczy do obejrzenia na Macu i iPhonie jest w „Zrobione w ostatniej sesji”.
+- **Prawdziwy telefon** — wszystko przy 390 i 360 px w emulacji Chrome; edytor map dotykiem tylko zdarzeniami syntetycznymi.
+- **CI na GitHubie** — workflow przeszedł lokalnie w czystej kopii, na GitHubie ruszy dopiero po wypchnięciu.
+- **Panel: Forum (struktura)** — zmiana kolejności działów i kategorii (pole „Kolejność”) tylko w testach integracyjnych.
+- **Scenariusze e2e działają na skromnych danych testowych**, nie na zaimportowanej bazie. Przegląd wyglądu z tej sesji był na kopii prawdziwych danych, ale klikanie w panelu — nie.
 - **Prawdziwe logowanie Google i prawdziwa captcha** — brak kluczy, testowane tylko logowanie testowe.
+- **Ponowny import z legacy** po zmianach w importerze (FAQ z poprzedniej sesji; w tej: emotikona `b)`, puste odnośniki, ciemne kolory tekstu) — na tym komputerze nie ma `legacy/` ani pomocniczego MySQL, zmiany mają tylko testy jednostkowe.
 
 ## Uwagi z przeglądu (niepoprawione)
 
-1. **Strona główna, News Center** — pod krótką treścią zakładki zostaje duża pusta przestrzeń (panel rozciąga się do wysokości prawej kolumny). Kwestia wyglądu, do decyzji.
-2. **Statystyki** — nie są teraz nigdzie pokazywane (`SiteStatistics.vue` czeka na miejsce). „Rycerzy” jest w nim ukryte przy zerze; do decyzji, czy zamiast tego liczyć też konta archiwalne (339).
-3. **Listy poza `AdminTable`** (zdjęcia w albumie, nawigacja, zakładki ustawień) — przyciski „Edytuj” i „Usuń” nadal bez nazwy z kontekstem pozycji.
-4. **Emotikony** — w nowych wpisach `:)` zostaje tekstem; zamiana na emoji działała tylko przy imporcie.
-5. **Pliki do pobrania** — trzy pozycje z konkursu z 2013 r. i regulamin „konta VIP”, w opisach adres e-mail konkursu. Do decyzji, czy zostają publicznie.
-6. **`i18n.baseUrl`** czyta `NUXT_PUBLIC_SITE_URL` przy budowaniu — zmienna musi być ustawiona już podczas `pnpm build`, inaczej `hreflang` wskaże `localhost`. Do ustawienia przy wdrożeniu dev/prod.
+Uwagi z trzech przeglądów z 2026-10-09, których nie poprawiałem — część to kwestie gustu albo treści, do decyzji Mateusza.
+
+**Układ**
+
+1. **Długie menu boczne wyznacza wysokość strony.** Na krótkich stronach (404, zdjęcie, pliki, lista newsów) obok menu zostaje 800–2000 px pustego nieba. Możliwe wyjścia: zwijane sekcje menu albo menu przyklejone, z własnym przewijaniem.
+2. **Duży kafel newsa** ma 627×385 px „nieba” na okładkę 140×180 px — do oceny (jego wysokość była już raz zmniejszana).
+3. **Strony z legacy złożone z pociętych grafik** (np. `saint-seiya/charakterystyki-postaci`): kawałki nie składają się co do piksela, zostają kreski i przesunięte paski. Tak było też przed zmianami tabel z tej sesji. Wymaga przebudowy treści albo osobnego stylu.
+4. **Treść z legacy**: nagłówki wewnątrz treści to zwykłe pogrubienia, nie nagłówki motywu; siatki kafelków w hubach trzymają się lewej strony; w tabelach dwukolumnowych wąska kolumna etykiet łamie tekst („Data premiery” w dwóch liniach).
+5. **Stopka „Rewolucyjne projekty”**: cztery kafle w czterech rozmiarach i stylach (grafiki z legacy; Angelologia nie ma grafiki).
+6. **Zdjęcia bez tytułu** (69 z 319) mają w nagłówku nazwę albumu; małe zdjęcie stoi samo na dużej scenie.
+7. **Forum i newsy**: długie tematy mają stronicowanie tylko na dole; strona kategorii newsów nie ma paska kategorii.
+8. **Wyłączone przyciski główne** (złoty gradient z kryciem 50%) wyglądają na brudnobrązowe.
+
+**Telefon**
+
+9. **Panel**: tabele nadal przewijają się w poziomie (pierwsza kolumna jest przyklejona; układu kartowego nie ma). Menu panelu otwiera się w treści i jest wyższe niż ekran, a pasek „Panel SSR” nie jest przyklejony. Pasek narzędzi edytora ma na telefonie 4–6 rzędów.
+10. **Małe cele dotyku**: na każdej mapie 11–19 obszarów ma jeden wymiar poniżej 32 px (przy szerokości mapy 768 px), próbki kolorów w edytorze mają 24 px, okruszki 16 px wysokości.
+11. **Tekst 10–10,4 px**: podpis „Konto nieaktywne”, osie wykresów dashboardu, nagłówki grup w menu panelu.
+12. **Okruszki** łamią się tak, że druga linia zaczyna się od samej strzałki.
+
+**Treść do poprawienia w panelu**
+
+13. Kategoria newsów „Aktuzlizacje dotyczące zawartości strony!” — literówka i długość (w kaflach jest obcinana).
+14. Kategoria FAQ „Rejestracja i logowanie” opisuje rejestrację e-mailem, mail aktywacyjny i przypominanie hasła — tego już nie ma.
+15. „Home” w menu górnym i okruszkach (`GENERAL.HOME` w `pl.json`) obok „Strona główna” w menu bocznym.
+16. Wersja `/en` miesza języki: interfejs jest po angielsku, treści z bazy po polsku (tabela `translations` jest pusta) — do czasu tłumaczenia treści.
+
+**Obrazki i kolory z legacy**
+
+17. Trzy awatary na `/redakcja` nie istnieją w `.data/uploads` — wszystkie mają nawiasy kwadratowe w nazwie pliku (`…[3526].jpg`, `dm1[1497].png`, `…[3412].jpg`). Sprawdzić na Macu, czy leżą w `legacy/images/avatars`; jeśli tak, importer gubi pliki z `[` i `]` w nazwie.
+18. Znak wodny Photobucketu na obrazkach, które jeszcze się ładują (115 podstron, 33 newsy, 39 postów) — wiąże się z decyzją o pobraniu obrazków zewnętrznych.
+19. Dwa kolory tekstu o słabym kontraście (`#8b4513`, `#993366`, po jednym miejscu) zostawione, bo niosą znaczenie (legenda mapy gwiazd).
+20. Okładki kategorii newsów 150×200 px ważą 60–80 kB (metadane), baner 100 kB; obrazki w stopce nie mają wymiarów. Do zrobienia przy podmianie grafik.
+
+**Wydajność i przeglądarki**
+
+21. Lista newsów na wolnym telefonie: przeskok układu po doczytaniu fontów (CLS 0,115 w Lighthouse).
+22. Wyszukiwarka i limity zapisów liczą w pamięci jednego procesu (patrz „Znane ograniczenia”).
+23. Do obejrzenia w prawdziwym Safari i Firefoksie: rozmycie tła pod przyklejonym paskiem menu i pod oknami dialogowymi (przeglądarki testowe go nie malują) oraz płynność animowanego nieba.
+24. **`i18n.baseUrl`** czyta `NUXT_PUBLIC_SITE_URL` przy budowaniu — zmienna musi być ustawiona już podczas `pnpm build`.
 
 ## Decyzje dla Mateusza
 
-1. **Wygląd** — do obejrzenia i uwag. Grafiki z legacy czekają na wersje w lepszej jakości.
-2. **Pobranie działających obrazków zewnętrznych na własny serwer** (1701 adresów). Chroni przed ich zniknięciem i przed blokowaniem obrazków `http://` na stronie `https://`. Nie robiłem bez zgody.
-3. **Sekcja Multimedia** (odcinki, skany, soundtracki). Strony są publiczne zgodnie z decyzją, ale nie ma ich w menu — w legacy te odnośniki widział tylko właściciel. Dodać do menu czy zostawić?
-4. **Hosting**: VPS czy Render, domena, kopie zapasowe. Pomiary i zalecane parametry VPS w sekcji „Wymagania serwera” niżej.
-5. **Klucze**: Google OAuth, Cloudflare Turnstile, `NUXT_ADMIN_EMAILS`.
-6. **`legacy/php-cgi53.core`** (653 MB zrzutu pamięci) — można usunąć.
-7. **Repozytorium na GitHubie jest publiczne** — zostaje publiczne czy przełączyć na prywatne? W `docs/legacy.md` są wymienione nazwy prywatnych plików z `legacy/` (same nazwy, bez treści).
-8. **Stare pliki konkursowe** w „Plikach do pobrania” (uwaga 5 wyżej).
-9. **Commit zmian z sesji na Windows** i los `pnpm-workspace.yaml` (patrz „Gdzie jesteśmy”).
-10. **Statystyki portalu** — gdzie mają wrócić (stopka, strona główna?) i czy „Rycerzy” ukrywać przy zerze, czy liczyć też konta archiwalne (uwaga 2 wyżej).
-11. **Nagłówek** — gość ma język schowany w menu „Zaloguj” (dwa kliknięcia do EN); alternatywa to przełącznik PL/EN na wierzchu paska. Rozmiar odnośników (`text-xs`) do oceny — przy 1024 px zmieściłby się też poprzedni `text-sm`.
-12. **Usunięte filmy** — 36 z 74 filmów nie istnieje już na YouTube, w tym cztery najnowsze, które trafiają na stronę główną. Do wyboru: sprawdzać filmy skryptem (jak `pnpm images:check` dla obrazków) i pomijać usunięte na stronie głównej, usunąć je z bazy w panelu albo podmienić adresy na działające kopie. Do tego czasu strona główna pokazuje zaślepki.
+1. **Commit zmian z sesji 2026-10-09** — leżą w katalogu roboczym na `staging`. Po wypchnięciu pierwszy raz ruszy CI na GitHubie.
+2. **Repozytorium na GitHubie jest publiczne** — zostaje publiczne czy przełączyć na prywatne? W `docs/legacy.md` są wymienione nazwy prywatnych plików z `legacy/` (same nazwy, bez treści). Z tego komputera nie da się tego przełączyć (brak `gh` i dostępu konta `m-wyka`); na GitHubie: Settings → General → Danger Zone → Change repository visibility.
+3. **Stare pliki konkursowe** w „Plikach do pobrania”: „Karta zadań” i „Karta odpowiedzi” z konkursu z 2013 r. (w opisach adres e-mail konkursu) oraz „Regulamin konta VIP”. Zostają publicznie, znikają w całości, czy zostają bez adresu e-mail w opisie? Da się to zrobić w panelu (Pliki), zmiana dotyczy tylko bazy.
+4. **Pobranie działających obrazków zewnętrznych na własny serwer** (1701 adresów). Chroni przed ich zniknięciem i przed blokowaniem obrazków `http://` na stronie `https://` (Lighthouse zgłasza je jako niezabezpieczone żądania). Nie robiłem bez zgody.
+5. **Sekcja Multimedia** (odcinki, skany, soundtracki). Strony są publiczne zgodnie z decyzją, ale nie ma ich w menu — w legacy te odnośniki widział tylko właściciel. Dodać do menu czy zostawić?
+6. **Hosting**: VPS czy Render, domena, kopie zapasowe. Pomiary i zalecane parametry VPS w sekcji „Wymagania serwera” niżej.
+7. **Klucze**: Google OAuth, Cloudflare Turnstile, `NUXT_ADMIN_EMAILS`.
+8. **Statystyki portalu** — nie są nigdzie pokazywane (`SiteStatistics.vue` czeka na miejsce). Gdzie mają wrócić (stopka, strona główna?) i czy „Rycerzy” ukrywać przy zerze, czy liczyć też konta archiwalne (339)?
+9. **Nagłówek** — gość ma język schowany w menu „Zaloguj” (dwa kliknięcia do EN); alternatywa to przełącznik PL/EN na wierzchu paska. Rozmiar odnośników (`text-xs`) do oceny — przy 1024 px zmieściłby się też poprzedni `text-sm`.
+10. **Usunięte filmy** — 36 z 74 filmów nie istnieje już na YouTube, w tym cztery najnowsze, które trafiają na stronę główną. Do wyboru: sprawdzać filmy skryptem (jak `pnpm images:check` dla obrazków) i pomijać usunięte na stronie głównej, usunąć je z bazy w panelu albo podmienić adresy na działające kopie. Do tego czasu strona główna i `/video` pokazują zaślepki.
+11. **Puste odnośniki w treści z legacy** — 102 odnośniki bez tekstu i obrazka (56 w podstronach, 46 w newsach; m.in. 8 na `/redakcja`) zostały po obrazkach, których już nie ma. Nowe zapisy i ponowny import usuwają je same; istniejącą bazę trzeba by przeczyścić jednorazowo. Nie ruszałem bazy bez zgody.
+12. **Wygląd** — uwagi z przeglądu są w „Uwagi z przeglądu (niepoprawione)”. Grafiki z legacy czekają na wersje w lepszej jakości.
 
 ## Wymagania serwera
 
@@ -298,29 +401,42 @@ Pomiar z 2026-10-05 na kopii projektu poza repozytorium (macOS, M2 Max, Node 22.
 - Wariant bez środowisk dev (same trzy produkcje): ok. 1,1 GB bez buildu, 2,7–3,6 GB z buildem na serwerze — wystarcza 2 vCPU, 4 GB RAM, 40 GB NVMe (80 GB przy większej ilości wideo), z plikiem wymiany 2 GB.
 - OVH (strona ovhcloud.com/pl, sprawdzone 2026-10-05, ceny netto przy opłacie za 12 miesięcy): VPS-1 to 2 vCore / 4 GB / 40 GB NVMe od 16,32 zł miesięcznie, VPS-2 to 4 vCore / 8 GB / 75 GB od 30,77 zł. Oba z IPv4, codzienną kopią i nielimitowanym transferem. Na same trzy produkcje wystarcza VPS-1.
 - Mikrus (mikr.us, sprawdzone 2026-10-05): planu 3.1 nie ma; 3.0 to 2 GB / 25 GB, 3.5 to 4 GB / 40 GB. Kontener LXC bez pliku wymiany, bez własnego IPv4 (domena tylko przez Cloudflare albo ich proxy), bez gwarancji CPU i SLA. Na 3.0 build wyłącznie poza serwerem; 3.5 mieści build na miejscu.
-- Wyszukiwarka (`/api/search`) liczy się 170–200 ms na zapytanie i na ten czas wstrzymuje serwer; nie ma limitu częstotliwości.
-- `server/routes/media` wczytuje cały plik do pamięci przed wysłaniem; największy dziś ma 3 MB, limit wgrywania to 50 MB.
+- Wyszukiwarka (`/api/search`) liczy się 170–200 ms na zapytanie i na ten czas wstrzymuje serwer. Od 2026-10-09 ma limit 30 zapytań na minutę z jednego adresu; adres bierze z `X-Forwarded-For`, więc reverse proxy musi ten nagłówek ustawiać sam, a nie przepuszczać od klienta.
+- `server/routes/media` wysyła pliki strumieniem (od 2026-10-09).
+- Strony HTML wychodzą z Node bez kompresji (strona główna 142 kB); pliki statyczne mają gotowe wersje gzip i brotli. Kompresję HTML ma włączyć reverse proxy.
+- Mapa strony (`/sitemap.xml`) to 1,2 MB generowane z bazy przy każdym żądaniu (ok. 90 ms), z nagłówkiem cache na godzinę.
 
 ## Znane ograniczenia
 
 - Tytuły podstron są wyliczone automatycznie ze starych nazw („Faq”, „Grecka”) — wymagają przejrzenia w panelu.
-- FAQ to osobny moduł (`faq_categories`, `faq_items`, panel „FAQ”, `/api/faq`, strona `/faq`), nie podstrona. Import z legacy dzieli starą stronę „MENU - FAQ” na kategorie i pytania (`scripts/legacy/faq.ts`) — ta ścieżka importu ma tylko testy jednostkowe, pełnego importu po zmianie nie puszczałem. Stary adres `viewpage.php?page_id=761` przekierowuje na stronę główną zamiast na `/faq`.
+- FAQ to osobny moduł (`faq_categories`, `faq_items`, panel „FAQ”, `/api/faq`, strona `/faq`), nie podstrona. Import z legacy dzieli starą stronę „MENU - FAQ” na kategorie i pytania (`scripts/legacy/faq.ts`) — ta ścieżka importu ma tylko testy jednostkowe, pełnego importu po zmianie nie puszczałem.
 - Zmiana adresu lub rodzica podstrony nie poprawia odnośników do niej w treściach innych stron ani w menu.
 - Edytor przy edycji starych treści gubi `<small>`, `<details>` i opakowania `<div>`; tabele, wyrównanie, kolory, obrazki i YouTube zachowuje.
 - Komentarze do filmów (2 z legacy) nie są nigdzie wyświetlane; filmy nie mają własnych stron.
 - Photobucket potrafi zwrócić obrazek ze znakiem wodnym zamiast oryginału — sprawdzanie tego nie wykrywa.
 - 40 zdjęć albumu „Sygnatury” i końcówka strony „Posejdon” (id 367) nie istnieją w legacy — nie do odzyskania.
-- Wiele starych filmów z YouTube już nie istnieje (szare miniatury).
-- Brak: mapy strony (sitemap), RSS, CI, audytu dostępności i wydajności.
+- Wiele starych filmów z YouTube już nie istnieje (zaślepka „Niedostępny”).
+- Treści użytkowników (forum, komentarze, shoutbox) nie mają i nie będą mieć wersji językowych — potwierdzone przez Mateusza 2026-10-09.
+- Za szerokie tabele z legacy przewijają się we własnej ramce; na telefonie dotyczy to ponad połowy tabel.
+- Mapa strony ma listę typów treści wpisaną w `listSitemapEntries` (`server/utils/feeds.ts`) — nowy publiczny typ strony trzeba tam dopisać ręcznie.
+- Limit wyszukiwarki i limit zapisów trzymają liczniki w pamięci procesu — po restarcie serwera zaczynają od zera, a przy kilku procesach każdy liczy osobno.
 
 ## Następne kroki
 
-1. Commit poprawek z przeglądu błędów na `staging` (po zgodzie Mateusza), potem `pnpm build` na Windows.
-2. Reszta z „Czego nie sprawdziłem”: Podstrony i struktura forum w e2e, telefon na pozostałych stronach (temat forum, mapa, panel), zakładki News Center w Firefoksie.
-3. Scalenie `staging` do `main`, gdy Mateusz zdecyduje. Do tego czasu commity tylko na `staging`.
-4. Przegląd wyglądu z Mateuszem i poprawki, w tym telefon.
-5. Klucze Google i Turnstile, test prawdziwego logowania.
-6. Decyzje 2–4 i wdrożenie.
+1. Commit zmian z 2026-10-09 na `staging` (po zgodzie Mateusza) i wypchnięcie — sprawdzić pierwszy przebieg CI na GitHubie.
+2. Na Macu: obejrzeć stronę w prawdziwym Safari i na iPhonie (lista w „Zrobione w ostatniej sesji”) oraz usunąć `legacy/php-cgi53.core` (653 MB zrzutu pamięci; decyzja Mateusza z 2026-10-09: usunąć — na tym komputerze nie ma katalogu `legacy/`).
+3. Decyzje 2 i 3 (repozytorium, pliki konkursowe), potem pozostałe z listy.
+4. Klucze Google i Turnstile, test prawdziwego logowania.
+5. Hosting i wdrożenie: reverse proxy z kompresją HTML i nagłówkiem `X-Forwarded-For`, `NUXT_PUBLIC_SITE_URL` ustawione już przy `pnpm build` (inaczej `hreflang`, mapa strony i RSS wskażą `localhost`), usunięcie kont testowych z bazy.
+6. Scalenie `staging` do `main`, gdy Mateusz zdecyduje. Do tego czasu commity tylko na `staging`.
+
+**Zaplanowane na później — tłumaczenie treści przez AI** (polecenie Mateusza z 2026-10-09: zapisać, nie robić teraz):
+
+- Cel: przetłumaczyć na angielski całą treść portalu za jednym razem, modelem językowym, i zapisać jako wersję EN w tabeli `translations`.
+- Zakres: wszystko, co panel pozwala tłumaczyć — newsy (tytuł, zajawka, treść), kategorie newsów, tagi, podstrony, mapy i ich obszary, albumy i zdjęcia (tytuły, opisy), kategorie video i filmy, kategorie i działy forum, ankiety i odpowiedzi, linki i ich kategorie, pliki, FAQ, menu boczne, News Center.
+- Poza zakresem: komentarze, wpisy shoutboksa i posty forum — tych nie tłumaczymy.
+- Do ustalenia przed startem: który model i z jakim budżetem (ok. 800 podstron i 380 newsów), czy tłumaczenie ma nadpisywać istniejące wpisy EN, jak zachować HTML i odnośniki w treści (slugi i adresy zostają wspólne) oraz kto przegląda wynik. Skrypt powinien dać się wznowić i pomijać rekordy już przetłumaczone.
+- Uwaga: `pnpm legacy:import --force` kasuje tabelę `translations` — tłumaczenie robić po ostatnim imporcie.
 
 ## Jak wznowić pracę
 
@@ -332,7 +448,7 @@ pnpm dev                # http://localhost:3000
 ```
 
 - **Windows**: Node 22.23 i pnpm 12 są domyślne w powłoce, `nvm use` niepotrzebne. Komendy z tego pliku pisane pod macOS trzeba przełożyć na PowerShell (zmienne przez `$env:NAZWA = '...'`).
-- **Logowanie lokalne**: `/logowanie-testowe`, wybór roli w formularzu. Wymaga `NUXT_E2E_LOGIN=true` — jest w `.env` na pierwszym komputerze, na Windows trzeba dopisać.
+- **Logowanie lokalne**: `/logowanie-testowe`, wybór roli w formularzu. Wymaga `NUXT_E2E_LOGIN=true` w `.env`.
 - **Ponowny import**: najpierw start pomocniczego MySQL (komenda w `docs/legacy.md`), potem `pnpm legacy:import --force` i `pnpm images:check`. Import kasuje bazę i katalog wgranych plików.
 
 **Przegląd na kopii bazy** — żeby klikanie w panelu nie zmieniało zaimportowanych danych:
@@ -347,7 +463,18 @@ NUXT_DB_PATH=.data/review/saintseiya.db NUXT_UPLOADS_DIR=.data/review/uploads pn
 
 Na Windows bez `sqlite3` (przy zatrzymanym serwerze): `Copy-Item .data/saintseiya.db* .data/review/`, potem `$env:NUXT_DB_PATH = '.data/review/saintseiya.db'; pnpm dev`. Do samego oglądania `NUXT_UPLOADS_DIR` może zostać domyślny.
 
-**Zrzuty ekranu zamiast sterowanej przeglądarki**: krótki skrypt Node z `chromium.launch({ channel: 'chrome' })` z `@playwright/test`, widok 390 px, `page.screenshot`; przy okazji `document.documentElement.scrollWidth - window.innerWidth` wykrywa wychodzenie poza ekran. Skrypt musi leżeć w katalogu projektu, żeby znalazł `node_modules` — po użyciu usunąć.
+**Kilka serwerów naraz** (wnioski z 2026-10-09, gdy obok działał `pnpm dev` Mateusza na porcie 3000):
+
+- `pnpm build` czyści `.nuxt` i psuje działający w tym samym katalogu serwer dev. Build i testy na buildzie puszczać w kopii projektu: skopiować pliki z `git ls-files -co --exclude-standard` do katalogu poza repozytorium, tam `pnpm install --frozen-lockfile --offline --store-dir E:\.pnpm-store`, `pnpm build`, `E2E_SERVER=build pnpm test:e2e`. To zarazem próba generalna CI.
+- Drugi `nuxt dev` w tym samym katalogu dzieli z pierwszym pamięć podręczną Vite (`node_modules/.cache/vite`). Gdy jeden przebuduje zależności, drugi odpowiada `504 Outdated Optimize Dep` na strony z edytorem, dopóki się go nie zrestartuje. Do oglądania zmian lepiej użyć builda z kopii.
+- Zatrzymanie zadania w tle nie zawsze zabija proces `node` na Windows — sprawdzić port (`Get-NetTCPConnection -State Listen -LocalPort 3200`) i zabić po numerze procesu.
+- Na tym komputerze coś po drodze rozpakowuje odpowiedzi HTTP dla przeglądarek (dokłada nagłówek `X-Content-Encoding-Over-Network: br`; najpewniej ochrona sieci w antywirusie — nie sprawdzałem, co dokładnie). Lighthouse i Chrome widzą przez to pliki statyczne bez kompresji, choć serwer wysyła brotli. `curl` bez nagłówka przeglądarki pokazuje stan faktyczny.
+
+**Skrypty do przeglądu** leżą w `.data/review/` (poza repozytorium, tylko na tym komputerze; korzystają z `node_modules` projektu):
+
+- `shots.mjs` — zrzuty ekranu stron w Chrome, Firefoksie lub WebKicie przy zadanej szerokości, z logowaniem testowym, wykrywaniem poziomego przewijania i błędów konsoli. Opis opcji na górze pliku; ścieżki podaje się bez początkowego ukośnika (Git Bash by je przepisał).
+- `axe.mjs` — audyt dostępności axe-core (`axe.min.js` obok), `tables.mjs` — pomiar wszystkich tabel z legacy przy zadanej szerokości, `heights.mjs` — wysokości stron w trzech silnikach.
+- Domyślny adres to `http://localhost:3200`; `shots.mjs` ma opcję `--base`. Lighthouse instalowałem osobno poza projektem (`npm install lighthouse`).
 
 **Uwagi do przeglądarki sterowanej przez Claude**:
 

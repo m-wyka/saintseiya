@@ -1,4 +1,5 @@
-import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import type { ModeratorPermission, UserRole } from '../../shared/utils/roles';
 
 interface TestAccount {
@@ -7,7 +8,7 @@ interface TestAccount {
   permissions?: ModeratorPermission[];
 }
 
-export const signIn = async (page: Page, account: TestAccount) => {
+export const signIn = async (page: Page, account: TestAccount): Promise<{ id: number }> => {
   const response = await page.request.post('/api/auth/e2e-login', {
     data: {
       googleId: `e2e:${account.name}`,
@@ -19,6 +20,7 @@ export const signIn = async (page: Page, account: TestAccount) => {
   if (!response.ok()) {
     throw new Error(`Test sign-in failed with status ${response.status()}`);
   }
+  return (await response.json()) as { id: number };
 };
 
 export const waitUntilInteractive = (page: Page) =>
@@ -29,6 +31,16 @@ export const openAccountMenu = (page: Page, triggerName: string) =>
     .getByRole('navigation', { name: /^(Menu główne|Main menu)$/ })
     .getByRole('button', { name: triggerName })
     .click();
+
+export const confirmRemoval = async (scope: Locator | Page, subject: string, label = 'Usuń') => {
+  const question = `Czy na pewno chcesz usunąć ${subject}?`;
+  const page = 'page' in scope ? scope.page() : scope;
+  const dialog = page.getByRole('dialog', { name: 'Potwierdzenie' });
+  await scope.getByRole('button', { name: label, exact: true }).click();
+  await expect(dialog.getByText(question)).toBeVisible();
+  await dialog.getByRole('button', { name: 'Tak' }).click();
+  await expect(dialog).toBeHidden();
+};
 
 export const visit = async (page: Page, address: string) => {
   const response = await page.goto(address);

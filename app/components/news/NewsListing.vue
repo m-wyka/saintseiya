@@ -22,7 +22,7 @@ await redirectPastLastPage(listing.value);
 
 <template>
   <div v-if="listing">
-    <NewsGrid v-if="listing.items.length" :news="listing.items" />
+    <NewsGrid v-if="listing.items.length" :news="listing.items" heading-tag="h2" />
     <EmptyState v-else :message="t('NEWS_LIST.EMPTY')" />
     <PaginationNav :page="listing.page" :page-count="listing.pageCount" />
   </div>

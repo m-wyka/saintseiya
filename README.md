@@ -45,12 +45,16 @@ Strona działa pod `http://localhost:3000`.
 | `pnpm build`, `pnpm preview` | Wersja produkcyjna i jej podgląd |
 | `pnpm check` | Lint, format, typy i testy jednostkowe/integracyjne — uruchamiać przed każdym commitem |
 | `pnpm test` | Testy Vitest |
-| `pnpm test:e2e` | Testy Playwright (same stawiają serwer i bazę testową w `.data/e2e`) |
+| `pnpm test:e2e` | Testy Playwright (same stawiają serwer i bazę testową w `.data/e2e`); z `E2E_SERVER=build` testują gotowy build z `.output` zamiast serwera deweloperskiego |
 | `pnpm lint:fix`, `pnpm format` | Automatyczne poprawki stylu |
 | `pnpm db:generate` | Nowa migracja SQL po zmianie `server/db/schema.ts` |
 | `pnpm db:migrate` | Zastosowanie migracji (serwer robi to też sam przy starcie) |
 | `pnpm legacy:import` | Import treści ze starej bazy (opis niżej) |
 | `pnpm images:check` | Sprawdzenie, które zewnętrzne obrazki w treściach jeszcze działają |
+
+Te same kroki wykonuje GitHub Actions (`.github/workflows/ci.yml`) przy każdym wypchnięciu na `staging` i `main` oraz w pull requestach: `pnpm check`, a osobno `pnpm build` i testy Playwright na buildzie.
+
+`pnpm build` czyści katalog `.nuxt`, więc nie uruchamiać go obok działającego `pnpm dev` w tym samym katalogu.
 
 ## Import ze starej strony
 
@@ -68,7 +72,7 @@ Import jest powtarzalny: `--force` zastępuje bazę, więc uruchamiać go tylko 
 | Katalog | Zawartość |
 |---|---|
 | `app/` | Frontend: strony, komponenty (`base/` to kontrolki bazowe), układy, store'y Pinia |
-| `server/api/`, `server/routes/` | Endpointy Nitro; `server/routes/media` serwuje wgrane pliki |
+| `server/api/`, `server/routes/` | Endpointy Nitro; `server/routes/media` serwuje wgrane pliki, a `sitemap.xml`, `rss.xml` (także `/en/rss.xml`) i `robots.txt` powstają z bazy |
 | `server/utils/` | Logika odczytu i zapisu (auto-importowana w Nitro) |
 | `server/admin/` | Zasoby panelu administratora — jeden plik na zasób |
 | `server/db/` | Schemat Drizzle i migracje |
