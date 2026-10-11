@@ -55,7 +55,6 @@ test.describe('administration panel', () => {
     await visit(page, '/newsy/powrot-brazowych-rycerzy');
     await expect(page.getByRole('heading', { level: 1, name: 'Powrót Brązowych Rycerzy' })).toBeVisible();
 
-    await openAccountMenu(page, 'Admin Tłumaczeń');
     await page.getByRole('group', { name: 'Język' }).getByRole('link', { name: 'en' }).click();
     await expect(page).toHaveURL('/en/news/powrot-brazowych-rycerzy');
     await expect(page.getByRole('heading', { level: 1, name: 'Return of the Bronze Saints' })).toBeVisible();
@@ -371,7 +370,7 @@ test.describe('administration panel', () => {
     await expect(memberRow.getByRole('button', { name: 'Odblokuj' })).toBeVisible();
 
     await visit(memberPage, '/');
-    await expect(memberPage.getByRole('button', { name: 'Zaloguj' })).toBeVisible();
+    await expect(memberPage.getByRole('link', { name: 'Zaloguj przez Google' })).toBeVisible();
     await expect(memberPage.getByRole('button', { name: 'Awansowany Rycerz' })).toHaveCount(0);
     expect([401, 403]).toContain((await memberPage.request.get('/api/admin/news')).status());
 

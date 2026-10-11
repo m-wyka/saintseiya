@@ -63,6 +63,7 @@ Przepisanie portalu fanowskiego o anime Saint Seiya (Rycerze Zodiaku) ze starego
 - `pnpm db:generate` — po każdej zmianie `server/db/schema.ts`.
 - `pnpm legacy:corrections` — nakłada poprawki redakcyjne z `scripts/legacy/corrections.ts` (miejsca i adresy podstron w drzewie, tytuły podstron, FAQ, nazwa kategorii) na istniejącą bazę; importer robi to sam na końcu.
 - `pnpm legacy:import --force`, potem `pnpm images:check` — odtworzenie bazy z legacy (wymaga pomocniczego MySQL, patrz `docs/legacy.md`). Nigdy na bazie z treściami nowych użytkowników ani z wpisanymi tłumaczeniami — import kasuje też tabelę `translations`.
+- `pnpm translations:export`, potem `pnpm translations:import --from <katalog>` — tłumaczenie treści z bazy na angielski: eksport zapisuje pliki z polami bez wersji EN, tłumaczy je agent według `scripts/translations/brief.md`, import sprawdza zgodność HTML i zapisuje do `translations` (opis w `README.md`).
 - Node 22: przed komendami ustawić `PATH` na Node 22 z nvm (domyślny w powłoce to 18).
 
 ## Wzorce w kodzie

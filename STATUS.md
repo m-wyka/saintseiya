@@ -1,24 +1,24 @@
 # Stan prac
 
-Stan na 2026-10-09, koniec trzeciej sesji tego dnia na drugim komputerze (Windows, `E:\work\saintseiya`). Plik do aktualizowania na koniec każdej sesji. Zasady projektu są w `CLAUDE.md`, opis starej strony i importu w `docs/legacy.md`, obsługa w `README.md`, zapis wcześniejszych sesji w `docs/historia-sesji.md`.
+Stan na 2026-10-10, koniec czwartej sesji (tłumaczenie treści na angielski) na drugim komputerze (Windows, `E:\work\saintseiya`). Plik do aktualizowania na koniec każdej sesji. Zasady projektu są w `CLAUDE.md`, opis starej strony i importu w `docs/legacy.md`, obsługa w `README.md`, zapis wcześniejszych sesji w `docs/historia-sesji.md`.
 
 ## Gdzie jesteśmy
 
-Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportowanych danych. Trzecia sesja 2026-10-09 zamknęła listę „czego nie sprawdziłem” z drugiej: `Content-Security-Policy` przeszła próbę z prawdziwą captchą Turnstile, wszystkie pola z legacy przeszły przez edytor (i edytor przestał gubić wyśrodkowanie oraz kolor), drzewo podstron jest uporządkowane, a panel ma poprawione uwagi z przeglądu. Nie ma podpiętego prawdziwego logowania Google ani hostingu (zostaje VPS).
+Aplikacja jest zbudowana od początku do końca i działa lokalnie na zaimportowanych danych. Trzecia sesja 2026-10-09 zamknęła listę „czego nie sprawdziłem” z drugiej: `Content-Security-Policy` przeszła próbę z prawdziwą captchą Turnstile, wszystkie pola z legacy przeszły przez edytor (i edytor przestał gubić wyśrodkowanie oraz kolor), drzewo podstron jest uporządkowane, a panel ma poprawione uwagi z przeglądu. Czwarta sesja (2026-10-09/10) dała treściom wersję angielską: 4288 z 4290 pól z tekstem ma tłumaczenie w tabeli `translations`. Nie ma podpiętego prawdziwego logowania Google ani hostingu (zostaje VPS).
 
 | Kontrola | Wynik | Kiedy |
 |---|---|---|
-| `pnpm check` (lint, format, typy, Vitest) | zielone, 374 testy w 33 plikach | 2026-10-09, Windows, w katalogu projektu, po ostatniej zmianie kodu |
-| `pnpm build` | przechodzi | 2026-10-09, Windows, w kopii projektu poza repozytorium, identycznej z katalogiem roboczym (poza tym plikiem i `docs/historia-sesji.md`) |
+| `pnpm check` (lint, format, typy, Vitest) | zielone, 394 testy w 36 plikach | 2026-10-10, Windows, w katalogu projektu, po ostatniej zmianie kodu |
+| `pnpm build` | przechodzi (w czwartej sesji nie powtarzane; doszły tylko skrypty i testy) | 2026-10-09, Windows, w kopii projektu poza repozytorium, identycznej z katalogiem roboczym (poza tym plikiem i `docs/historia-sesji.md`) |
 | `pnpm test:e2e` (Playwright) | zielone, 55 testów | 2026-10-09, Windows, na buildzie produkcyjnym (`E2E_SERVER=build`) w tej samej kopii; w trybie dev nie puszczane |
 | `pnpm audit` | 2 pozycje | 2026-10-09, druga sesja; w trzeciej nie powtarzane. Zostały `node-forge` i `braces`, bez poprawionej wersji |
-| CI (`.github/workflows/ci.yml`) | zielone dla `9ee8dde` na `staging` i `main` | 2026-10-09. Zmian z drugiej i trzeciej sesji CI nie widziało — nie są wypchnięte. W `ci.yml` zniknęło `version: 12` (wersję pnpm podaje `packageManager` w `package.json`); czy `pnpm/action-setup@v6` to przyjmuje, pokaże pierwszy przebieg po wypchnięciu |
+| CI (`.github/workflows/ci.yml`) | zielone dla `9ee8dde` na `staging` i `main` | 2026-10-09. Zmian z drugiej, trzeciej i czwartej sesji CI nie widziało — nie są wypchnięte. W `ci.yml` zniknęło `version: 12` (wersję pnpm podaje `packageManager` w `package.json`); czy `pnpm/action-setup@v6` to przyjmuje, pokaże pierwszy przebieg po wypchnięciu |
 
-- **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**; Mateusz przełączy je na prywatne sam, później). `staging` i `main` wskazują na commit `9ee8dde`, lokalnie i na `origin`; gałąź robocza to `staging`. `legacy/`, `.data/`, `.env` są ignorowane.
-- **Niezacommitowane**: druga i trzecia sesja 2026-10-09 razem — 88 zmienionych i 13 nowych plików oraz usunięty `render.yaml`. Niczego nie commitowałem ani nie wypychałem.
+- **Git**: zdalne repozytorium `origin` to `https://github.com/m-wyka/saintseiya` (**publiczne**; Mateusz przełączy je na prywatne sam, później). Zmiany z drugiej i trzeciej sesji Mateusz zacommitował jako `374397f` na `staging` (lokalnie, o jeden commit przed `origin/staging`); `main` zostaje na `9ee8dde`. Gałąź robocza to `staging`. `legacy/`, `.data/`, `.env` są ignorowane.
+- **Niezacommitowane**: czwarta sesja — nowe `scripts/translations/` (8 plików) i 3 pliki testów oraz zmiany w `package.json`, `README.md`, `CLAUDE.md`, `STATUS.md` i `docs/historia-sesji.md`. Niczego nie commitowałem ani nie wypychałem.
 - **Dostęp do GitHuba**: na pierwszym komputerze `origin` używa aliasu SSH `git@github-m-wyka:m-wyka/saintseiya.git` (jak `dot-sport-shop`), bo domyślne dane GitHuba należą tam do innego konta, bez prawa zapisu. Na drugim komputerze do wypychania potrzebny jest dostęp konta `m-wyka`; nie ma tu `gh`.
 - **Procesy**: `pnpm dev` Mateusza na porcie 3000 działa (uruchomiony ponownie o 21:02, przed trzecią sesją); nie ruszałem go i po sesji odpowiada poprawnie. Z moich procesów nic nie zostało, kopię roboczą `E:\work\saintseiya-build` usunąłem.
-- **Baza**: `.data/saintseiya.db` z importu 2026-10-05 (migracje 0000–0004), obrazki zewnętrzne sprawdzone. Zmieniana ręcznie trzy razy 2026-10-09, bez wpisów w dzienniku zmian: rano porządki (trzy pliki do pobrania, puste odnośniki), w drugiej sesji `pnpm legacy:corrections` (tytuły podstron, kategoria newsów, FAQ), w trzeciej to samo polecenie z nowymi poprawkami (przenosiny w drzewie podstron, drobiazgi w FAQ). Jest teraz 800 podstron (796 opublikowanych) i 63 pytania FAQ. Kopie: `.data/backup-2026-10-09/` (sprzed porządków), `.data/backup-2026-10-09-przed-poprawkami/` (sprzed poprawek treści, z oryginałami 22 okładek kategorii newsów) i `.data/backup-2026-10-09-przed-drzewem/` (sprzed przenosin) — można usunąć, gdy niepotrzebne. Zostają 3 konta testowe (id 340–342, dwa z rolą administratora) i 10 wpisów konta testowego w dzienniku zmian — **decyzja Mateusza: na razie nie czyścić**; do usunięcia przed wdrożeniem. Sprawdzenia trzeciej sesji szły wyłącznie na kopiach bazy, kont testowych nie przybyło. Tłumaczeń nie ma żadnych. Na tym komputerze nie ma `legacy/` ani pomocniczego MySQL.
+- **Baza**: `.data/saintseiya.db` z importu 2026-10-05 (migracje 0000–0004), obrazki zewnętrzne sprawdzone. Zmieniana ręcznie trzy razy 2026-10-09, bez wpisów w dzienniku zmian: rano porządki (trzy pliki do pobrania, puste odnośniki), w drugiej sesji `pnpm legacy:corrections` (tytuły podstron, kategoria newsów, FAQ), w trzeciej to samo polecenie z nowymi poprawkami (przenosiny w drzewie podstron, drobiazgi w FAQ). Jest teraz 800 podstron (796 opublikowanych) i 63 pytania FAQ. Kopie: `.data/backup-2026-10-09/` (sprzed porządków), `.data/backup-2026-10-09-przed-poprawkami/` (sprzed poprawek treści, z oryginałami 22 okładek kategorii newsów) i `.data/backup-2026-10-09-przed-drzewem/` (sprzed przenosin) — można usunąć, gdy niepotrzebne. Zostają 3 konta testowe (id 340–342, dwa z rolą administratora) i 10 wpisów konta testowego w dzienniku zmian — **decyzja Mateusza: na razie nie czyścić**; do usunięcia przed wdrożeniem. Sprawdzenia trzeciej sesji szły wyłącznie na kopiach bazy, kont testowych nie przybyło. W czwartej sesji doszło 4286 wierszy tłumaczeń EN (tabela `translations`) i ustawienie `newsCenterTabs.en`, zapisane skryptem, bez wpisów w dzienniku zmian; kopia sprzed tłumaczenia leży w `.data/backup-2026-10-09-przed-tlumaczeniem/`. **Ponowny import z legacy skasowałby te tłumaczenia** — oddane pliki tłumaczy są w `.data/translations/imported/` i dają się wgrać ponownie przez `pnpm translations:import --from .data/translations/imported`, o ile rekordy zachowają identyfikatory. Na tym komputerze nie ma `legacy/` ani pomocniczego MySQL.
 - **Baza na pierwszym komputerze (macOS)**: eksport z Windows z 2026-10-05 — **starszy niż baza tutaj** (bez porządków i poprawek z 2026-10-09). Przed dalszą pracą na Macu przenieść stąd świeży eksport bazy i `.data/uploads` albo puścić tam `pnpm legacy:corrections` (poprawki treści i drzewa; porządków z rana nie obejmuje). Poprzednie dane leżą tam w `.data/backup-before-import-2026-10-05/` (190 MB) — można usunąć.
 - **`.data/uploads`**: 22 okładki kategorii newsów (`legacy/images/news_cats`) są zapisane bez metadanych (1,7 MB → 0,3 MB). Sprawdzone w trzeciej sesji: wszystkie 22 oryginały leżą w kopii zapasowej, wymiary obu wersji są takie same.
 - **Skrypty do przeglądu**: `.data/review/` (poza repozytorium, tylko na tym komputerze) — opis w „Jak wznowić pracę”. Leży tam też `.data/review/saintseiya.db`, kopia bazy z rana 2026-10-09; można usunąć.
@@ -56,71 +56,30 @@ Na drugim komputerze:
 
 ## Zrobione w ostatniej sesji
 
-Trzecia sesja 2026-10-09 na Windows. Mateusz wkleił listę „czego nie sprawdziłem i co zostało” z drugiej sesji z poleceniem „Ogarnij to”. Wszystko niżej jest niezacommitowane. Opis drugiej sesji przeszedł do `docs/historia-sesji.md`.
+Czwarta sesja, 2026-10-09 wieczorem do 2026-10-10, Windows. Polecenie Mateusza: przetłumaczyć teksty na angielski za pomocą AI, „ludzkim tekstem”. Zmiany w repozytorium z tej sesji są niezacommitowane. Opis trzeciej sesji przeszedł do `docs/historia-sesji.md`.
 
-**Rozstrzygnąłem sam w ramach tego polecenia** (każde da się cofnąć; jeśli Mateusz woli inaczej — powiedzieć):
+**Wynik**: wersję angielską ma 4288 z 4290 pól z tekstem (ok. 5,3 mln znaków): wszystkie tytuły, menu, kategorie, ankiety, opisy galerii i filmów, FAQ, okienka mapy nieba, 379 newsów i 688 z 690 podstron z treścią; do tego zakładki News Center. Działająca strona pokazuje je pod `/en`. Brakujące pola są wymienione w „Decyzje dla Mateusza” i „Następne kroki”.
 
-- Sekcja „Wcześniejsze sesje” jest przeniesiona do `docs/historia-sesji.md`, nie wycięta. Ten plik ma teraz ok. 320 linii zamiast 576 (39 kB zamiast 95 kB) i mieści się w jednym odczycie.
-- Podstrony w dziwnych miejscach drzewa dostały właściwe miejsca i adresy, razem z odnośnikami w treściach (wcześniej adresów nie ruszałem).
-- Dwie strony „Literatura” w mitologii greckiej, zawierające sam baner, są szkicami.
-- Pasek menu ma tło kryjące w 80% zamiast 55%.
-- Obrazek wgrywany w panelu może mieć najwyżej 50 megapikseli; wznowienie zakończonej ankiety pyta o potwierdzenie.
+**Jak to zrobione**
 
-**1. Rozmycie pod paskiem menu.** Prawdziwy Chrome i prawdziwy Edge malują rozmycie (zrzuty paska nad przewiniętą treścią: `.data/review/blur/`). Firefox i WebKit z Playwrighta go nie malują — Firefox także w zwykłym oknie — i przy tle 55% etykiety menu zlewały się z treścią pod spodem. Przy 80% menu jest czytelne także bez rozmycia, treść prześwituje tylko jako słaby cień (`.data/review/blur-after/`); w Chrome pasek wygląda prawie tak samo jak przedtem. Prawdziwego Safari i prawdziwego Firefoksa nadal nie widziałem.
+- Tłumaczyli subagenci Claude (model sesji, Opus 5.5) według instrukcji `scripts/translations/brief.md`: styl, słowniczek terminów Saint Seiya, format plików. Klucza API tu nie ma, więc nie powstał skrypt wołający API.
+- Nowe narzędzie `scripts/translations/` z komendami `pnpm translations:export` i `pnpm translations:import` (opis w `README.md`): eksport zapisuje pola bez wersji EN do plików po ok. 30 tys. znaków, import sprawdza każde tłumaczenie HTML znacznik po znaczniku i odrzuca te, w których coś zniknęło, doszło albo się zmieniło, oraz teksty wyraźnie krótsze lub dłuższe od oryginału. W tej sesji import nie odrzucił niczego; tłumacze sprawdzali własne pliki trybem `--dry-run` i poprawiali je przed oddaniem.
+- Najpierw poszły krótkie teksty (każdy różny tekst raz), potem treści HTML z listą ustalonych już tytułów podstron w nagłówku pliku. Długie opowiadania jednego autora szły kolejno, z notatkami o nazwach przekazywanymi następnemu tłumaczowi.
+- Zakładki News Center (ustawienie `newsCenterTabs.en`) przetłumaczyłem sam, jednorazowym skryptem `.data/translate/newscenter-en.mjs`.
+- Kopia bazy sprzed tłumaczenia: `.data/backup-2026-10-09-przed-tlumaczeniem/`. Oddane pliki tłumaczy: `.data/translations/imported/` (poza repozytorium).
 
-**2. `Content-Security-Policy` z Turnstile, Google i YouTube** — build uruchomiony z publicznymi kluczami testowymi Cloudflare, prawdziwy Chrome (`.data/review/csp-check.mjs`):
+**Ustalenia redakcyjne przyjęte w tłumaczeniu** (pełna lista w `brief.md`): brytyjska pisownia jak w interfejsie; „Rycerz” to Saint, „Święty Wojownik” to God Warrior (tak używa tego strona — seria Asgard), „Wielki Mistrz” to Grand Pope, „Zbroja” to Cloth; użytkownicy strony to Knights; nazwy grup, serwisów i nicki zostają; pomyłki autorów zostają, literówki w nazwach własnych tłumacze zwykle poprawiali.
 
-- Widżet Turnstile ładuje się (skrypt i ramka z `challenges.cloudflare.com`), wydaje token, a shoutbox, komentarz i odpowiedź na forum zapisują się z kodem 201 po weryfikacji tokenu przez serwer w Cloudflare. Konsola bez ani jednej blokady.
-- Z kluczem „zawsze odrzuca” serwer odpowiada 400 `ERRORS.CAPTCHA_REQUIRED`, z tokenem i bez (`captcha-reject.mjs`) — weryfikacja naprawdę działa.
-- „Zaloguj przez Google” wychodzi na `accounts.google.com` (z wymyślonym identyfikatorem klienta Google pokazuje tam błąd), a powrót pod `/auth/google` kończy na stronie głównej z komunikatem o nieudanym logowaniu. Polityka nie bierze w tym udziału — to zwykłe przekierowania.
-- Film z listy `/video` odtwarza się w ramce `youtube-nocookie.com` (odtwarzacz załadowany).
+**Sprawdzone**: `pnpm check` po ostatniej zmianie kodu (zielone, 394 testy w 36 plikach); 22 nowe testy narzędzia; strony `/en/faq`, `/en`, `/en/saint-seiya/manga`, `/en/mitologia/grecka/bogowie/hekate` i `/en/news` odpowiadają 200 i pokazują angielski tekst; porównałem z oryginałem próbki FAQ, newsów, opisów gwiazdozbiorów i fan fiction.
 
-**3. Edytor na wszystkich polach z legacy** — każde z 1532 pól (806 podstron, zajawki i treści newsów, FAQ, okienka map) przeszło na kopii bazy przez prawdziwy komponent edytora i prawdziwy zapis w panelu (`.data/review/roundtrip.mjs`, porównanie `roundtrip-inspect.mjs`). Zapisało się 1175 z 1175 rekordów.
+**Nie sprawdzone**
 
-- Bez strat w żadnym polu: tekst, obrazki i ich wymiary, odnośniki z obrazków, filmy, opływanie, pogrubienie, kursywa, podkreślenie, przekreślenie.
-- Pierwszy przebieg pokazał prawdziwe straty, teraz poprawione:
-  - wyśrodkowanie zrobione przez `<div>` (jest w 43 polach) znikało — z tekstu w 16 polach, z obrazków w 25 — teraz przed edycją przechodzi na akapity w środku (`app/utils/editorContent.ts`);
-  - kolor ustawiony na `<div>` znikał w 6 polach — przechodzi na tekst;
-  - `<sup>` i `<small>` znikały (3 pola) — edytor zna je teraz razem z `<sub>` (`editorExtensions.ts`), bez przycisków w pasku;
-  - pusta lista (`<ol> </ol>`, 88 sztuk w 48 polach) wracała jako lista z jednym pustym punktem — jest usuwana.
-- Po poprawkach zostają: pomarańczowy kolor podpisu na stronie „Prozerpina” (id 387; `<hr>` wstawione w środek kolorowego tekstu) i wyrównanie wpisane na `<span>` w jednej zajawce (news 7), które i tak niczego nie wyrównywało.
-- Nieszkodliwe różnice, których nie ruszałem: sąsiednie identyczne znaczniki i odnośniki sklejają się w jeden, czarny kolor tekstu znika (celowo), tabele dostają brakujące komórki, a na `/redakcja` znika `rowspan` wystający poza ostatni wiersz tabeli (komórki z awatarami, od których zależy układ kart, zostają bez zmian).
+- Nikt nie przeczytał całości. Jakość oceniłem na kilkunastu próbkach; reszta przeszła tylko kontrolę automatyczną (znaczniki, długość, resztki polskiego).
+- Spójność między tłumaczami: ten sam termin mógł dostać różne formy w różnych sekcjach. Znane rozjazdy: imiona w zapisie autora (Hyouga/Shiryuu/Muu) w jednych plikach i znormalizowane (Hyoga/Shiryu/Mu) w innych; „Death Mask” i „Deathmask”; nazwy gwiazd Widm tłumaczone dosłownie z polskiego; etykiety charakterystyk („History” i „STORY”, „See the Sources” i „Check the Sources”); tytuły odcinków i rozdziałów tłumaczone z polskiego, nie z oficjalnych wydań.
+- `pnpm build` i testy e2e w tej sesji nie były puszczane. Zmiany w kodzie to nowe skrypty w `scripts/translations/`, testy i dwie komendy w `package.json`; kodu aplikacji nie ruszałem.
+- Wygląd przetłumaczonych stron w przeglądarce (dłuższe tytuły w menu i kafelkach) — nie oglądany.
 
-**4. Okładki kategorii newsów** — kopia zapasowa sprawdzona: 22 z 22 oryginałów, te same wymiary co pliki w użyciu.
-
-**5. Drzewo podstron i FAQ** — poprawki w `scripts/legacy/corrections.ts`, nałożone na lokalną bazę przez `pnpm legacy:corrections` (najpierw na kopii, potem na bazie; kopia sprzed zmiany w `.data/backup-2026-10-09-przed-drzewem/`):
-
-- 19 podstron przeniesionych, odnośniki do nich przepisane w 48 treściach (podstrony, newsy, posty, komentarz), 6 pustych hubów usuniętych:
-  - `lost-canvas/charakterystyki-postaci/bogowie` i `saint-seiya/charakterystyki-postaci/srebrni-rycerze/inni-srebrni-rycerze` wyszły z hubów powstałych z literówki;
-  - `mitologia/rzymska/bogowie/pluton` trafił do właściwego huba, `jowisz-2` to teraz `mars`, „Kraina Umarłych” jest w hubie „Miejsca”;
-  - „Zew krwi 3”, „Skrzywiona perfekcyjność, cz. 2” i „Run Away 2” stoją obok poprzedniej części, nie pod nią;
-  - charakterystyki postaci filmów 3–6 są pod swoim filmem (`filmy-kinowe/film-3/charakterystyki-postaci`), jak przy filmach 1 i 2;
-  - adresy z literówką tytułu: `brama-piekla`, `plejady`, `echidna`, `jak-powstalo-halloween`, `elizjum-recenzja`, `atena-jej-wielka-milosc-3` i `-4`.
-- Stare adresy tych stron dają 404 (nowa strona nie była jeszcze publiczna, więc nikt do nich nie linkuje); adresy ze starej strony (`viewpage.php?page_id=…`) przekierowują na nowe miejsca — sprawdzone na działającej stronie.
-- `mitologia/grecka/literatura` i `literatura-2` (sam baner sekcji, zero tekstu, zero odnośników do nich) są szkicami.
-- FAQ: pięć odpowiedzi straciło nieaktualne szczegóły — nazwę dawnego hostingu, prywatną wiadomość i „bana na IP” przy ostrzeżeniach, „u dołu strony” przy najnowszych komentarzach oraz dwa odesłania do pytań po numerze, którego już nie mają. Reszta odpowiedzi bez zmian.
-- Po zmianie: 800 podstron, 0 osieroconych, adresy zgodne z drzewem, `PRAGMA integrity_check` zwraca `ok`.
-
-**6. Panel** (numery z dawnej listy „Uwagi z przeglądu”):
-
-- 9 — tryb EN: wyczyszczone pole tłumaczenia znaczy „użyj polskiego” także dla pól wymaganych (tytuł, etykieta obszaru mapy, odpowiedź ankiety); dodanie pozycji przy włączonym EN pyta, czy zapisać ją jako polską; przełączenie PL/EN przy niezapisanych zmianach pyta o zgodę (formularze stron, newsów, map, ankiet, proste listy, nawigacja, ustawienia).
-- 10 — kategorii newsów z newsami nie da się usunąć; drugi tag o tej samej nazwie (bez względu na wielkość liter) jest odrzucany.
-- 11 — podtytuł drzewa stron pokazuje liczbę stron bieżącego poziomu (łączną tylko na poziomie głównym); adres spoza YouTube wpisany jako film daje komunikat; wyśrodkowanie z `<div>` oraz `<sub>`/`<sup>` zostają (punkt 3).
-- 12 — obrazek ponad 50 megapikseli jest odrzucany (plik 12000×9000 już nie przejdzie); „Wznów” przy zakończonej ankiecie pokazuje datę jej zakończenia i pyta o potwierdzenie. Uprawnienia do „Obrazków” bez zmian — to decyzja Mateusza.
-- 15 — pasek narzędzi edytora na telefonie ma przy prawej krawędzi gasnący brzeg, który ustępuje na końcu przewijania.
-- 19 — `/logowanie-testowe` bez `NUXT_E2E_LOGIN` odpowiada 404 (sprawdzone na buildzie, także `/en/test-login`).
-
-**Nowe testy**: przenosiny podstron, przepisywanie odnośników, usuwanie pustych hubów, szkice z samych banerów i poprawki odpowiedzi FAQ (`corrections.test.ts`), odmowa usunięcia kategorii z newsami, tag o zajętej nazwie, wyczyszczony tytuł i etykieta obszaru w tłumaczeniu, obrazek o zbyt dużych wymiarach; e2e: edycja strony z legacy zachowuje wyśrodkowanie i kolor bloków, komunikat o adresie spoza YouTube, strażniki tłumaczeń (niezapisane zmiany, nowa pozycja w EN, wyczyszczony tytuł), odmowy w kategoriach i tagach, liczba stron na poziomie drzewa.
-
-**Sprawdzone**: `pnpm check` (374 testy) w katalogu projektu; `pnpm build` i 55 testów e2e na buildzie w kopii identycznej z katalogiem roboczym — wszystko po ostatniej zmianie kodu. Pierwszy przebieg e2e pokazał błąd w moim nowym teście (obrazek spod `/theme` jest odrzucany przez czyszczenie treści), nie w aplikacji.
-
-**Nie sprawdzone**:
-
-- Prawdziwe Safari, iPhone i prawdziwy Firefox — bez zmian, nie ma ich tutaj.
-- Pełne logowanie prawdziwym kontem Google (brak kluczy); sprawdzone jest wyjście do Google i powrót z błędem.
-- Okna z pytaniem o niezapisane zmiany w formularzu plików do pobrania i przy zdjęciach albumu — te formularze nie zgłaszają niezapisanych zmian.
-- Gasnący brzeg paska edytora obejrzany tylko w emulacji telefonu w Chrome.
-- Ponowny import z legacy z nowymi poprawkami drzewa — nie ma tu `legacy/`; krok ma testy integracyjne i przeszedł na kopii oraz na lokalnej bazie.
+**Limit sesji**: 20 równoległych tłumaczy wyczerpało limit Claude po ok. 40 minutach (2026-10-09 ok. 23:50); po odnowieniu wznowiłem od miejsca przerwania, nic nie przepadło.
 
 ## Co jest zrobione
 
@@ -161,7 +120,7 @@ Zostało to, czego nie da się poprawić bez decyzji, bez redakcji albo bez nowy
 
 1. **FAQ wymaga oka redakcji** — skład Redakcji w „Kto zarządza stroną?”, zapowiedź newslettera, grupa i fanpage na Facebooku, lista tłumaczy, rady o kodekach i odtwarzaczach, „Postać Miesiąca”. Tego nie da się sprawdzić w kodzie.
 2. **Strony z legacy złożone z pociętych grafik** składają się bez odstępów, ale tam, gdzie redakcja zmieszała dwa zestawy kawałków (`saint-seiya/charakterystyki-postaci`), zostają drobne przesunięcia — to cecha samych grafik.
-3. **Wersja `/en`** miesza języki: interfejs po angielsku, treści z bazy po polsku — do czasu tłumaczenia treści (plan w „Następne kroki”).
+3. **Wersja `/en`** ma treści po angielsku z tłumaczenia przez AI, którego nikt nie przeczytał w całości; komentarze, forum i shoutbox zostają po polsku. Znane niespójności nazw są w „Zrobione w ostatniej sesji”. Tytuły odcinków, rozdziałów i tomów są tłumaczone z polskiego, nie z oficjalnych wydań.
 4. **Zdjęcia bez tytułu** (69 z 319) mają nagłówek z numerem w albumie; prawdziwe tytuły może nadać tylko redakcja.
 5. **Dwie strony „Literatura”** (szkice z samym banerem) — redakcja może je uzupełnić albo usunąć.
 
@@ -194,6 +153,9 @@ Zostało to, czego nie da się poprawić bez decyzji, bez redakcji albo bez nowy
 6. **Przełącznik języka dla gościa** — odłożone. Jest schowany w menu „Zaloguj” (dwa kliknięcia do EN); alternatywa to przełącznik PL/EN na wierzchu paska. Rozmiar odnośników paska (`text-xs`) też do oceny.
 7. **`node-forge` i `braces`** — dwie pozostałe pozycje `pnpm audit` (wysokie), obie w narzędziach deweloperskich i budujących, bez poprawionej wersji w rejestrze. Sprawdzić ponownie przy następnej aktualizacji Nuxta.
 8. **Uprawnienia do „Obrazków”** — osobne uprawnienie moderatora czy zostaje, jak jest (punkt 9 w „Uwagi z przeglądu”)?
+10. **Treści z seksem postaci niepełnoletnich** — dwie strony fan fiction zostają bez wersji EN: `fan-fiction/shen-arshenik/run-away-1` (scena erotyczna i opis napaści seksualnej na postać, która według tekstu ma 16 lat — Claude tego nie tłumaczy) oraz `fan-fiction/sha-chan/szukajac-szczescia-6` (dwa ostatnie akapity to scena seksu postaci niepełnoletnich; zlecenie rozdziału bez tych akapitów zablokowała kontrola uprawnień Claude Code). Polskie oryginały są opublikowane; pod `/en` te strony pokazują polski tekst. Do decyzji: czy te strony mają zostać publiczne. „Run Away 2” i prolog „Zewu krwi”, wstrzymane wcześniej z ostrożności, po przeczytaniu zostały przetłumaczone w całości (nie zawierają treści seksualnych); wersja EN ma więc „Run Away 2” bez części pierwszej.
+11. **Dane prywatne w newsie 141** — treść (także polska) podaje imię i nazwisko osoby prywatnej, adres domowy i numer konta bankowego. Do decyzji: usunąć z obu wersji w panelu?
+12. **Ujednolicenie nazw w wersji EN** — jedna pisownia imion (Hyoga czy Hyouga itd.) i jeden zestaw etykiet charakterystyk; da się to zrobić zamianą w tabeli `translations`, ale wymaga wyboru form.
 9. **Rozstrzygnięcia z trzeciej sesji** (lista na górze „Zrobione w ostatniej sesji”) — do potwierdzenia albo cofnięcia, zwłaszcza tło paska menu i dwie strony „Literatura” jako szkice.
 
 ## Wymagania serwera
@@ -241,20 +203,20 @@ Pomiar z 2026-10-05 na kopii projektu poza repozytorium (macOS, M2 Max, Node 22.
 
 ## Następne kroki
 
-1. **Mateusz**: przejrzeć zmiany z drugiej i trzeciej sesji i zdecydować o commicie. Po wypchnięciu sprawdzić pierwszy przebieg CI (zmiana w `ci.yml`).
+1. **Mateusz**: wypchnąć `374397f` i sprawdzić pierwszy przebieg CI (zmiana w `ci.yml`); przejrzeć zmiany z czwartej sesji i zdecydować o commicie.
 2. Na Macu: podnieść pnpm do 12, przenieść stąd bazę i `.data/uploads`, obejrzeć stronę w prawdziwym Safari i na iPhonie (lista w „Czego nie sprawdziłem”), sprawdzić trzy awatary w `legacy/images/avatars` oraz usunąć `legacy/php-cgi53.core` (653 MB zrzutu pamięci; decyzja Mateusza z 2026-10-09).
 3. Klucze Google i Turnstile, potem jedno prawdziwe logowanie na buildzie.
 4. Hosting na VPS: reverse proxy z HTTPS, kompresją HTML i `X-Forwarded-For`, `NUXT_TRUSTED_PROXY_HOPS` zgodne z liczbą proxy, usunięcie kont testowych i ich wpisów z dziennika zmian.
 5. Redakcja w panelu: FAQ i dwie strony „Literatura” (punkty 1 i 5 w „Uwagi z przeglądu”).
 6. Pozostałe uwagi do panelu: punkty 9–12 w „Uwagi z przeglądu”.
 
-**Zaplanowane na później — tłumaczenie treści przez AI** (polecenie Mateusza z 2026-10-09: zapisać, nie robić teraz):
+**Po tłumaczeniu na angielski** (czwarta sesja):
 
-- Cel: przetłumaczyć na angielski całą treść portalu za jednym razem, modelem językowym, i zapisać jako wersję EN w tabeli `translations`.
-- Zakres: wszystko, co panel pozwala tłumaczyć — newsy (tytuł, zajawka, treść), kategorie newsów, tagi, podstrony, mapy i ich obszary, albumy i zdjęcia (tytuły, opisy), kategorie video i filmy, kategorie i działy forum, ankiety i odpowiedzi, linki i ich kategorie, pliki, FAQ, menu boczne, News Center.
-- Poza zakresem: komentarze, wpisy shoutboksa i posty forum — tych nie tłumaczymy.
-- Do ustalenia przed startem: który model i z jakim budżetem (ok. 800 podstron i 380 newsów), czy tłumaczenie ma nadpisywać istniejące wpisy EN, jak zachować HTML i odnośniki w treści (slugi i adresy zostają wspólne) oraz kto przegląda wynik. Skrypt powinien dać się wznowić i pomijać rekordy już przetłumaczone.
-- Uwaga: `pnpm legacy:import --force` kasuje tabelę `translations` — tłumaczenie robić po ostatnim imporcie.
+- Przeczytać wersję EN przynajmniej na stronach, które widzi każdy: strona główna, menu, FAQ, regulamin, redakcja, kilka newsów i charakterystyk. Poprawki wprowadza się w panelu (przełącznik PL/EN).
+- Zdecydować o punktach 10–12 w „Decyzje dla Mateusza”.
+- 2 pola zostają bez wersji EN (dwie strony z punktu 10); `pnpm translations:export` będzie je wypisywał jako oczekujące, dopóki nie dostaną tłumaczenia albo nie znikną.
+- Nowe treści dodane po polsku tłumaczy się tak samo: `pnpm translations:export`, tłumacz według `scripts/translations/brief.md`, `pnpm translations:import`. Zmiana polskiego tekstu nie odświeża istniejącego tłumaczenia.
+- Uwaga: `pnpm legacy:import --force` kasuje tabelę `translations`.
 
 ## Jak wznowić pracę
 

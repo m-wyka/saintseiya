@@ -53,6 +53,8 @@ Strona działa pod `http://localhost:3000`.
 | `pnpm legacy:import` | Import treści ze starej bazy (opis niżej) |
 | `pnpm legacy:corrections` | Poprawki redakcyjne z `scripts/legacy/corrections.ts` (miejsca i adresy podstron w drzewie, tytuły podstron, FAQ, nazwa kategorii newsów) nałożone na istniejącą bazę; import robi to sam |
 | `pnpm images:check` | Sprawdzenie, które zewnętrzne obrazki w treściach jeszcze działają |
+| `pnpm translations:export` | Zapisuje do `.data/translations/pending` pliki z treściami, które nie mają jeszcze wersji angielskiej (opis niżej) |
+| `pnpm translations:import` | Sprawdza przetłumaczone pliki i zapisuje je jako wersję EN w tabeli `translations` |
 
 Te same kroki wykonuje GitHub Actions (`.github/workflows/ci.yml`) przy każdym wypchnięciu na `staging` i `main` oraz w pull requestach: `pnpm check`, a osobno `pnpm build` i testy Playwright na buildzie.
 
@@ -69,6 +71,21 @@ pnpm images:check            # oznacza martwe obrazki zewnętrzne
 
 Import jest powtarzalny: `--force` zastępuje bazę, więc uruchamiać go tylko przed startem produkcyjnym, nigdy na bazie z nowymi treściami użytkowników.
 
+## Tłumaczenie treści na angielski
+
+Treści z bazy tłumaczy model językowy, a skrypty pilnują, żeby do bazy trafiło tylko to, co ma nienaruszony HTML.
+
+```sh
+pnpm translations:export                       # pliki do tłumaczenia w .data/translations/pending
+pnpm translations:import --from <katalog>      # domyślnie .data/translations/translated
+```
+
+- Eksport bierze pola, które panel pozwala tłumaczyć (bez ścieżek grafik), pomija te bez tekstu i te, które mają już wersję EN. Krótkie teksty (tytuły, etykiety, ankiety) trafiają do plików `text-*`, każdy różny tekst raz; treści HTML do plików `html-*`, z listą ustalonych już tłumaczeń tytułów, które w danym pliku występują. Dlatego najpierw tłumaczy się i importuje pliki `text-*`, a potem eksportuje ponownie.
+- Tłumacz (agent Claude) dostaje instrukcję `scripts/translations/brief.md` ze słowniczkiem terminów i pliki z `pending`; oddaje pliki o tych samych nazwach.
+- Import odrzuca tłumaczenie HTML, w którym zniknął, doszedł albo zmienił się jakikolwiek znacznik lub atrybut (poza `alt` i `title`), oraz tekst wyraźnie krótszy lub dłuższy od oryginału. Odrzucone pola zostają bez wersji EN i wracają przy następnym eksporcie. Istniejących tłumaczeń nie nadpisuje bez `--overwrite`. Z `--dry-run` tylko sprawdza i niczego nie zapisuje, z `--file <nazwa>` bierze jeden plik — tak tłumacz sprawdza własną pracę. Puste akapity z twardą spacją, które po tłumaczeniu wracają ze zwykłą, import odtwarza z oryginału.
+- Zakładki News Center leżą w ustawieniach (`newsCenterTabs.en`), nie w tabeli `translations` — tłumaczy się je w panelu.
+- Komentarzy, postów forum i shoutboksa nie tłumaczymy.
+
 ## Struktura
 
 | Katalog | Zawartość |
@@ -80,6 +97,7 @@ Import jest powtarzalny: `--force` zastępuje bazę, więc uruchamiać go tylko 
 | `server/db/` | Schemat Drizzle i migracje |
 | `shared/utils/` | Kod wspólny dla frontu i serwera (role, adresy, slugi) |
 | `scripts/legacy/` | Importer starej strony |
+| `scripts/translations/` | Eksport treści do tłumaczenia, instrukcja dla tłumacza i import wersji angielskiej |
 | `tests/unit`, `tests/integration`, `tests/e2e` | Testy |
 | `public/theme/` | Grafiki motywu, które zostają obrazkami |
 | `.data/` | Baza, wgrane pliki, dane testów — poza repozytorium |

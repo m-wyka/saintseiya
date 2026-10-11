@@ -18,6 +18,8 @@
     "legacy:import": "tsx scripts/legacy/importLegacy.ts",
     "legacy:corrections": "tsx scripts/legacy/applyCorrections.ts",
     "images:check": "tsx scripts/images/checkExternalImages.ts",
+    "translations:export": "tsx scripts/translations/exportPending.ts",
+    "translations:import": "tsx scripts/translations/importTranslated.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "typecheck": "nuxt typecheck",

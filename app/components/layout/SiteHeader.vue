@@ -61,6 +61,7 @@ const isCurrent = (item: (typeof MAIN_NAVIGATION)[number]) =>
         </li>
       </ul>
       <SearchTrigger />
+      <LanguageSwitcher />
       <UserMenu />
     </div>
   </nav>

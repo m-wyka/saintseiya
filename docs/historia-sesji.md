@@ -2,6 +2,74 @@
 
 Zapis wyjęty ze `STATUS.md` 2026-10-09, żeby tamten plik dało się przeczytać jednym odczytem. Każdy rozdział opisuje stan z dnia swojej sesji: listy „Nie sprawdzone” i „Do decyzji” bywały później zamykane, a liczby testów rosły. Aktualny stan jest w `STATUS.md`. Nowe sesje dopisywać na górze.
 
+## Trzecia sesja 2026-10-09 (Windows)
+
+Trzecia sesja 2026-10-09 na Windows. Mateusz wkleił listę „czego nie sprawdziłem i co zostało” z drugiej sesji z poleceniem „Ogarnij to”. Wszystko niżej jest niezacommitowane. Opis drugiej sesji przeszedł do `docs/historia-sesji.md`.
+
+**Rozstrzygnąłem sam w ramach tego polecenia** (każde da się cofnąć; jeśli Mateusz woli inaczej — powiedzieć):
+
+- Sekcja „Wcześniejsze sesje” jest przeniesiona do `docs/historia-sesji.md`, nie wycięta. Ten plik ma teraz ok. 320 linii zamiast 576 (39 kB zamiast 95 kB) i mieści się w jednym odczycie.
+- Podstrony w dziwnych miejscach drzewa dostały właściwe miejsca i adresy, razem z odnośnikami w treściach (wcześniej adresów nie ruszałem).
+- Dwie strony „Literatura” w mitologii greckiej, zawierające sam baner, są szkicami.
+- Pasek menu ma tło kryjące w 80% zamiast 55%.
+- Obrazek wgrywany w panelu może mieć najwyżej 50 megapikseli; wznowienie zakończonej ankiety pyta o potwierdzenie.
+
+**1. Rozmycie pod paskiem menu.** Prawdziwy Chrome i prawdziwy Edge malują rozmycie (zrzuty paska nad przewiniętą treścią: `.data/review/blur/`). Firefox i WebKit z Playwrighta go nie malują — Firefox także w zwykłym oknie — i przy tle 55% etykiety menu zlewały się z treścią pod spodem. Przy 80% menu jest czytelne także bez rozmycia, treść prześwituje tylko jako słaby cień (`.data/review/blur-after/`); w Chrome pasek wygląda prawie tak samo jak przedtem. Prawdziwego Safari i prawdziwego Firefoksa nadal nie widziałem.
+
+**2. `Content-Security-Policy` z Turnstile, Google i YouTube** — build uruchomiony z publicznymi kluczami testowymi Cloudflare, prawdziwy Chrome (`.data/review/csp-check.mjs`):
+
+- Widżet Turnstile ładuje się (skrypt i ramka z `challenges.cloudflare.com`), wydaje token, a shoutbox, komentarz i odpowiedź na forum zapisują się z kodem 201 po weryfikacji tokenu przez serwer w Cloudflare. Konsola bez ani jednej blokady.
+- Z kluczem „zawsze odrzuca” serwer odpowiada 400 `ERRORS.CAPTCHA_REQUIRED`, z tokenem i bez (`captcha-reject.mjs`) — weryfikacja naprawdę działa.
+- „Zaloguj przez Google” wychodzi na `accounts.google.com` (z wymyślonym identyfikatorem klienta Google pokazuje tam błąd), a powrót pod `/auth/google` kończy na stronie głównej z komunikatem o nieudanym logowaniu. Polityka nie bierze w tym udziału — to zwykłe przekierowania.
+- Film z listy `/video` odtwarza się w ramce `youtube-nocookie.com` (odtwarzacz załadowany).
+
+**3. Edytor na wszystkich polach z legacy** — każde z 1532 pól (806 podstron, zajawki i treści newsów, FAQ, okienka map) przeszło na kopii bazy przez prawdziwy komponent edytora i prawdziwy zapis w panelu (`.data/review/roundtrip.mjs`, porównanie `roundtrip-inspect.mjs`). Zapisało się 1175 z 1175 rekordów.
+
+- Bez strat w żadnym polu: tekst, obrazki i ich wymiary, odnośniki z obrazków, filmy, opływanie, pogrubienie, kursywa, podkreślenie, przekreślenie.
+- Pierwszy przebieg pokazał prawdziwe straty, teraz poprawione:
+  - wyśrodkowanie zrobione przez `<div>` (jest w 43 polach) znikało — z tekstu w 16 polach, z obrazków w 25 — teraz przed edycją przechodzi na akapity w środku (`app/utils/editorContent.ts`);
+  - kolor ustawiony na `<div>` znikał w 6 polach — przechodzi na tekst;
+  - `<sup>` i `<small>` znikały (3 pola) — edytor zna je teraz razem z `<sub>` (`editorExtensions.ts`), bez przycisków w pasku;
+  - pusta lista (`<ol> </ol>`, 88 sztuk w 48 polach) wracała jako lista z jednym pustym punktem — jest usuwana.
+- Po poprawkach zostają: pomarańczowy kolor podpisu na stronie „Prozerpina” (id 387; `<hr>` wstawione w środek kolorowego tekstu) i wyrównanie wpisane na `<span>` w jednej zajawce (news 7), które i tak niczego nie wyrównywało.
+- Nieszkodliwe różnice, których nie ruszałem: sąsiednie identyczne znaczniki i odnośniki sklejają się w jeden, czarny kolor tekstu znika (celowo), tabele dostają brakujące komórki, a na `/redakcja` znika `rowspan` wystający poza ostatni wiersz tabeli (komórki z awatarami, od których zależy układ kart, zostają bez zmian).
+
+**4. Okładki kategorii newsów** — kopia zapasowa sprawdzona: 22 z 22 oryginałów, te same wymiary co pliki w użyciu.
+
+**5. Drzewo podstron i FAQ** — poprawki w `scripts/legacy/corrections.ts`, nałożone na lokalną bazę przez `pnpm legacy:corrections` (najpierw na kopii, potem na bazie; kopia sprzed zmiany w `.data/backup-2026-10-09-przed-drzewem/`):
+
+- 19 podstron przeniesionych, odnośniki do nich przepisane w 48 treściach (podstrony, newsy, posty, komentarz), 6 pustych hubów usuniętych:
+  - `lost-canvas/charakterystyki-postaci/bogowie` i `saint-seiya/charakterystyki-postaci/srebrni-rycerze/inni-srebrni-rycerze` wyszły z hubów powstałych z literówki;
+  - `mitologia/rzymska/bogowie/pluton` trafił do właściwego huba, `jowisz-2` to teraz `mars`, „Kraina Umarłych” jest w hubie „Miejsca”;
+  - „Zew krwi 3”, „Skrzywiona perfekcyjność, cz. 2” i „Run Away 2” stoją obok poprzedniej części, nie pod nią;
+  - charakterystyki postaci filmów 3–6 są pod swoim filmem (`filmy-kinowe/film-3/charakterystyki-postaci`), jak przy filmach 1 i 2;
+  - adresy z literówką tytułu: `brama-piekla`, `plejady`, `echidna`, `jak-powstalo-halloween`, `elizjum-recenzja`, `atena-jej-wielka-milosc-3` i `-4`.
+- Stare adresy tych stron dają 404 (nowa strona nie była jeszcze publiczna, więc nikt do nich nie linkuje); adresy ze starej strony (`viewpage.php?page_id=…`) przekierowują na nowe miejsca — sprawdzone na działającej stronie.
+- `mitologia/grecka/literatura` i `literatura-2` (sam baner sekcji, zero tekstu, zero odnośników do nich) są szkicami.
+- FAQ: pięć odpowiedzi straciło nieaktualne szczegóły — nazwę dawnego hostingu, prywatną wiadomość i „bana na IP” przy ostrzeżeniach, „u dołu strony” przy najnowszych komentarzach oraz dwa odesłania do pytań po numerze, którego już nie mają. Reszta odpowiedzi bez zmian.
+- Po zmianie: 800 podstron, 0 osieroconych, adresy zgodne z drzewem, `PRAGMA integrity_check` zwraca `ok`.
+
+**6. Panel** (numery z dawnej listy „Uwagi z przeglądu”):
+
+- 9 — tryb EN: wyczyszczone pole tłumaczenia znaczy „użyj polskiego” także dla pól wymaganych (tytuł, etykieta obszaru mapy, odpowiedź ankiety); dodanie pozycji przy włączonym EN pyta, czy zapisać ją jako polską; przełączenie PL/EN przy niezapisanych zmianach pyta o zgodę (formularze stron, newsów, map, ankiet, proste listy, nawigacja, ustawienia).
+- 10 — kategorii newsów z newsami nie da się usunąć; drugi tag o tej samej nazwie (bez względu na wielkość liter) jest odrzucany.
+- 11 — podtytuł drzewa stron pokazuje liczbę stron bieżącego poziomu (łączną tylko na poziomie głównym); adres spoza YouTube wpisany jako film daje komunikat; wyśrodkowanie z `<div>` oraz `<sub>`/`<sup>` zostają (punkt 3).
+- 12 — obrazek ponad 50 megapikseli jest odrzucany (plik 12000×9000 już nie przejdzie); „Wznów” przy zakończonej ankiecie pokazuje datę jej zakończenia i pyta o potwierdzenie. Uprawnienia do „Obrazków” bez zmian — to decyzja Mateusza.
+- 15 — pasek narzędzi edytora na telefonie ma przy prawej krawędzi gasnący brzeg, który ustępuje na końcu przewijania.
+- 19 — `/logowanie-testowe` bez `NUXT_E2E_LOGIN` odpowiada 404 (sprawdzone na buildzie, także `/en/test-login`).
+
+**Nowe testy**: przenosiny podstron, przepisywanie odnośników, usuwanie pustych hubów, szkice z samych banerów i poprawki odpowiedzi FAQ (`corrections.test.ts`), odmowa usunięcia kategorii z newsami, tag o zajętej nazwie, wyczyszczony tytuł i etykieta obszaru w tłumaczeniu, obrazek o zbyt dużych wymiarach; e2e: edycja strony z legacy zachowuje wyśrodkowanie i kolor bloków, komunikat o adresie spoza YouTube, strażniki tłumaczeń (niezapisane zmiany, nowa pozycja w EN, wyczyszczony tytuł), odmowy w kategoriach i tagach, liczba stron na poziomie drzewa.
+
+**Sprawdzone**: `pnpm check` (374 testy) w katalogu projektu; `pnpm build` i 55 testów e2e na buildzie w kopii identycznej z katalogiem roboczym — wszystko po ostatniej zmianie kodu. Pierwszy przebieg e2e pokazał błąd w moim nowym teście (obrazek spod `/theme` jest odrzucany przez czyszczenie treści), nie w aplikacji.
+
+**Nie sprawdzone**:
+
+- Prawdziwe Safari, iPhone i prawdziwy Firefox — bez zmian, nie ma ich tutaj.
+- Pełne logowanie prawdziwym kontem Google (brak kluczy); sprawdzone jest wyjście do Google i powrót z błędem.
+- Okna z pytaniem o niezapisane zmiany w formularzu plików do pobrania i przy zdjęciach albumu — te formularze nie zgłaszają niezapisanych zmian.
+- Gasnący brzeg paska edytora obejrzany tylko w emulacji telefonu w Chrome.
+- Ponowny import z legacy z nowymi poprawkami drzewa — nie ma tu `legacy/`; krok ma testy integracyjne i przeszedł na kopii oraz na lokalnej bazie.
+
 ## Druga sesja 2026-10-09 (Windows)
 
 **Decyzje Mateusza z tej sesji**: klucze Google i Turnstile później; Render odpada, zostaje VPS; kont testowych w bazie jeszcze nie czyścić; obrazki z Photobucketu i usunięte filmy z YouTube zostają, jak są; repozytorium na prywatne przełączy sam; Multimedia w menu, miejsce na statystyki i przełącznik języka dla gościa — odłożone; ponowny import z legacy raczej nie będzie potrzebny.

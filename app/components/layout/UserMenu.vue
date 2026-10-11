@@ -21,23 +21,15 @@ const signOut = async (closeMenu: () => void) => {
 </script>
 
 <template>
-  <BaseDropdown class="[&>button]:rounded-full [&>button]:pr-3 [&>button]:pl-2">
+  <BaseDropdown v-if="account" class="[&>button]:rounded-full [&>button]:pr-3 [&>button]:pl-2">
     <template #trigger="{ isOpen }">
       <span
-        class="flex size-7 shrink-0 items-center justify-center rounded-full font-display text-[0.7rem] leading-none font-bold"
-        :class="
-          initials
-            ? 'bg-linear-to-br from-gold-300 to-cosmo-600 text-abyss-950'
-            : 'bg-white/5 text-aqua-300 ring-1 ring-white/15'
-        "
+        class="flex size-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-gold-300 to-cosmo-600 font-display text-[0.7rem] leading-none font-bold text-abyss-950"
         aria-hidden="true"
       >
-        <template v-if="initials">{{ initials }}</template>
-        <AppIcon v-else name="user" class="text-sm" />
+        {{ initials }}
       </span>
-      <span class="max-w-32 truncate text-xs font-semibold max-sm:sr-only">
-        {{ account?.name ?? t('LAYOUT.SIGN_IN') }}
-      </span>
+      <span class="max-w-32 truncate text-xs font-semibold max-sm:sr-only">{{ account.name }}</span>
       <AppIcon
         name="chevronDown"
         class="text-xs transition-[rotate] duration-200 ease-cosmo"
@@ -46,48 +38,52 @@ const signOut = async (closeMenu: () => void) => {
     </template>
 
     <template #default="{ close }">
-      <template v-if="account">
-        <div class="px-2.5 pt-1 pb-2">
-          <p class="truncate text-sm font-semibold text-gold-300">{{ account.name }}</p>
-          <p class="text-xs text-aqua-500">{{ t(userRoleLabelKey(account.role)) }}</p>
-        </div>
-        <ul class="border-t border-white/10 py-1">
-          <li>
-            <NuxtLinkLocale :to="routes.user(account.id)" :class="ITEM_CLASSES">
-              <AppIcon name="user" />
-              {{ t('LAYOUT.PROFILE') }}
-            </NuxtLinkLocale>
-          </li>
-          <li>
-            <NuxtLinkLocale :to="routes.account()" :class="ITEM_CLASSES">
-              <AppIcon name="settings" />
-              {{ t('LAYOUT.YOUR_ACCOUNT') }}
-            </NuxtLinkLocale>
-          </li>
-          <li v-if="account.role !== 'user'">
-            <NuxtLinkLocale :to="ADMIN_HOME" :class="ITEM_CLASSES">
-              <AppIcon name="chart" />
-              {{ t('LAYOUT.PANEL') }}
-            </NuxtLinkLocale>
-          </li>
-        </ul>
-      </template>
-
-      <div
-        class="flex items-center justify-between gap-3 px-2.5 py-2 text-xs"
-        :class="{ 'border-t border-white/10': account }"
-      >
-        <span class="text-sm text-aqua-200" aria-hidden="true">{{ t('GENERAL.LANGUAGE') }}</span>
-        <LanguageSwitcher />
+      <div class="px-2.5 pt-1 pb-2">
+        <p class="truncate text-sm font-semibold text-gold-300">{{ account.name }}</p>
+        <p class="text-xs text-aqua-500">{{ t(userRoleLabelKey(account.role)) }}</p>
       </div>
-
+      <ul class="border-t border-white/10 py-1">
+        <li>
+          <NuxtLinkLocale :to="routes.user(account.id)" :class="ITEM_CLASSES">
+            <AppIcon name="user" />
+            {{ t('LAYOUT.PROFILE') }}
+          </NuxtLinkLocale>
+        </li>
+        <li>
+          <NuxtLinkLocale :to="routes.account()" :class="ITEM_CLASSES">
+            <AppIcon name="settings" />
+            {{ t('LAYOUT.YOUR_ACCOUNT') }}
+          </NuxtLinkLocale>
+        </li>
+        <li v-if="account.role !== 'user'">
+          <NuxtLinkLocale :to="ADMIN_HOME" :class="ITEM_CLASSES">
+            <AppIcon name="chart" />
+            {{ t('LAYOUT.PANEL') }}
+          </NuxtLinkLocale>
+        </li>
+      </ul>
       <div class="border-t border-white/10 pt-1">
-        <button v-if="account" type="button" :class="ITEM_CLASSES" @click="signOut(close)">
+        <button type="button" :class="ITEM_CLASSES" @click="signOut(close)">
           <AppIcon name="logout" />
           {{ t('LAYOUT.SIGN_OUT') }}
         </button>
-        <LoginLink v-else class="mt-1 w-full justify-center" />
       </div>
     </template>
   </BaseDropdown>
+
+  <a
+    v-else
+    href="/auth/google"
+    class="flex items-center gap-2 rounded-full pr-3 pl-2 text-aqua-200 transition duration-200 ease-cosmo select-none hover:bg-white/5 hover:text-gold-300 active:scale-[0.97]"
+    :aria-label="t('LAYOUT.SIGN_IN_WITH_GOOGLE')"
+    :title="t('LAYOUT.SIGN_IN_WITH_GOOGLE')"
+  >
+    <span
+      class="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/5 text-aqua-300 ring-1 ring-white/15"
+      aria-hidden="true"
+    >
+      <AppIcon name="user" class="text-sm" />
+    </span>
+    <span class="text-xs font-semibold max-sm:hidden">{{ t('LAYOUT.SIGN_IN') }}</span>
+  </a>
 </template>

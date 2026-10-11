@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import sharp from 'sharp';
-import { openAccountMenu, starrySky, visit } from './helpers';
+import { starrySky, visit } from './helpers';
 
 test.describe('public site', () => {
   test('home page shows the header, navigation, news and the news center', async ({ page }) => {
@@ -225,7 +225,6 @@ test.describe('public site', () => {
 
   test('the English version keeps its language and addresses while browsing', async ({ page }) => {
     await visit(page, '/');
-    await openAccountMenu(page, 'Zaloguj');
     await page.getByRole('group', { name: 'Język' }).getByRole('link', { name: 'en' }).click();
 
     await expect(page).toHaveURL('/en');
@@ -240,7 +239,6 @@ test.describe('public site', () => {
 
     await mainMenu.getByRole('link', { name: 'Gallery' }).click();
     await expect(page).toHaveURL('/en/gallery');
-    await openAccountMenu(page, 'Sign in');
     await page.getByRole('group', { name: 'Language' }).getByRole('link', { name: 'pl' }).click();
     await expect(page).toHaveURL('/galeria');
     await expect(page.locator('html')).toHaveAttribute('lang', 'pl-PL');

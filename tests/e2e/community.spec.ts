@@ -89,7 +89,8 @@ test.describe('signed-in community features', () => {
     await openAccountMenu(page, 'Gość Testowy');
     await page.getByRole('button', { name: 'Wyloguj' }).click();
     await expect(page).toHaveURL('/');
-    await openAccountMenu(page, 'Zaloguj');
-    await expect(page.getByRole('link', { name: 'Zaloguj przez Google' })).toBeVisible();
+    await expect(
+      page.getByRole('navigation', { name: 'Menu główne' }).getByRole('link', { name: 'Zaloguj przez Google' }),
+    ).toHaveAttribute('href', '/auth/google');
   });
 });

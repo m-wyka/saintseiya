@@ -6,16 +6,22 @@ const pathWithoutHash = (path: string) => path.split('#')[0];
 </script>
 
 <template>
-  <div class="flex items-center gap-1" role="group" :aria-label="t('GENERAL.LANGUAGE')">
+  <div
+    class="mr-2 flex h-8 shrink-0 items-center self-center rounded-full border border-white/10 bg-white/5 p-0.5 text-xs"
+    role="group"
+    :aria-label="t('GENERAL.LANGUAGE')"
+  >
     <NuxtLink
       v-for="option in locales"
       :key="option.code"
       :to="pathWithoutHash(switchLocalePath(option.code))"
       :lang="option.code"
       :title="option.name"
-      class="rounded-full px-3 py-1.5 font-semibold uppercase transition duration-150"
+      class="flex h-full items-center rounded-full px-2.5 font-semibold uppercase transition duration-200 ease-cosmo"
       :class="
-        option.code === locale ? 'bg-white/10 text-gold-300' : 'text-aqua-300 hover:bg-white/5 hover:text-gold-300'
+        option.code === locale
+          ? 'bg-white/10 text-gold-300 max-sm:hidden'
+          : 'text-aqua-300 hover:bg-white/10 hover:text-gold-300'
       "
       :aria-current="option.code === locale ? 'true' : undefined"
     >
